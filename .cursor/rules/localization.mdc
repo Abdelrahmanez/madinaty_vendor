@@ -1,0 +1,122 @@
+---
+alwaysApply: true
+---
+
+
+# Localization System
+
+The FitRack app uses i18next for internationalization with support for English and Arabic:
+
+## Directory Structure:
+- `/src/locales/i18n.js` - Main configuration for i18next
+- `/src/locales/EN` - English translations
+- `/src/locales/AR` - Arabic translations
+
+## Translation Files Organization:
+- `en.js`/`ar.js` - Root translation files that should spread screen translations into the root object
+- `/components` - Component-specific translations
+- `/screens` - Screen-specific translations
+
+## IMPORTANT: Translation Structure
+The main language files must directly spread the screen translations:
+
+```javascript
+// CORRECT STRUCTURE - en.js/ar.js
+import screensTranslations from "./screens";
+
+const en = {
+  ...screensTranslations,  // Spread directly into root
+  componentsTranslations: { /* component translations */ },
+};
+```
+
+```javascript
+// INCORRECT STRUCTURE - DO NOT USE
+const en = {
+  screensTranslations: { homeScreenTranslations }, // Don't nest translations
+};
+```
+
+## Using Translations:
+- Import the useTranslation hook from react-i18next
+- Access translations with the t() function directly with the key
+- Example: `t('loginScreen.title')` will render "Sign In"
+
+## Language Switching:
+- Use the [useLocales](mdc:src/hooks/useLocales.js) hook to change languages
+- `handleChangeLanguage(lang)` - Changes the application language
+
+## Code Example:
+```javascript
+import { useTranslation } from 'react-i18next';
+
+function MyComponent() {
+  const { t } = useTranslation();
+  
+  return <Text>{t('key.to.translation')}</Text>;
+}
+```
+
+Always structure new translations according to the existing pattern and use the provided hooks.
+
+
+Always structure new translations according to the existing pattern and use the provided hooks.
+
+# Localization System
+
+The FitRack app uses i18next for internationalization with support for English and Arabic:
+
+## Directory Structure:
+- `/src/locales/i18n.js` - Main configuration for i18next
+- `/src/locales/EN` - English translations
+- `/src/locales/AR` - Arabic translations
+
+## Translation Files Organization:
+- `en.js`/`ar.js` - Root translation files that should spread screen translations into the root object
+- `/components` - Component-specific translations
+- `/screens` - Screen-specific translations
+
+## IMPORTANT: Translation Structure
+The main language files must directly spread the screen translations:
+
+```javascript
+// CORRECT STRUCTURE - en.js/ar.js
+import screensTranslations from "./screens";
+
+const en = {
+  ...screensTranslations,  // Spread directly into root
+  componentsTranslations: { /* component translations */ },
+};
+```
+
+```javascript
+// INCORRECT STRUCTURE - DO NOT USE
+const en = {
+  screensTranslations: { homeScreenTranslations }, // Don't nest translations
+};
+```
+
+## Using Translations:
+- Import the useTranslation hook from react-i18next
+- Access translations with the t() function directly with the key
+- Example: `t('loginScreen.title')` will render "Sign In"
+
+## Language Switching:
+- Use the [useLocales](mdc:src/hooks/useLocales.js) hook to change languages
+- `handleChangeLanguage(lang)` - Changes the application language
+
+## Code Example:
+```javascript
+import { useTranslation } from 'react-i18next';
+
+function MyComponent() {
+  const { t } = useTranslation();
+  
+  return <Text>{t('key.to.translation')}</Text>;
+}
+```
+
+Always structure new translations according to the existing pattern and use the provided hooks.
+
+
+Always structure new translations according to the existing pattern and use the provided hooks.

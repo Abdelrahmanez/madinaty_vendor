@@ -1,0 +1,48 @@
+---
+globs: src/stores/*.js
+---
+
+# State Management
+
+Madinaty app uses Zustand for global state management. Stores are located in the `/src/stores` directory.
+
+## Available Stores:
+
+- [alertStore.js](mdc:src/stores/alertStore.js) - Manages global alert/notification states
+- [authStore.js](mdc:src/stores/authStore.js) - Handles authentication state
+- [themeStore.js](mdc:src/stores/themeStore.js) - Manages app theme settings
+
+## Using Zustand:
+
+1. Import the store:
+```javascript
+import useAuthStore from '../stores/authStore';
+```
+
+2. Access state and actions:
+```javascript
+const { isAuthenticated, login, logout } = useAuthStore();
+```
+
+## Store Creation Pattern:
+
+```javascript
+// Example store structure
+import { create } from 'zustand';
+
+const useExampleStore = create((set) => ({
+  // state
+  someValue: initialValue,
+  
+  // actions
+  setSomeValue: (newValue) => set({ someValue: newValue }),
+  resetState: () => set({ someValue: initialValue }),
+}));
+
+export default useExampleStore;
+```
+
+Follow this pattern when creating new stores and always use the `use` prefix for store hooks.
+
+
+Follow this pattern when creating new stores and always use the `use` prefix for store hooks.

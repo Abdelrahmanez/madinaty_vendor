@@ -1,0 +1,43 @@
+const addressScreenTranslations = {
+  addressScreen: {
+    title: "Saved Addresses",
+    editAddress: "Edit Address",
+    addAddress: "Add New Address",
+    addressName: "Address Name",
+    addressNamePlaceholder: "e.g. Home, Work, etc.",
+    streetAddress: "Street Address",
+    streetAddressPlaceholder: "Street, building, floor, apartment number",
+    notes: "Additional Notes",
+    notesPlaceholder: "Additional delivery notes (optional)",
+    deliveryZone: "Delivery Zone",
+    zonePlaceholder: "Select Delivery Zone",
+    selectZone: "Select Delivery Zone",
+    noZonesAvailable: "No delivery zones available",
+    save: "Save",
+    edit: "Edit",
+    cancel: "Cancel",
+    savedAddresses: "Saved Addresses",
+    noAddresses: "You haven't added any addresses yet",
+    default: "Current",
+    setDefault: "Set as Current",
+    defaultAddressSet: "Address set as current",
+    addressSetAsCurrent: "Address set as current",
+    clickToSetCurrent: "Tap to set as current",
+    unknownZone: "Unknown Zone",
+    confirmDelete: "Delete Address?",
+    deleteWarning: "Are you sure you want to delete this address?",
+    delete: "Delete",
+    success: "Success",
+    error: "Error",
+    addressAdded: "Address added successfully",
+    addressUpdated: "Address updated successfully",
+    addressDeleted: "Address deleted successfully",
+    errorFetchingAddresses: "Error fetching addresses. Please try again.",
+    errorSavingAddress: "Error saving address. Please try again.",
+    errorDeletingAddress: "Error deleting address. Please try again.",
+    errorSettingDefault: "Error setting current address. Please try again.",
+    requiredField: "This field is required"
+  }
+};
+
+export default addressScreenTranslations; 

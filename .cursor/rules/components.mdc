@@ -1,0 +1,385 @@
+# قواعد مكونات تطبيق توصيل الطعام
+
+## HomeHeader
+- يجب أن يكون الهيدر بخلفية حمراء `COLORS.PRIMARY` مع اسم المستخدم محاذياً لليمين
+- أيقونة الإشعارات دائرية على يسار الهيدر مع عداد للإشعارات الغير مقروءة
+- ارتفاع الهيدر لا يقل عن 60 نقطة
+
+```javascript
+// مثال للمكون
+const HomeHeader = ({ username, notificationsCount }) => {
+  return (
+    <View style={styles.headerContainer}>
+      <NotificationIcon count={notificationsCount} />
+      <View style={styles.welcomeContainer}>
+        <Text style={styles.welcomeText}>أهلاً بك في مدينتك</Text>
+        <Text style={styles.usernameText}>{username}</Text>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    backgroundColor: COLORS.PRIMARY,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    height: 64,
+  },
+  welcomeContainer: {
+    alignItems: 'flex-end',
+  },
+  welcomeText: {
+    color: COLORS.WHITE,
+    fontSize: TYPOGRAPHY.FONT_SIZES.sm,
+  },
+  usernameText: {
+    color: COLORS.WHITE,
+    fontSize: TYPOGRAPHY.FONT_SIZES.lg,
+    fontWeight: 'bold',
+  },
+});
+```
+
+## SearchBar
+- حقل البحث أبيض مع استدارة كبيرة واسعة
+- أيقونة البحث على اليسار ونص توجيهي رمادي
+- يجب أن يكون الحقل واضحاً مع ظل خفيف
+
+```javascript
+// مثال للمكون
+const SearchBar = ({ onSearch }) => {
+  return (
+    <View style={styles.searchContainer}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="ابحث عن مطاعم أو أطعمة"
+        placeholderTextColor={COLORS.GRAY}
+        onChangeText={onSearch}
+      />
+      <Icon name="search" size={20} color={COLORS.GRAY} style={styles.searchIcon} />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  searchContainer: {
+    marginHorizontal: SPACING.md,
+    marginVertical: SPACING.md,
+    backgroundColor: COLORS.WHITE,
+    borderRadius: ROUNDNESS.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    shadowColor: COLORS.SHADOW,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  searchInput: {
+    flex: 1,
+    height: 50,
+    paddingRight: SPACING.md,
+    textAlign: 'right',
+    fontFamily: TYPOGRAPHY.FONT_FAMILY,
+  },
+  searchIcon: {
+    marginLeft: SPACING.sm,
+  },
+});
+```
+
+## CategorySection
+- عنوان القسم على اليمين مع زر "عرض الكل" باللون الأحمر على اليسار
+- مكونات الأقسام تكون دائرية بحدود حمراء
+- النص تحت الأيقونات
+
+```javascript
+// مثال للمكون
+const CategorySection = ({ title, categories, onViewAll }) => {
+  return (
+    <View style={styles.sectionContainer}>
+      <View style={styles.sectionHeader}>
+        <TouchableOpacity onPress={onViewAll}>
+          <Text style={styles.viewAllText}>عرض الكل</Text>
+        </TouchableOpacity>
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
+        {categories.map((category) => (
+          <CategoryItem key={category.id} category={category} />
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  sectionContainer: {
+    marginVertical: SPACING.md,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  sectionTitle: {
+    fontSize: TYPOGRAPHY.FONT_SIZES.lg,
+    fontWeight: 'bold',
+    color: COLORS.TEXT_PRIMARY,
+  },
+  viewAllText: {
+    fontSize: TYPOGRAPHY.FONT_SIZES.sm,
+    color: COLORS.PRIMARY,
+  },
+  categoriesContainer: {
+    paddingHorizontal: SPACING.md,
+  },
+});
+```
+
+## CategoryItem
+- الأيقونة دائرية بحدود حمراء والنص أسفلها
+- مسافة متساوية بين أيقونات الأقسام
+
+```javascript
+// مثال للمكون
+const CategoryItem = ({ category }) => {
+  return (
+    <View style={styles.categoryItemContainer}>
+      <View style={styles.categoryIconContainer}>
+        <Image source={category.icon} style={styles.categoryIcon} />
+      </View>
+      <Text style={styles.categoryName}>{category.name}</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  categoryItemContainer: {
+    alignItems: 'center',
+    marginHorizontal: SPACING.sm,
+    width: 80,
+  },
+  categoryIconContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: ROUNDNESS.full,
+    borderWidth: 1,
+    borderColor: COLORS.PRIMARY,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.WHITE,
+  },
+  categoryIcon: {
+    width: 40,
+    height: 40,
+  },
+  categoryName: {
+    marginTop: SPACING.xs,
+    fontSize: TYPOGRAPHY.FONT_SIZES.sm,
+    textAlign: 'center',
+    color: COLORS.TEXT_PRIMARY,
+  },
+});
+```
+
+## RestaurantCard
+- بطاقة بخلفية بيضاء وزوايا مستديرة
+- حالة المطعم (مفتوح) في بادج خضراء
+- تقييم المطعم كنجوم صفراء مع الرقم
+- معلومات التوصيل (المسافة والوقت) في أسفل البطاقة
+
+```javascript
+// مثال للمكون
+const RestaurantCard = ({ restaurant }) => {
+  return (
+    <View style={styles.cardContainer}>
+      <Image source={restaurant.image} style={styles.restaurantImage} />
+      <View style={styles.statusBadge}>
+        <Text style={styles.statusText}>مفتوح</Text>
+      </View>
+      
+      <View style={styles.cardContent}>
+        <View style={styles.restaurantHeader}>
+          <View style={styles.ratingContainer}>
+            <Text style={styles.ratingText}>{restaurant.rating}</Text>
+            <Icon name="star" size={16} color={COLORS.YELLOW} />
+          </View>
+          <Text style={styles.restaurantName}>{restaurant.name}</Text>
+        </View>
+        
+        <View style={styles.restaurantLocation}>
+          <Text style={styles.locationText}>{restaurant.location}</Text>
+        </View>
+        
+        <View style={styles.restaurantInfo}>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoValue}>{restaurant.deliveryTime} د.م</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoValue}>{restaurant.deliveryDistance} للتوصيل</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    backgroundColor: COLORS.WHITE,
+    borderRadius: ROUNDNESS.md,
+    marginVertical: SPACING.sm,
+    marginHorizontal: SPACING.md,
+    shadowColor: COLORS.SHADOW,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    overflow: 'hidden',
+  },
+  restaurantImage: {
+    width: '100%',
+    height: 150,
+    resizeMode: 'cover',
+  },
+  statusBadge: {
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.md,
+    backgroundColor: COLORS.SUCCESS,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs / 2,
+    borderRadius: ROUNDNESS.xs,
+  },
+  statusText: {
+    color: COLORS.WHITE,
+    fontSize: TYPOGRAPHY.FONT_SIZES.xs,
+    fontWeight: 'bold',
+  },
+  cardContent: {
+    padding: SPACING.md,
+  },
+  restaurantHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  restaurantName: {
+    fontSize: TYPOGRAPHY.FONT_SIZES.lg,
+    fontWeight: 'bold',
+    color: COLORS.TEXT_PRIMARY,
+    textAlign: 'right',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingText: {
+    fontSize: TYPOGRAPHY.FONT_SIZES.sm,
+    fontWeight: 'bold',
+    marginRight: 4,
+  },
+  restaurantLocation: {
+    marginBottom: SPACING.xs,
+  },
+  locationText: {
+    fontSize: TYPOGRAPHY.FONT_SIZES.sm,
+    color: COLORS.TEXT_SECONDARY,
+    textAlign: 'right',
+  },
+  restaurantInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  infoItem: {
+    alignItems: 'center',
+  },
+  infoValue: {
+    fontSize: TYPOGRAPHY.FONT_SIZES.xs,
+    color: COLORS.TEXT_SECONDARY,
+  },
+});
+```
+
+## BottomTabBar
+- شريط تنقل سفلي بثلاثة أزرار
+- أيقونات فوق النص
+- الزر النشط باللون الأحمر
+
+```javascript
+// مثال للمكون
+const BottomTabBar = ({ navigation, state }) => {
+  return (
+    <View style={styles.tabBarContainer}>
+      <TouchableOpacity 
+        style={styles.tabItem} 
+        onPress={() => navigation.navigate('Account')}
+      >
+        <Icon name="user" size={20} color={state.index === 2 ? COLORS.PRIMARY : COLORS.GRAY} />
+        <Text style={[styles.tabLabel, state.index === 2 && styles.activeTabLabel]}>
+          حسابي
+        </Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={styles.tabItem} 
+        onPress={() => navigation.navigate('Favorites')}
+      >
+        <Icon name="heart" size={20} color={state.index === 1 ? COLORS.PRIMARY : COLORS.GRAY} />
+        <Text style={[styles.tabLabel, state.index === 1 && styles.activeTabLabel]}>
+          المفضلة
+        </Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={styles.tabItem} 
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Icon name="home" size={20} color={state.index === 0 ? COLORS.PRIMARY : COLORS.GRAY} />
+        <Text style={[styles.tabLabel, state.index === 0 && styles.activeTabLabel]}>
+          الرئيسية
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  tabBarContainer: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.WHITE,
+    height: 60,
+    shadowColor: COLORS.SHADOW,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  tabItem: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabLabel: {
+    fontSize: TYPOGRAPHY.FONT_SIZES.xs,
+    color: COLORS.GRAY,
+    marginTop: SPACING.xs,
+  },
+  activeTabLabel: {
+    color: COLORS.PRIMARY,
+    fontWeight: 'bold',
+  },
+});
+```
+description:
+globs:
+alwaysApply: false
+---

@@ -1,0 +1,74 @@
+
+---
+globs: src/__apis__/*.js,src/api-definitions/*.ts
+---
+
+# API Structure
+
+## API Implementation
+
+The API layer in FitRack app is organized in the `src/__apis__` directory using axios for HTTP requests.
+
+### Key Files:
+
+- [axios.js](mdc:src/__apis__/axios.js) - Axios instance configuration with interceptors
+- [auth.js](mdc:src/__apis__/auth.js) - Authentication-related API calls
+- [accounts.js](mdc:src/__apis__/accounts.js) - Account management API calls
+
+### API Pattern:
+
+1. Create API functions that return promises
+2. Use the centralized axios instance
+3. Handle errors consistently
+4. API functions should be named with descriptive verbs (e.g., `fetchUser`, `updateProfile`)
+
+### Example:
+
+```javascript
+import axiosInstance from './axios';
+
+export const fetchResourceExample = async (params) => {
+  try {
+    const response = await axiosInstance.get('/resource-endpoint', { params });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+```
+
+## API Definitions
+
+FitRack app uses OpenAPI-style TypeScript definitions in the `src/api-definitions` directory as the source of truth for all API contracts. These files should be referenced for:
+
+- Request/response models and schemas
+- Endpoint paths and methods
+- Required parameters and payloads
+- Response codes and structures
+
+### Key Definition Files:
+
+- [advertisement.api.ts](mdc:src/api-definitions/advertisement.api.ts) - Advertisement management
+- [auth.api.ts](mdc:src/api-definitions/auth.api.ts) - Authentication endpoints
+- [bannerOffer.api.ts](mdc:src/api-definitions/bannerOffer.api.ts) - Banner offers
+- [cart.api.ts](mdc:src/api-definitions/cart.api.ts) - Shopping cart functionality
+- [category.api.ts](mdc:src/api-definitions/category.api.ts) - Product categories
+- [deliveryZone.api.ts](mdc:src/api-definitions/deliveryZone.api.ts) - Delivery zones
+- [dish.api.ts](mdc:src/api-definitions/dish.api.ts) - Menu items and dishes
+- [notification.api.ts](mdc:src/api-definitions/notification.api.ts) - Notifications
+- [order.api.ts](mdc:src/api-definitions/order.api.ts) - Order processing
+- [promoCode.api.ts](mdc:src/api-definitions/promoCode.api.ts) - Promotional codes
+- [restaurant.api.ts](mdc:src/api-definitions/restaurant.api.ts) - Restaurant data
+- [review.api.ts](mdc:src/api-definitions/review.api.ts) - Customer reviews
+- [user.api.ts](mdc:src/api-definitions/user.api.ts) - User profile management
+
+### Definition Structure:
+
+Each API definition file follows this structure:
+- `models` - Data schemas for requests and responses
+- `commonResponses` - Reusable response definitions
+- `endpoints` - API route definitions with methods, paths, and response mappings
+
+When implementing API calls in `src/__apis__`, always refer to the corresponding definition in `src/api-definitions` to ensure consistency between frontend and backend.
+
+When creating new API endpoints, follow this pattern and organize them by domain in appropriate files.

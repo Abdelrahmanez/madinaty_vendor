@@ -1,0 +1,29 @@
+---
+description: Navigation system architecture and usage
+---
+
+# Navigation
+
+FitRack app uses React Navigation v7 with a nested navigation structure:
+
+- `/src/navigators/index.js` is the main navigation entry point that determines authentication state
+- Authentication flow is handled by conditional rendering of either:
+  - `AppNavigator.js` - for authenticated users
+  - `AuthNavigator.js` - for unauthenticated users
+  
+## Navigation Service
+
+[NavigationService.js](mdc:src/navigators/NavigationService.js) provides helper functions to navigate from non-component files:
+
+- `setNavigator(ref)` - Sets the navigation ref
+- `navigate(name, params)` - Navigate to a screen
+- `reset(params, name)` - Reset navigation state
+- `getCurrentRoute()` - Get current route information
+
+## Main Screens
+
+- `welcomeScreen` - Initial landing screen
+- `loginScreen` - Authentication screen
+- `homeScreen` - Main screen after authentication
+
+Always import the NavigationService for navigating outside of components.

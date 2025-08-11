@@ -1,0 +1,2 @@
+# madinaty_vendor
+

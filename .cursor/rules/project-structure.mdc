@@ -1,0 +1,34 @@
+---
+alwaysApply: true
+---
+
+# Project Structure
+
+The Madinaty app follows a standard React Native architecture with Expo:
+
+- [App.js](mdc:App.js) - Main app entry point that sets up providers, theme, and navigation
+- [index.js](mdc:index.js) - Initial JavaScript file that registers the app component
+- [app.json](mdc:app.json) - Expo configuration file
+- [config.js](mdc:config.js) - App-wide configuration settings
+
+## Directory Structure:
+
+- `/src` - Main source code directory
+  - `/__apis__` - API service calls using axios
+  - `/components` - Reusable UI components
+  - `/hooks` - Custom React hooks
+  - `/locales` - i18n translations (EN and AR languages)
+  - `/navigators` - React Navigation setup
+  - `/screens` - App screens organized by feature
+  - `/stores` - Zustand state management stores
+  - `/theme` - Theming configuration
+
+## Key Technologies:
+- React Native with Expo
+- React Navigation for routing
+- i18next for internationalization
+- Zustand for state management
+- React Native Paper for UI components
+
+- Zustand for state management
+- React Native Paper for UI components

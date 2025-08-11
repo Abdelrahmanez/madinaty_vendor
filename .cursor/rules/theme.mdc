@@ -1,0 +1,111 @@
+---
+globs: src/theme/*.js
+---
+
+# Theme System
+
+## Color Palette
+
+The Madinaty app uses a consistent color system defined in the theme files:
+
+### Primary Colors
+
+- **Primary**: `#E01105` (Main brand color - Red)
+- **On Primary**: `#FFFFFF` (Text/icons on primary color)
+- **Primary Container**: `#FFCDD2` (Light theme) / `#7D0000` (Dark theme)
+- **On Primary Container**: `#8B0000` (Light theme) / `#FFCDD2` (Dark theme)
+
+### Secondary Colors
+
+- **Secondary**: `#404040` (Light theme) / `#E0E0E0` (Dark theme)
+- **On Secondary**: `#FFFFFF` (Light theme) / `#262626` (Dark theme)
+- **Secondary Container**: `#E0E0E0` (Light theme) / `#404040` (Dark theme)
+- **On Secondary Container**: `#262626` (Light theme) / `#E0E0E0` (Dark theme)
+
+### Utility Colors
+
+- **Error**: `#C62828` (Error messages)
+- **Background**: `#FFFFFF` (Light theme) / `#262626` (Dark theme)
+- **Surface**: `#FFFFFF` (Light theme) / `#262626` (Dark theme)
+- **Outline**: `#808080` (Borders)
+
+## Theme Structure
+
+The theme system is composed of two main files:
+
+1. [palettes.js](mdc:src/theme/palettes.js) - Defines color schemes for both light and dark themes
+2. [index.js](mdc:src/theme/index.js) - Configures the theme provider and exports the ThemedApp component
+
+## Usage
+
+### Accessing Theme Colors
+
+To use theme colors in components:
+
+```javascript
+import { useTheme } from 'react-native-paper';
+
+function MyComponent() {
+  const theme = useTheme();
+  
+  return (
+    <View style={{ backgroundColor: theme.colors.primary }}>
+      <Text style={{ color: theme.colors.onPrimary }}>
+        Themed content
+      </Text>
+    </View>
+  );
+}
+```
+
+### Custom Styling
+
+When creating custom styles, always reference the theme colors instead of hardcoding color values:
+
+```javascript
+import { StyleSheet } from 'react-native';
+import { useTheme } from 'react-native-paper';
+
+function StyledComponent() {
+  const theme = useTheme();
+  
+  const styles = StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.colors.outline,
+    },
+    text: {
+      color: theme.colors.onSurface,
+    },
+    button: {
+      backgroundColor: theme.colors.primary,
+      color: theme.colors.onPrimary,
+    },
+  });
+  
+  // Component JSX
+}
+```
+
+### Theme Switching
+
+The app supports dynamic theme switching using the theme store:
+
+```javascript
+import useThemeStore from '../stores/themeStore';
+
+function ThemeToggle() {
+  const { mode, toggleTheme } = useThemeStore();
+  
+  return (
+    <Button onPress={toggleTheme}>
+      Switch to {mode === 'dark' ? 'light' : 'dark'} mode
+    </Button>
+  );
+}
+```
+
+Always use the theme system for consistent styling across the application.
+
+
+Always use the theme system for consistent styling across the application.

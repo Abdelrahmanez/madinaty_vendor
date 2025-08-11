@@ -1,0 +1,150 @@
+# قواعد دعم اللغة العربية والاتجاه من اليمين إلى اليسار (RTL)
+
+## قواعد عامة للاتجاه RTL
+- استخدم خاصية `flexDirection: 'row'` للتحكم في اتجاه العناصر
+- استخدم الخصائص المناسبة للمحاذاة مثل `textAlign: 'right'` للنصوص
+- تأكد من مراعاة التنسيق المناسب للهوامش والحشوات
+
+```javascript
+// مثال لتنفيذ الاتجاه RTL
+import { I18nManager } from 'react-native';
+
+// تفعيل اتجاه RTL على مستوى التطبيق
+if (i18n.language === 'ar') {
+  I18nManager.forceRTL(true);
+} else {
+  I18nManager.forceRTL(false);
+}
+```
+
+## الخطوط العربية المدعومة
+- استخدم خطوطًا تدعم اللغة العربية مثل Tajawal أو Dubai أو Almarai
+- تأكد من تحميل الخطوط باستخدام expo-font
+
+```javascript
+// مثال لإعداد الخطوط
+import * as Font from 'expo-font';
+
+await Font.loadAsync({
+  'Tajawal-Regular': require('./assets/fonts/Tajawal-Regular.ttf'),
+  'Tajawal-Medium': require('./assets/fonts/Tajawal-Medium.ttf'),
+  'Tajawal-Bold': require('./assets/fonts/Tajawal-Bold.ttf'),
+});
+
+// تطبيق الخط في الستايلات
+const styles = StyleSheet.create({
+  text: {
+    fontFamily: 'Tajawal-Regular',
+  },
+  boldText: {
+    fontFamily: 'Tajawal-Bold',
+  },
+});
+```
+
+## تنسيق الاتجاه للعناصر المختلفة
+
+### النصوص
+```javascript
+const textStyles = StyleSheet.create({
+  arabicText: {
+    textAlign: 'right',
+    writingDirection: 'rtl',
+  },
+});
+```
+
+### الصفوف (Rows)
+```javascript
+const rowStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',       // الترتيب من اليسار إلى اليمين
+    justifyContent: 'flex-end', // محاذاة العناصر إلى اليمين
+  },
+  rowReversed: {
+    flexDirection: 'row-reverse', // الترتيب من اليمين إلى اليسار
+    justifyContent: 'flex-start',  // محاذاة العناصر إلى اليسار
+  },
+});
+```
+
+### الأزرار والأيقونات
+```javascript
+const buttonStyles = StyleSheet.create({
+  button: {
+    flexDirection: 'row-reverse', // أيقونة على اليمين ثم النص
+  },
+  buttonIcon: {
+    marginLeft: 0,
+    marginRight: 8, // المسافة بين الأيقونة والنص
+  },
+});
+```
+
+### القوائم والتمرير
+```javascript
+const listStyles = StyleSheet.create({
+  horizontalList: {
+    // لقوائم التمرير الأفقية، ابدأ من اليمين
+    flexDirection: 'row-reverse',
+  },
+  verticalList: {
+    // للقوائم الرأسية
+    alignItems: 'flex-end', // محاذاة العناصر إلى اليمين
+  },
+});
+```
+
+## دليل تحويل الواجهة إلى RTL
+
+### 1. تبديل الاتجاهات
+| LTR (الإنجليزية) | RTL (العربية) |
+|------------------|---------------|
+| paddingLeft      | paddingRight  |
+| marginLeft       | marginRight   |
+| left             | right         |
+| flexDirection: 'row' | flexDirection: 'row-reverse' |
+| justifyContent: 'flex-start' | justifyContent: 'flex-end' |
+
+### 2. نصائح لمعالجة مشاكل RTL
+- استخدم تعابير شرطية للتنسيقات المعتمدة على اللغة
+- تجنب القيم المطلقة للموضع (position) عندما تتعلق بالاتجاه
+- استخدم معرّف `I18nManager.isRTL` للتحقق من الاتجاه الحالي
+
+```javascript
+const dynamicStyles = {
+  textContainer: {
+    alignItems: I18nManager.isRTL ? 'flex-end' : 'flex-start',
+    paddingLeft: I18nManager.isRTL ? 0 : SPACING.md,
+    paddingRight: I18nManager.isRTL ? SPACING.md : 0,
+  },
+};
+```
+
+### 3. مكتبات مفيدة لدعم RTL
+- [react-native-localization](https://github.com/stefalda/ReactNativeLocalization): لدعم اللغات المتعددة
+- [i18next](https://www.i18next.com/): منصة شاملة للترجمة والتدويل
+- [react-native-restart](https://github.com/avishayil/react-native-restart): لإعادة تشغيل التطبيق عند تغيير اللغة أو اتجاه RTL
+
+## دعم الأرقام العربية
+- تأكد من عرض الأرقام بالشكل المناسب للغة المستخدمة
+
+```javascript
+// تحويل الأرقام إلى صيغة عربية أو إنجليزية
+const formatNumber = (number) => {
+  const currentLanguage = i18n.language;
+  if (currentLanguage === 'ar') {
+    // تحويل الأرقام إلى عربية إذا كانت اللغة عربية
+    return number.toLocaleString('ar-SA');
+  }
+  // استخدام الأرقام الإنجليزية للغات الأخرى
+  return number.toString();
+};
+
+// مثال استخدام
+<Text style={styles.priceText}>{formatNumber(price)} ر.س</Text>
+```
+description:
+globs:
+alwaysApply: true
+---

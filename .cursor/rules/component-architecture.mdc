@@ -1,0 +1,141 @@
+---
+globs: src/components/**/*.js,src/screens/**/*.js
+---
+
+# Component Architecture
+
+## Separation of Logic
+
+All business logic should be separated from the UI components:
+
+- Use custom hooks for complex logic (`/src/hooks/`)
+- Move API calls and data fetching outside component body
+- Use state management (Zustand stores) for shared state
+- Keep component functions focused on UI rendering
+
+### Example - Logic Separation:
+
+```javascript
+// Bad - Logic mixed with UI
+const MyComponent = () => {
+  const [data, setData] = useState(null);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('/api/data');
+        setData(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+  }, []);
+  
+  // Component rendering with mixed logic
+};
+
+// Good - Logic separated
+// In a custom hook (e.g., src/hooks/useData.js):
+const useData = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get('/api/data');
+        setData(response.data);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+  
+  return { data, loading, error };
+};
+
+// In component:
+const MyComponent = () => {
+  const { data, loading, error } = useData();
+  
+  // Pure UI rendering with logic handled by the hook
+};
+```
+
+## Small, Reusable Components
+
+Components should be small and focused on a single responsibility:
+
+- Each component should do one thing well
+- Maximum ~200 lines per component file
+- Extract repeated patterns into reusable components
+- Use composition to build complex interfaces from simple components
+
+### Component Types:
+
+1. **UI Components** - Small, reusable visual elements
+   - Buttons, inputs, cards, etc.
+   - Should be stateless when possible
+   - Accept props for customization
+
+2. **Container Components** - Manage state and data flow
+   - Connect to stores or APIs
+   - Pass data down to UI components
+   - Handle business logic
+
+3. **Page/Screen Components** - Compose other components
+   - Focus on layout and structure
+   - Minimal direct logic
+
+### Example - Component Structure:
+
+```javascript
+// UI Component (src/components/Button.js)
+const Button = ({ 
+  label, 
+  onPress, 
+  type = 'primary', 
+  disabled = false 
+}) => (
+  <TouchableOpacity 
+    style={[styles.button, styles[type]]} 
+    onPress={onPress}
+    disabled={disabled}
+  >
+    <Text style={styles.text}>{label}</Text>
+  </TouchableOpacity>
+);
+
+// Container Component (src/components/ProductList.js)
+const ProductList = () => {
+  const { products, loading } = useProducts(); // Custom hook
+  
+  if (loading) return <LoadingIndicator />;
+  
+  return (
+    <View style={styles.container}>
+      {products.map(product => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </View>
+  );
+};
+
+// Screen Component (src/screens/HomeScreen/index.js)
+const HomeScreen = ({ navigation }) => (
+  <Screen>
+    <Header title="Home" />
+    <FeaturedBanner />
+    <ProductList />
+    <Footer />
+  </Screen>
+);
+```
+
+Always follow these patterns to keep the code maintainable, testable, and scalable as the application grows.

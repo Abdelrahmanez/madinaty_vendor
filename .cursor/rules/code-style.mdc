@@ -1,0 +1,66 @@
+---
+alwaysApply: true
+---
+
+# Code Style Guidelines
+
+FitRack app follows specific code style patterns:
+
+## JavaScript/React:
+
+- Use functional components with hooks
+- Use arrow functions for component definitions
+- Use destructuring for props
+- Place all imports at the top, grouped by:
+  1. React/React Native imports
+  2. Third-party libraries
+  3. Local imports (components, utils, etc.)
+- Use named exports for components
+
+## Naming Conventions:
+
+- Components: PascalCase (e.g., `LoginScreen.js`)
+- Files: camelCase for utils, hooks, services (e.g., `authStore.js`)
+- Functions: camelCase (e.g., `handleSubmit`)
+- Constants: UPPER_CASE for true constants
+- Boolean variables: start with 'is', 'has', 'should' (e.g., `isLoading`)
+
+## Component Structure:
+
+```javascript
+import React, { useState, useEffect } from 'react';
+import { View, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
+
+// Local imports
+import styles from './styles';
+import useAuthStore from '../stores/authStore';
+
+const ComponentName = ({ navigation, route }) => {
+  // State and hooks
+  const [localState, setLocalState] = useState(initialValue);
+  const { t } = useTranslation();
+  const { user } = useAuthStore();
+  
+  // Effects
+  useEffect(() => {
+    // Effect logic
+  }, [dependencies]);
+  
+  // Handler functions
+  const handleSomething = () => {
+    // Function logic
+  };
+  
+  // Component rendering
+  return (
+    <View style={styles.container}>
+      <Text>{t('key')}</Text>
+    </View>
+  );
+};
+
+export default ComponentName;
+```
+
+Follow these patterns for consistency across the codebase.
