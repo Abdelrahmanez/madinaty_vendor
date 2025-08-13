@@ -1,19 +1,12 @@
 // components
 import { processingTranslations } from "./components";
-import componentsTranslations from "./components";
 // pages
-import screensTranslations from "./screens";
-import authScreensTranslations from "./screens/authScreensTranslations";
-// common
-import commonTranslations from "./common";
+import { homeScreenTranslations } from "./screens";
 
 // ----------------------------------------------------------------------
 
 const en = {
-  ...screensTranslations,
-  ...authScreensTranslations,
-  ...componentsTranslations,
-  ...commonTranslations,
+  screensTranslations: { homeScreenTranslations },
   componentsTranslations: { processingTranslations },
 };
 

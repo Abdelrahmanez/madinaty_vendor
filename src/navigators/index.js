@@ -1,53 +1,57 @@
-import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-// navigators
-import AuthNavigator from './AuthNavigator';
-import AppNavigator from './AppNavigator';
-
-// navigation service
-import NavigationService from './NavigationService';
-
+import { useState, useEffect } from "react";
+// react-native
+import AsyncStorage from "@react-native-async-storage/async-storage";
+// react navigation
+import { NavigationContainer } from "@react-navigation/native";
+// navigation layouts
+import AuthNavigator from "./AuthNavigator";
+import AppNavigator from "./AppNavigator";
+import NavigationService from "./NavigationService";
 // stores
-import useAuthStore from '../stores/authStore';
+import useAuthStore from "../stores/authStore";
 
-const Stack = createNativeStackNavigator();
+// -------------------------------------------------------------------------------------------
 
-function RootNavigator() {
-  const { isAuthenticated, isFirstTimeUser, initializeAuth } = useAuthStore();
+function Navigation() {
+  const [loading, setLoading] = useState(true);
 
-  // Initialize auth state
+  const { isAuthenticated, login, logout } = useAuthStore();
+
   useEffect(() => {
-    initializeAuth();
+    const checkAuthStatus = async () => {
+      try {
+        const accessToken = await AsyncStorage.getItem("access_token");
+        const refreshToken = await AsyncStorage.getItem("refresh_token");
+        if (accessToken && refreshToken) {
+          login();
+        } else {
+          logout();
+        }
+      } catch (error) {
+        console.log("Error checking auth status:", error);
+        logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuthStatus();
   }, []);
 
-  // تهيئة خدمة التوجيه
-  const handleNavigationRef = (ref) => {
-    NavigationService.setNavigator(ref);
-  };
+  if (loading) {
+    // You can return a loading indicator here
+    return null;
+  }
 
   return (
-    <NavigationContainer ref={handleNavigationRef}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!isAuthenticated ? (
-          // إذا لم يكن المستخدم مسجلاً، اعرض مسار المصادقة
-          <Stack.Screen 
-            name="Auth" 
-            component={AuthNavigator} 
-            options={{ gestureEnabled: false }}
-          />
-        ) : (
-          // إذا كان المستخدم مسجلاً، اعرض مسار التطبيق الرئيسي
-          <Stack.Screen 
-            name="App" 
-            component={AppNavigator} 
-            options={{ gestureEnabled: false }}
-          />
-        )}
-      </Stack.Navigator>
+    <NavigationContainer
+      ref={(navigatorRef) => {
+        NavigationService.setNavigator(navigatorRef);
+      }}
+    >
+      {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }
 
-export default RootNavigator;
+export default Navigation;

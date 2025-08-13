@@ -1,20 +1,12 @@
 // components
 import { processingTranslations } from "./components";
-import componentsTranslations from "./components";
 // pages
-import screensTranslations from "./screens";
-import authScreensTranslations from "./screens/authScreensTranslations";
-// common
-import commonTranslations from "./common";
+import { homeScreenTranslations } from "./screens";
 
 // ----------------------------------------------------------------------
 
 const ar = {
-  ...screensTranslations,
-  ...authScreensTranslations,
-  ...componentsTranslations,
-  ...commonTranslations,
-  // Keep the nested structure for backward compatibility
+  screensTranslations: { homeScreenTranslations },
   componentsTranslations: { processingTranslations },
 };
 

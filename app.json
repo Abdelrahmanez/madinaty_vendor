@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Madinaty",
-    "slug": "madinaty",
+    "name": "FitRack",
+    "slug": "FitRack-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,20 +20,13 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "package": "com.abueldahab.Madinatyapp"
+      "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "2c0d505e-d892-4060-8daa-c2f92ea730cf"
-      }
-    },
-    "owner": "abueldahab"
+    ]
   }
 }

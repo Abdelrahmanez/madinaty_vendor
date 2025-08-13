@@ -1,19 +1,12 @@
 export const LightTheme = {
   dark: false,
   mode: "adaptive",
-  roundness: {
-    xs: 10,    // Extra small (inputs, chips)
-    sm: 12,    // Small (buttons, cards)
-    md: 16,   // Medium (modals, dialogs)
-    lg: 20,   // Large (bottom sheets)
-    xl: 24,   // Extra large (floating components)
-    full: 9999, // Fully rounded (badges, avatars)
-  },
+  roundness: 1,
   colors: {
-    primary: "#E01105",
+    primary: "#B3852E",
     onPrimary: "#FFFFFF",
-    primaryContainer: "#FFCDD2",
-    onPrimaryContainer: "#8B0000",
+    primaryContainer: "#FFEAC7",
+    onPrimaryContainer: "#4D3200",
     secondary: "#404040",
     onSecondary: "#FFFFFF",
     secondaryContainer: "#E0E0E0",
@@ -38,10 +31,10 @@ export const LightTheme = {
     scrim: "#000000",
     inverseSurface: "#262626",
     inverseOnSurface: "#F0F0F0",
-    inversePrimary: "#FF6B61",
+    inversePrimary: "#D7B85A",
     elevation: {
       level0: "transparent",
-      level1: "#F8F8F8", // تغيير من #FCF8E3 (الأصفر) إلى رمادي فاتح محايد
+      level1: "#FCF8E3",
       level2: "#F5F5F5",
       level3: "#F0F0F0",
       level4: "#EDEDED",
@@ -50,26 +43,18 @@ export const LightTheme = {
     surfaceDisabled: "rgba(38, 38, 38, 0.12)",
     onSurfaceDisabled: "rgba(38, 38, 38, 0.38)",
     backdrop: "rgba(38, 38, 38, 0.4)",
-    success: "#4CD137",
   },
 };
 
 export const DarkTheme = {
   dark: true,
   mode: "adaptive",
-  roundness: {
-    xs: 10,    // Extra small (inputs, chips)
-    sm: 12,    // Small (buttons, cards)
-    md: 16,   // Medium (modals, dialogs)
-    lg: 20,   // Large (bottom sheets)
-    xl: 24,   // Extra large (floating components)
-    full: 9999, // Fully rounded (badges, avatars)
-  },
+  roundness: 4,
   colors: {
-    primary: "#E01105",
+    primary: "#B3852E",
     onPrimary: "#FFFFFF",
-    primaryContainer: "#7D0000",
-    onPrimaryContainer: "#FFCDD2",
+    primaryContainer: "#6D4C00",
+    onPrimaryContainer: "#FFEAC7",
     secondary: "#E0E0E0",
     onSecondary: "#262626",
     secondaryContainer: "#404040",
@@ -94,7 +79,7 @@ export const DarkTheme = {
     scrim: "#000000",
     inverseSurface: "#E0E0E0",
     inverseOnSurface: "#262626",
-    inversePrimary: "#FF6B61",
+    inversePrimary: "#B3852E",
     elevation: {
       level0: "transparent",
       level1: "#404040",
@@ -106,6 +91,5 @@ export const DarkTheme = {
     surfaceDisabled: "rgba(224, 224, 224, 0.12)",
     onSurfaceDisabled: "rgba(224, 224, 224, 0.38)",
     backdrop: "rgba(224, 224, 224, 0.4)",
-    success: "#4CD137",
   },
 };
