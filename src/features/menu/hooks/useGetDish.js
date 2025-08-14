@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getDish } from '../__apis__/dish';
+import { getDish } from '../api/dish';
 
 export const useGetDish = (dishId) => {
     const [dish, setDish] = useState(null);

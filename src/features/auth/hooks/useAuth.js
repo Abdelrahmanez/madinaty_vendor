@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { loginRequest, registerRequest, logoutRequest } from '../__apis__/auth';
-import useAuthStore from '../stores/authStore';
-import useAlertStore from '../stores/alertStore';
+import { loginRequest, registerRequest, logoutRequest } from '../api/auth';
+import useAuthStore from '../../../stores/authStore';
+import useAlertStore from '../../../stores/alertStore';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { registerPushToken, unregisterPushToken } from '../__apis__/notification';
+import { registerPushToken, unregisterPushToken } from '../../notifications/api/notification';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
-import { refreshAuthHeaders } from '../__apis__/axios';
+import { refreshAuthHeaders } from '../../../services/axios';
 
 /**
  * Hook للتعامل مع عمليات المصادقة

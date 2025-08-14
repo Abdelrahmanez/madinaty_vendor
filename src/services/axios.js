@@ -1,6 +1,6 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import NavigationService from "../navigators/NavigationService";
+import NavigationService from "../navigation/NavigationService";
 import { API_BASE_URL } from "../config/api";
 
 export const mainUrl = API_BASE_URL;

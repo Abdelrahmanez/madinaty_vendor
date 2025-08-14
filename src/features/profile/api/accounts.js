@@ -1,4 +1,4 @@
-import axiosInstance from "./axios";
+import axiosInstance from "../../../services/axios";
 
 export const exampleFetcher = async () =>
   axiosInstance

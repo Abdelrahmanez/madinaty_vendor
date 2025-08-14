@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import { Card, Divider, ActivityIndicator } from 'react-native-paper';
-import { checkServerConnection, runNetworkDiagnostics } from '../__apis__/serverTest';
+import { checkServerConnection, runNetworkDiagnostics } from '../services/serverTest';
 import { API_BASE_URL } from '../config/api';
 
 /**

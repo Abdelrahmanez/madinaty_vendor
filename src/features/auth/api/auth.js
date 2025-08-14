@@ -1,6 +1,6 @@
-import axiosInstance from "./axios";
+import axiosInstance from "../../../services/axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS } from "../../../config/api";
 
 /**
  * تسجيل مستخدم جديد

@@ -1,5 +1,5 @@
-import axiosInstance from "./axios";
-import { API_BASE_URL, API_ENDPOINTS } from "../config/api";
+import axiosInstance from "../../../services/axios";
+import { API_BASE_URL, API_ENDPOINTS } from "../../../config/api";
 import * as Device from 'expo-device';
 
 /**

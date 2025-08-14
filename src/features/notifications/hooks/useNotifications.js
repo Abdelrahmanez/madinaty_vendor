@@ -3,10 +3,10 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-import { registerPushToken, unregisterPushToken } from '../__apis__/notification';
-import useAuthStore from '../stores/authStore';
+import { registerPushToken, unregisterPushToken } from '../api/notification';
+import useAuthStore from '../../../stores/authStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { refreshAuthHeaders } from '../__apis__/axios';
+import { refreshAuthHeaders } from '../../../services/axios';
 
 // تكوين الإشعارات
 Notifications.setNotificationHandler({

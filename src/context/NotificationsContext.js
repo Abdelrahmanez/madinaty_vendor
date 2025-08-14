@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import useNotifications from '../hooks/useNotifications';
+import useNotifications from '../features/notifications/hooks/useNotifications';
 
 // إنشاء سياق الإشعارات
 const NotificationsContext = createContext({

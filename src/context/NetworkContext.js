@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { AppState, Platform } from 'react-native';
 import * as Network from 'expo-network';
-import { checkServerConnection } from '../__apis__/serverTest';
+import { checkServerConnection } from '../services/serverTest';
 
 /**
  * سياق (Context) لإدارة حالة اتصال الشبكة في التطبيق

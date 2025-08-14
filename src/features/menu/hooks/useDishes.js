@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getDishes } from '../__apis__/dish';
+import { getDishes } from '../api/dish';
 
 
 export const useDishes = (filters = {}) => {

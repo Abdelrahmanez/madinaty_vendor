@@ -1,5 +1,5 @@
-import axiosInstance from './axios';
-import { API_ENDPOINTS } from '../config/api';
+import axiosInstance from '../../../services/axios';
+import { API_ENDPOINTS } from '../../../config/api';
 
 export const createOrder = (orderData) => {
     return axiosInstance.post(API_ENDPOINTS.ORDERS.CREATE, orderData);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { createOrder } from '../__apis__/order';
-import { useErrorHandler } from './useErrorHandler';
-import { PAYMENT_METHODS } from '../utils/enums';
+import { createOrder } from '../api/order';
+import { useErrorHandler } from '../../../hooks/useErrorHandler';
+import { PAYMENT_METHODS } from '../../../utils/enums';
 
 export const useOrder = () => {
   const [loading, setLoading] = useState(false);

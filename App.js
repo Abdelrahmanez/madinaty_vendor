@@ -5,7 +5,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 // safe area context
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 // navigation-layouts
-import Navigation from "./src/navigators";
+import Navigation from "./src/navigation";
+import ErrorBoundary from "./src/components/ErrorBoundary";
 // i18n
 import "./src/locales/i18n";
 // expo app loading
@@ -47,13 +48,13 @@ export default function App() {
     "Inter-Bold": Inter_700Bold,
     
     // خطوط Almarai
-    "Almarai-Light": require("./assets/fonts/Almarai/Almarai-Light.ttf"),
-    "Almarai-Regular": require("./assets/fonts/Almarai/Almarai-Regular.ttf"),
-    "Almarai-Bold": require("./assets/fonts/Almarai/Almarai-Bold.ttf"),
-    "Almarai-ExtraBold": require("./assets/fonts/Almarai/Almarai-ExtraBold.ttf"),
+    "Almarai-Light": require("./src/assets/fonts/Almarai/Almarai-Light.ttf"),
+    "Almarai-Regular": require("./src/assets/fonts/Almarai/Almarai-Regular.ttf"),
+    "Almarai-Bold": require("./src/assets/fonts/Almarai/Almarai-Bold.ttf"),
+    "Almarai-ExtraBold": require("./src/assets/fonts/Almarai/Almarai-ExtraBold.ttf"),
     
     // خط SpaceMono السابق
-    "SpaceMono-Regular": require("./assets/fonts/SpaceMono-Regular.ttf"),
+    "SpaceMono-Regular": require("./src/assets/fonts/SpaceMono-Regular.ttf"),
   });
 
   if (!fontsLoaded) {
@@ -69,13 +70,15 @@ export default function App() {
           translucent
         />
         <ThemedApp>
-          <NetworkProvider>
-            <NotificationsProvider>
-              <Navigation />
-              <Alert />
-              <ConnectionAlert />
-            </NotificationsProvider>
-          </NetworkProvider>
+          <ErrorBoundary>
+            <NetworkProvider>
+              <NotificationsProvider>
+                <Navigation />
+                <Alert />
+                <ConnectionAlert />
+              </NotificationsProvider>
+            </NetworkProvider>
+          </ErrorBoundary>
         </ThemedApp>
       </SafeAreaProvider>
     </GestureHandlerRootView>

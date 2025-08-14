@@ -4,7 +4,7 @@ import { useTheme, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { I18nManager } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { fontSize, fontStyleBold, FONTS } from '../theme/fontSizes';
+import { fontSize, FONTS } from '../theme/fontSizes';
 
 const TopBar = ({ 
   title, 
