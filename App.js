@@ -1,12 +1,13 @@
+import React from "react";
 import { StatusBar, useColorScheme } from "react-native";
 // react-native-gesture-handler
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-// react-native-reanimated
-import Reanimated from "react-native-reanimated";
+// safe area context
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 // navigation-layouts
 import Navigation from "./src/navigators";
 // i18n
-/* import "./src/locales/i18n"; */
+import "./src/locales/i18n";
 // expo app loading
 import SplashScreen from "expo-splash-screen";
 // custom fonts
@@ -18,11 +19,19 @@ import {
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
-} from "@expo-google-fonts/inter"; // Import Inter fonts
+} from "@expo-google-fonts/inter";
 // theme
 import ThemedApp from "./src/theme";
 // custom alert component
 import Alert from "./src/components/Alert";
+// notifications context
+import NotificationsProvider from "./src/context/NotificationsContext";
+// network context for monitoring internet connection
+import NetworkProvider from "./src/context/NetworkContext";
+// connection alert component
+import ConnectionAlert from "./src/components/ConnectionAlert";
+
+// إزالة تعديل المكونات الافتراضية لتجنب المشاكل
 
 // ------------------------------------------------------------------
 
@@ -36,6 +45,15 @@ export default function App() {
     "Inter-Medium": Inter_500Medium,
     "Inter-SemiBold": Inter_600SemiBold,
     "Inter-Bold": Inter_700Bold,
+    
+    // خطوط Almarai
+    "Almarai-Light": require("./assets/fonts/Almarai/Almarai-Light.ttf"),
+    "Almarai-Regular": require("./assets/fonts/Almarai/Almarai-Regular.ttf"),
+    "Almarai-Bold": require("./assets/fonts/Almarai/Almarai-Bold.ttf"),
+    "Almarai-ExtraBold": require("./assets/fonts/Almarai/Almarai-ExtraBold.ttf"),
+    
+    // خط SpaceMono السابق
+    "SpaceMono-Regular": require("./assets/fonts/SpaceMono-Regular.ttf"),
   });
 
   if (!fontsLoaded) {
@@ -44,14 +62,22 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar
-        barStyle={scheme === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={scheme === "dark" ? "#000000" : "#ffffff"}
-      />
-      <ThemedApp>
-        <Navigation />
-        <Alert />
-      </ThemedApp>
+      <SafeAreaProvider>
+        <StatusBar
+          barStyle={scheme === "dark" ? "light-content" : "dark-content"}
+          backgroundColor="transparent"
+          translucent
+        />
+        <ThemedApp>
+          <NetworkProvider>
+            <NotificationsProvider>
+              <Navigation />
+              <Alert />
+              <ConnectionAlert />
+            </NotificationsProvider>
+          </NetworkProvider>
+        </ThemedApp>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
