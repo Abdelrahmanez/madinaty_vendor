@@ -1,14 +1,13 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Placeholder: add admin-specific screens here when available
-import OrdersNavigator from './OrdersNavigator';
+import AdminDashboard from '../features/admin/screens/adminDashboard';
 
 const Stack = createNativeStackNavigator();
 
 const AdminNavigator = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="AdminOrders" component={OrdersNavigator} />
+    <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
   </Stack.Navigator>
 );
 

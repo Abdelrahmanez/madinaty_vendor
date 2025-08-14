@@ -1,18 +1,13 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// For delivery flow we will reuse orders tracking screens
-import CurrentOrdersScreen from '../features/orders/screens/currentOrdersScreen';
-import OrderDetailsScreen from '../features/orders/screens/orderDetailsScreen';
-import OrderTrackingScreen from '../features/orders/screens/orderTrackingScreen';
+import DeliveryDashboard from '../features/delivery/screens/deliveryDashboard';
 
 const Stack = createNativeStackNavigator();
 
 const DeliveryNavigator = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="DeliveryCurrentOrders" component={CurrentOrdersScreen} />
-    <Stack.Screen name="DeliveryOrderDetails" component={OrderDetailsScreen} />
-    <Stack.Screen name="DeliveryOrderTracking" component={OrderTrackingScreen} />
+    <Stack.Screen name="DeliveryDashboard" component={DeliveryDashboard} />
   </Stack.Navigator>
 );
 
