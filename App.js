@@ -39,7 +39,7 @@ import ConnectionAlert from "./src/components/ConnectionAlert";
 export default function App() {
   const scheme = useColorScheme(); // Detect system theme
 
-  let [fontsLoaded] = useFonts({
+  const [fontsLoaded] = useFonts({
     "Inter-Thin": Inter_100Thin,
     "Inter-Light": Inter_300Light,
     "Inter-Regular": Inter_400Regular,

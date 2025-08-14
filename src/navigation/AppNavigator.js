@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import AuthNavigator from './AuthNavigator';
-import RoleBasedNavigator from './RoleBasedNavigator';
+import CustomerNavigator from './CustomerNavigator';
 import { navigationRef } from './NavigationService';
 
 const Stack = createNativeStackNavigator();
@@ -14,8 +14,8 @@ const AppNavigator = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {/* Auth flow */}
         <Stack.Screen name="Auth" component={AuthNavigator} />
-        {/* Role-based navigation */}
-        <Stack.Screen name="MainTabs" component={RoleBasedNavigator} />
+        {/* Main app navigation */}
+        <Stack.Screen name="MainTabs" component={CustomerNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );
