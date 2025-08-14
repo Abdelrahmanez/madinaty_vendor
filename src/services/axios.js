@@ -113,7 +113,7 @@ axiosInstance.interceptors.response.use(
     if (error.response.status === 401) {
       await AsyncStorage.removeItem("access_token");
       await AsyncStorage.removeItem("refresh_token");
-      NavigationService.navigate("Login");
+      NavigationService.navigate("Auth");
       return Promise.reject(error);
     }
 
@@ -148,11 +148,11 @@ axiosInstance.interceptors.response.use(
           // مسح الرموز المميزة وتوجيه المستخدم لتسجيل الدخول مجدداً
           await AsyncStorage.removeItem("access_token");
           await AsyncStorage.removeItem("refresh_token");
-          NavigationService.navigate("Login");
+          NavigationService.navigate("Auth");
         }
       } else {
         console.log("رمز التحديث غير متوفر.");
-        NavigationService.navigate("Login");
+        NavigationService.navigate("Auth");
       }
     }
 

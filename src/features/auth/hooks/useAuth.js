@@ -35,6 +35,13 @@ const useAuth = () => {
    */
   const registerDeviceForNotifications = async () => {
     try {
+      // Skip push notifications in development if no proper EAS project is configured
+      const projectId = Constants?.expoConfig?.extra?.eas?.projectId;
+      if (!projectId || projectId === 'your-project-id-here') {
+        console.log('تخطي تسجيل الإشعارات - لم يتم تكوين معرف المشروع');
+        return;
+      }
+
       let token = await AsyncStorage.getItem('expoPushToken');
       
       if (!token) {
@@ -43,7 +50,7 @@ const useAuth = () => {
         if (status === 'granted') {
           try {
             const tokenData = await Notifications.getExpoPushTokenAsync({
-              projectId: Constants?.expoConfig?.extra?.eas?.projectId,
+              projectId: projectId,
             });
             token = tokenData.data;
             await AsyncStorage.setItem('expoPushToken', token);
@@ -83,6 +90,13 @@ const useAuth = () => {
    */
   const unregisterDeviceForNotifications = async () => {
     try {
+      // Skip push notifications in development if no proper EAS project is configured
+      const projectId = Constants?.expoConfig?.extra?.eas?.projectId;
+      if (!projectId || projectId === 'your-project-id-here') {
+        console.log('تخطي إلغاء تسجيل الإشعارات - لم يتم تكوين معرف المشروع');
+        return;
+      }
+
       const token = await AsyncStorage.getItem('expoPushToken');
       if (token) {
         // تأكد من تحديث ترويسات المصادقة قبل إرسال الطلب

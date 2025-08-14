@@ -10,12 +10,12 @@ import {
   TouchableOpacity
 } from "react-native";
 import { useTheme } from "react-native-paper";
-import TopBar from '../../components/TopBar';
+import TopBar from '../../../../components/TopBar';
 import { useRestaurants } from "../../hooks/useRestaurants";
 import { useQueryFilters } from "../../hooks/useQueryFilters";
 import RestaurantsList from "../../components/restaurants/RestaurantsList";
-import LoadingIndicator from "../../components/LoadingIndicator";
-import  ReusableModal  from "../../components/ReusableModal";
+import LoadingIndicator from "../../../../components/LoadingIndicator";
+import  ReusableModal  from "../../../../components/ReusableModal";
 import RestaurantFilter from "../../components/restaurants/RestaurantFilter";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
     

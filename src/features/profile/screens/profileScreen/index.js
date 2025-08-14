@@ -68,7 +68,7 @@ const ProfileScreen = ({ navigation }) => {
         // بعد تسجيل الخروج بنجاح، توجيه المستخدم إلى شاشة تسجيل الدخول
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Login' }],
+          routes: [{ name: 'Auth' }],
         });
       }
     } catch (error) {
@@ -78,7 +78,12 @@ const ProfileScreen = ({ navigation }) => {
 
   // التنقل إلى صفحات أخرى
   const navigateTo = (screen, params) => {
-    navigation.navigate(screen, params);
+    if (screen === 'ChangePassword') {
+      // Navigate to Auth navigator for ChangePassword
+      navigation.navigate('Auth', { screen: 'ChangePassword' });
+    } else {
+      navigation.navigate(screen, params);
+    }
   };
   
   return (

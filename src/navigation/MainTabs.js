@@ -5,7 +5,7 @@ import { useTheme } from 'react-native-paper';
 
 import RestaurantNavigator from './RestaurantNavigator';
 import OrdersNavigator from './OrdersNavigator';
-import ProfileScreen from '../features/profile/screens/profileScreen';
+import ProfileNavigator from './ProfileNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,7 +27,7 @@ const MainTabs = () => {
     >
       <Tab.Screen name="HomeTab" component={RestaurantNavigator} options={{ title: 'الرئيسية' }} />
       <Tab.Screen name="OrdersTab" component={OrdersNavigator} options={{ title: 'الطلبات' }} />
-      <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'حسابي' }} />
+      <Tab.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: 'حسابي' }} />
     </Tab.Navigator>
   );
 };

@@ -13,11 +13,11 @@ import {
 } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import TopBar from '../../../components/TopBar';
-import AddressCard from '../../../components/address/AddressCard';
-import AddressForm from '../../../components/address/AddressForm';
+import TopBar from '../../../../components/TopBar';
+import AddressCard from '../../components/AddressCard';
+import AddressForm from '../../components/AddressForm';
 import { useAddresses } from '../../hooks/useAddresses';
-import { fontSize } from '../../../theme/fontSizes';
+import { fontSize } from '../../../../theme/fontSizes';
 
 const isRTL = I18nManager.isRTL;
 

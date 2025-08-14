@@ -17,7 +17,7 @@ const WelcomeScreen = ({ navigation }) => {
   useEffect(() => {
     if (isAuthenticated) {
       // إذا كان المستخدم مسجل دخوله بالفعل، يتم توجيهه إلى الشاشة الرئيسية
-      navigation.replace('Home');
+      navigation.replace('MainTabs');
     }
   }, [isAuthenticated, navigation]);
 
@@ -34,7 +34,7 @@ const WelcomeScreen = ({ navigation }) => {
   // Handle skip login (continue as guest)
   const handleSkip = () => {
     skipAuth();
-    navigation.replace('Home');
+    navigation.replace('MainTabs');
   };
 
   // إذا كان المستخدم مسجل دخوله، لا تعرض شيئًا حتى يعمل useEffect الخاص بالتوجيه

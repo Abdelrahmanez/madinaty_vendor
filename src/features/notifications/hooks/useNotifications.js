@@ -53,7 +53,14 @@ export const getNotificationPermissionsAndToken = async () => {
     // 5. الحصول على Expo Push Token
     try {
       console.log('🔑 جاري الحصول على توكن الإشعارات...');
-      const projectId = Constants?.expoConfig?.extra?.eas?.projectId || 'madinaty-app';
+      const projectId = Constants?.expoConfig?.extra?.eas?.projectId;
+      
+      // Skip push notifications in development if no proper EAS project is configured
+      if (!projectId || projectId === 'your-project-id-here') {
+        console.log('تخطي الحصول على توكن الإشعارات - لم يتم تكوين معرف المشروع');
+        return null;
+      }
+      
       console.log('استخدام projectId للإشعارات:', projectId);
       
       const tokenData = await Notifications.getExpoPushTokenAsync({
@@ -269,7 +276,13 @@ export default function useNotifications() {
       // الحصول على الـ token
       try {
         // تحديد معرّف المشروع - استخدام القيمة من التكوين أو القيمة الافتراضية
-        const projectId = Constants?.expoConfig?.extra?.eas?.projectId || 'madinaty-app';
+        const projectId = Constants?.expoConfig?.extra?.eas?.projectId;
+        
+        // Skip push notifications in development if no proper EAS project is configured
+        if (!projectId || projectId === 'your-project-id-here') {
+          console.log('تخطي الحصول على توكن الإشعارات - لم يتم تكوين معرف المشروع');
+          return null;
+        }
         
         const tokenData = await Notifications.getExpoPushTokenAsync({
           projectId: projectId,
