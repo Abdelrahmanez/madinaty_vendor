@@ -37,6 +37,8 @@ export const API_ENDPOINTS = {
       console.log("Fetching restaurant detail for id:", id);
       return `/restaurants/${id}`;
     },
+    MY_RESTAURANT: "/restaurants/my-restaurant",
+
   },
   CATEGORIES: {
     LIST: (type) => `/categories?type=${type}`,

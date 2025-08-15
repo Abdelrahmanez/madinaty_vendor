@@ -5,8 +5,9 @@ export const createOrder = (orderData) => {
     return axiosInstance.post(API_ENDPOINTS.ORDERS.CREATE, orderData);
 };
 
-export const getOrders = (filters = {}) => {
-    return axiosInstance.get(API_ENDPOINTS.ORDERS.LIST, { params: filters });
+export const getOrders = async (filters = {}) => {
+    const response = await axiosInstance.get(API_ENDPOINTS.ORDERS.LIST, { params: filters });
+    return response.data.data;
 };
 
 export const getOrder = (orderId) => {

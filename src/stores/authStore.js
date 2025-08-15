@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { unregisterPushToken } from '../features/notifications/api/notification';
 
 const useAuthStore = create((set, get) => ({
   isAuthenticated: false,
@@ -65,15 +66,40 @@ const useAuthStore = create((set, get) => ({
   // Logout function
   logout: async () => {
     try {
+      // Get the stored push token before clearing auth data
+      const expoPushToken = await AsyncStorage.getItem('expoPushToken');
+      
+      // Clear authentication data
       await Promise.all([
         AsyncStorage.removeItem('accessToken'),
         AsyncStorage.removeItem('userData')
       ]);
+      
+      // Unregister push token from backend if it exists
+      if (expoPushToken) {
+        console.log('📱 Unregistering push token on logout:', expoPushToken);
+        try {
+          const result = await unregisterPushToken(expoPushToken);
+          if (result.success) {
+            console.log('✅ Push token unregistered successfully on logout');
+            // Remove the token from local storage
+            await AsyncStorage.removeItem('expoPushToken');
+          } else {
+            console.error('❌ Failed to unregister push token on logout:', result.error);
+          }
+        } catch (tokenError) {
+          console.error('❌ Error unregistering push token on logout:', tokenError);
+        }
+      }
+      
+      // Update auth state
       set({ 
         isAuthenticated: false, 
         accessToken: null, 
         user: null 
       });
+      
+      console.log('✅ Logout completed successfully');
     } catch (error) {
       console.error('Error during logout:', error);
     }

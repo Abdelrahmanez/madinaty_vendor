@@ -31,10 +31,18 @@ import NotificationsProvider from "./src/context/NotificationsContext";
 import NetworkProvider from "./src/context/NetworkContext";
 // connection alert component
 import ConnectionAlert from "./src/components/ConnectionAlert";
+// push token management
+import { usePushToken } from "./src/features/notifications/hooks/usePushToken";
 
 // إزالة تعديل المكونات الافتراضية لتجنب المشاكل
 
 // ------------------------------------------------------------------
+
+// Push Token Initializer Component
+const PushTokenInitializer = () => {
+  usePushToken(); // This hook will handle push token management
+  return null;
+};
 
 export default function App() {
   const scheme = useColorScheme(); // Detect system theme
@@ -72,11 +80,12 @@ export default function App() {
         <ThemedApp>
           <ErrorBoundary>
             <NetworkProvider>
-              <NotificationsProvider>
-                <Navigation />
-                <Alert />
-                <ConnectionAlert />
-              </NotificationsProvider>
+                          <NotificationsProvider>
+              <PushTokenInitializer />
+              <Navigation />
+              <Alert />
+              <ConnectionAlert />
+            </NotificationsProvider>
             </NetworkProvider>
           </ErrorBoundary>
         </ThemedApp>
