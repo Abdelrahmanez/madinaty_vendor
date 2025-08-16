@@ -41,7 +41,8 @@ export const calculateOrderTotal = (items) => {
  */
 export const getCustomerName = (user) => {
   if (!user) return 'عميل مجهول';
-  return user.name || 'عميل مجهول';
+  const name = user.name?.toString().trim();
+  return name?.length ? name : 'عميل مجهول';
 };
 
 /**

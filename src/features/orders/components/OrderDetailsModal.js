@@ -5,7 +5,8 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity, 
-  Alert 
+  Alert,
+  Linking
 } from 'react-native';
 import { useTheme, Portal, Modal } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -47,6 +48,7 @@ const OrderDetailsModal = ({
   const theme = useTheme();
   const styles = createStyles(theme);
   const [updating, setUpdating] = useState(false);
+  const [showAllItems, setShowAllItems] = useState(false);
 
   if (!order) {
     return null;
@@ -76,7 +78,9 @@ const OrderDetailsModal = ({
     customerName,
     customerPhone,
     deliveryAddress,
-    specialInstructions
+    specialInstructions,
+    itemsCount,
+    itemsSummary
   } = transformedOrder;
 
   const statusLabel = ORDER_STATUS_LABELS[status] || 'غير معروف';
@@ -271,6 +275,34 @@ const OrderDetailsModal = ({
     );
   };
 
+  // Determine the primary next action to keep UI simple and focused
+  const getNextPrimaryAction = () => {
+    if (canAcceptOrder(status)) {
+      return { label: 'قبول الطلب', handler: handleAcceptOrder };
+    }
+    if (canPrepareOrder(status)) {
+      return { label: 'بدء التحضير', handler: handleStartPreparing };
+    }
+    if (canMarkAsReady(status)) {
+      return { label: 'الطلب جاهز', handler: handleMarkAsReady };
+    }
+    if (canAssignToDriver(status)) {
+      return { label: 'تعيين سائق', handler: handleAssignToDriver };
+    }
+    if (canMarkAsPickedUp(status)) {
+      return { label: 'تم الاستلام', handler: handleMarkAsPickedUp };
+    }
+    if (canMarkAsOnTheWay(status)) {
+      return { label: 'في الطريق', handler: handleMarkAsOnTheWay };
+    }
+    if (canMarkAsDelivered(status)) {
+      return { label: 'تم التوصيل', handler: handleMarkAsDelivered };
+    }
+    return null;
+  };
+
+  const primaryAction = getNextPrimaryAction();
+
   return (
     <Portal>
       <Modal
@@ -287,6 +319,31 @@ const OrderDetailsModal = ({
             </TouchableOpacity>
           </View>
 
+          {/* Customer Information (placed first per priority) */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>معلومات العميل</Text>
+            <View style={styles.customerInfo}>
+              <View style={styles.infoRow}>
+                <MaterialCommunityIcons name="account" size={20} color={theme.colors.primary} />
+                <Text style={styles.infoLabel}>الاسم:</Text>
+                <Text style={styles.infoValue}>{customerName}</Text>
+              </View>
+              {customerPhone && (
+                <TouchableOpacity
+                  style={styles.infoRow}
+                  onPress={() => Linking.openURL(`tel:${customerPhone}`)}
+                  activeOpacity={0.7}
+                >
+                  <MaterialCommunityIcons name="phone" size={20} color={theme.colors.primary} />
+                  <Text style={styles.infoLabel}>الهاتف:</Text>
+                  <Text style={[styles.infoValue, { color: theme.colors.primary }]}>
+                    {customerPhone}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
           {/* Order Basic Info */}
           <View style={styles.section}>
             <View style={styles.orderHeader}>
@@ -297,37 +354,31 @@ const OrderDetailsModal = ({
                 <Text style={styles.statusText}>{statusLabel}</Text>
               </View>
             </View>
-            
+            <View style={styles.orderMetaRow}>
+              <View style={styles.metaChip}>
+                <MaterialCommunityIcons name="calendar" size={14} color={theme.colors.onSurfaceVariant} />
+                <Text style={styles.metaText}>{formatOrderDate(createdAt)}</Text>
+              </View>
+              <View style={styles.metaChip}>
+                <MaterialCommunityIcons name="clock-outline" size={14} color={theme.colors.onSurfaceVariant} />
+                <Text style={styles.metaText}>{formatOrderTime(createdAt)}</Text>
+              </View>
+              {typeof itemsCount === 'number' && (
+                <View style={styles.metaChip}>
+                  <MaterialCommunityIcons name="silverware-fork-knife" size={14} color={theme.colors.onSurfaceVariant} />
+                  <Text style={styles.metaText}>{itemsCount} صنف</Text>
+                </View>
+              )}
+            </View>
+            {itemsSummary && (
+              <Text style={styles.itemsSummaryText}>{itemsSummary}</Text>
+            )}
             <View style={styles.paymentStatusRow}>
               <View style={[styles.paymentStatusBadge, { 
                 backgroundColor: paymentStatus === 'paid' ? theme.colors.success : theme.colors.warning 
               }]}>
                 <Text style={styles.paymentStatusText}>{paymentStatusLabel}</Text>
               </View>
-            </View>
-            
-            <Text style={styles.orderDate}>
-              {formatOrderDate(createdAt)} - {formatOrderTime(createdAt)}
-            </Text>
-          </View>
-
-          {/* Customer Information */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>معلومات العميل</Text>
-            <View style={styles.customerInfo}>
-              <View style={styles.infoRow}>
-                <MaterialCommunityIcons name="account" size={20} color={theme.colors.primary} />
-                <Text style={styles.infoLabel}>الاسم:</Text>
-                <Text style={styles.infoValue}>{customerName}</Text>
-              </View>
-              
-              {customerPhone && (
-                <View style={styles.infoRow}>
-                  <MaterialCommunityIcons name="phone" size={20} color={theme.colors.primary} />
-                  <Text style={styles.infoLabel}>الهاتف:</Text>
-                  <Text style={styles.infoValue}>{customerPhone}</Text>
-                </View>
-              )}
             </View>
           </View>
 
@@ -348,7 +399,7 @@ const OrderDetailsModal = ({
           {/* Order Items */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>الأطباق المطلوبة</Text>
-            {items.map((item, index) => (
+            {(showAllItems ? items : items.slice(0, 3)).map((item, index) => (
               <View key={index} style={styles.itemRow}>
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemName}>{item.dish?.name || 'طبق غير محدد'}</Text>
@@ -374,6 +425,17 @@ const OrderDetailsModal = ({
                 </View>
               </View>
             ))}
+            {items.length > 3 && (
+              <TouchableOpacity
+                onPress={() => setShowAllItems((prev) => !prev)}
+                style={styles.showMoreButton}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.showMoreText}>
+                  {showAllItems ? 'عرض أقل' : `عرض الكل (${items.length})`}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Special Instructions */}
@@ -394,21 +456,21 @@ const OrderDetailsModal = ({
                 <Text style={styles.infoValue}>{paymentLabel}</Text>
               </View>
               
-              {subtotal && (
+              {typeof subtotal === 'number' && (
                 <View style={styles.priceRow}>
                   <Text style={styles.priceLabel}>المجموع الفرعي:</Text>
                   <Text style={styles.priceValue}>{formatCurrency(subtotal)}</Text>
                 </View>
               )}
               
-              {deliveryFee && (
+              {typeof deliveryFee === 'number' && (
                 <View style={styles.priceRow}>
                   <Text style={styles.priceLabel}>رسوم التوصيل:</Text>
                   <Text style={styles.priceValue}>{formatCurrency(deliveryFee)}</Text>
                 </View>
               )}
               
-              {discount && (
+              {typeof discount === 'number' && discount > 0 && (
                 <View style={styles.priceRow}>
                   <Text style={styles.priceLabel}>الخصم:</Text>
                   <Text style={styles.priceValue}>-{formatCurrency(discount)}</Text>
@@ -423,92 +485,19 @@ const OrderDetailsModal = ({
           </View>
         </ScrollView>
 
-        {/* Action Buttons */}
+        {/* Action Buttons (Apple-like: one primary, one secondary) */}
         <View style={styles.actionsContainer}>
-          {canAcceptOrder(status) && (
+          {primaryAction && (
             <PrimaryButton
               mode="contained"
-              onPress={handleAcceptOrder}
+              onPress={primaryAction.handler}
               loading={updating}
               disabled={updating}
               style={styles.actionButton}
             >
-              قبول الطلب
+              {primaryAction.label}
             </PrimaryButton>
           )}
-          
-          {canPrepareOrder(status) && (
-            <PrimaryButton
-              mode="contained"
-              onPress={handleStartPreparing}
-              loading={updating}
-              disabled={updating}
-              style={styles.actionButton}
-            >
-              بدء التحضير
-            </PrimaryButton>
-          )}
-          
-          {canMarkAsReady(status) && (
-            <PrimaryButton
-              mode="contained"
-              onPress={handleMarkAsReady}
-              loading={updating}
-              disabled={updating}
-              style={styles.actionButton}
-            >
-              الطلب جاهز
-            </PrimaryButton>
-          )}
-          
-          {canAssignToDriver(status) && (
-            <PrimaryButton
-              mode="contained"
-              onPress={handleAssignToDriver}
-              loading={updating}
-              disabled={updating}
-              style={styles.actionButton}
-            >
-              تعيين سائق
-            </PrimaryButton>
-          )}
-          
-          {canMarkAsPickedUp(status) && (
-            <PrimaryButton
-              mode="contained"
-              onPress={handleMarkAsPickedUp}
-              loading={updating}
-              disabled={updating}
-              style={styles.actionButton}
-            >
-              تم الاستلام
-            </PrimaryButton>
-          )}
-          
-          {canMarkAsOnTheWay(status) && (
-            <PrimaryButton
-              mode="contained"
-              onPress={handleMarkAsOnTheWay}
-              loading={updating}
-              disabled={updating}
-              style={styles.actionButton}
-            >
-              في الطريق
-            </PrimaryButton>
-          )}
-          
-          {canMarkAsDelivered(status) && (
-            <PrimaryButton
-              mode="contained"
-              onPress={handleMarkAsDelivered}
-              loading={updating}
-              disabled={updating}
-              style={styles.actionButton}
-            >
-              تم التوصيل
-            </PrimaryButton>
-          )}
-          
           {canCancelOrder(status) && (
             <SecondaryButton
               mode="outlined"
@@ -531,8 +520,11 @@ const createStyles = (theme) => StyleSheet.create({
   modalContainer: {
     backgroundColor: theme.colors.background,
     margin: 20,
-    borderRadius: 16,
+    borderRadius: 20,
     maxHeight: '90%',
+    width: '94%',
+    maxWidth: 600,
+    alignSelf: 'center',
   },
   scrollView: {
     flex: 1,
@@ -551,7 +543,11 @@ const createStyles = (theme) => StyleSheet.create({
     color: theme.colors.onSurface,
   },
   closeButton: {
-    padding: 4,
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 22,
   },
   section: {
     padding: 20,
@@ -569,6 +565,31 @@ const createStyles = (theme) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  orderMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginVertical: 8,
+  },
+  metaChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surfaceVariant,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  metaText: {
+    fontSize: 12,
+    color: theme.colors.onSurfaceVariant,
+    marginLeft: 6,
+  },
+  itemsSummaryText: {
+    fontSize: 12,
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: 6,
   },
   orderNumber: {
     fontSize: 18,
@@ -677,6 +698,18 @@ const createStyles = (theme) => StyleSheet.create({
     fontWeight: '500',
     color: theme.colors.primary,
   },
+  showMoreButton: {
+    marginTop: 8,
+    alignSelf: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  showMoreText: {
+    fontSize: 13,
+    color: theme.colors.primary,
+    fontWeight: '600',
+  },
   specialInstructions: {
     fontSize: 14,
     color: theme.colors.onSurface,
@@ -725,7 +758,9 @@ const createStyles = (theme) => StyleSheet.create({
     borderTopColor: theme.colors.outlineVariant,
   },
   actionButton: {
-    borderRadius: 8,
+    borderRadius: 12,
+    minHeight: 48,
+    justifyContent: 'center',
   },
   cancelButton: {
     borderColor: theme.colors.error,
