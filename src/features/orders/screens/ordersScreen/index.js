@@ -1,45 +1,68 @@
-import React from "react";
-import { View, Text, StyleSheet, I18nManager } from "react-native";
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from 'react-native-paper';
 import TopBar from '../../../../components/TopBar';
+import { RestaurantStatus } from '../../../restaurant/components';
+import { OrdersList } from '../../../orders/components';
+import { useOrders } from '../../../orders/hooks/useOrders';
+import SocketDebugger from '../../../orders/components/SocketDebugger';
 
-const isRTL = I18nManager.isRTL;
-
-const OrdersScreen = ({ navigation }) => {
+const OrdersScreen = () => {
   const theme = useTheme();
-  
+  const insets = useSafeAreaInsets();
+  const styles = createStyles(theme, insets);
+
+  const {
+    orders,
+    loading,
+    error,
+    updating,
+    socketConnected,
+    updateOrderStatus,
+    cancelOrder,
+    refreshOrders,
+    getSocketStatus,
+    socket
+  } = useOrders();
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <TopBar 
+    <View style={styles.container}>
+      <TopBar
         title="الطلبات"
-        subtitle="متابعة طلباتك الحالية والسابقة"
+        showBackButton={false}
+        backgroundColor={theme.colors.primary}
+        titleColor={theme.colors.onPrimary}
       />
       
-      <View style={styles.contentContainer}>
-        <Text style={[styles.contentText, { color: theme.colors.primary }]}>
-          صفحة الطلبات
-        </Text>
-      </View>
+      <OrdersList
+        orders={orders}
+        loading={loading}
+        error={error}
+        updating={updating}
+        onRefresh={refreshOrders}
+        onStatusUpdate={updateOrderStatus}
+        onCancelOrder={cancelOrder}
+        restaurantStatus={<RestaurantStatus />}
+        socketDebugger={
+          __DEV__ ? (
+            <SocketDebugger
+              socket={socket}
+              socketConnected={socketConnected}
+              getSocketStatus={getSocketStatus}
+            />
+          ) : null
+        }
+      />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme, insets) => StyleSheet.create({
   container: {
     flex: 1,
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  contentText: {
-    fontSize: 24, 
-    fontWeight: 'bold',
-    textAlign: 'center',
-    writingDirection: 'rtl',
+    backgroundColor: theme.colors.background,
   },
 });
 
-export default OrdersScreen; 
+export default OrdersScreen;

@@ -2,6 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NavigationService from "../navigation/NavigationService";
 import { API_BASE_URL } from "../config/api";
+import useAuthStore from "../stores/authStore";
 
 export const mainUrl = API_BASE_URL;
 
@@ -113,6 +114,11 @@ axiosInstance.interceptors.response.use(
     if (error.response.status === 401) {
       await AsyncStorage.removeItem("access_token");
       await AsyncStorage.removeItem("refresh_token");
+      try {
+        // mark user unauthenticated to avoid loops
+        const setUnauthenticated = useAuthStore.getState()?.setUnauthenticated;
+        setUnauthenticated && setUnauthenticated();
+      } catch {}
       NavigationService.navigate("Auth");
       return Promise.reject(error);
     }

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { View, StyleSheet, Animated } from "react-native";
 // react-native-paper
-import { Snackbar, useTheme } from "react-native-paper";
+import { Snackbar, useTheme, Text } from "react-native-paper";
 // stores
 import useAlertStore from "../stores/alertStore";
 // react-native-size-matters
@@ -12,7 +12,7 @@ import { moderateScale } from "react-native-size-matters";
 const Alert = () => {
   const theme = useTheme();
 
-  const { isTriggered, type, message, resetAlert } = useAlertStore();
+  const { isTriggered, type, message, duration, showIcon, autoClose, resetAlert } = useAlertStore();
 
   const slideAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -32,6 +32,21 @@ const Alert = () => {
     }
 
     return color;
+  };
+
+  const getStatusIcon = () => {
+    if (!showIcon) return null;
+    
+    switch (type) {
+      case "success":
+        return "✅ ";
+      case "warning":
+        return "⚠️ ";
+      case "error":
+        return "❌ ";
+      default:
+        return "";
+    }
   };
 
   useEffect(() => {
@@ -84,8 +99,15 @@ const Alert = () => {
           backgroundColor: snackBarBackgroundColor(),
         }}
         onDismiss={onDismissSnackBar}
+        duration={autoClose ? duration : undefined}
+        action={{
+          label: 'إغلاق',
+          onPress: onDismissSnackBar,
+        }}
       >
-        {message}
+        <Text style={styles.messageText}>
+          {getStatusIcon()}{message}
+        </Text>
       </Snackbar>
     </Animated.View>
   );
@@ -98,5 +120,20 @@ const styles = StyleSheet.create({
     marginHorizontal: moderateScale(20),
     marginBottom: moderateScale(10),
     borderRadius: 9,
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  messageText: {
+    color: '#FFFFFF',
+    fontSize: moderateScale(14),
+    fontWeight: '600',
+    textAlign: 'center',
+    flex: 1,
   },
 });

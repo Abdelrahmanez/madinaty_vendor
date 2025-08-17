@@ -1,7 +1,6 @@
-import { StyleSheet } from "react-native";
-import { useTheme } from 'react-native-paper';
-import { I18nManager } from 'react-native';
-import { fontSize } from '../../theme/fontSizes';
+// Deprecated: Home screen styles are no longer used. Keeping file for import safety.
+export default {};
+export const useStyles = () => ({});
 
 // استخدام I18nManager للتحقق مما إذا كانت اللغة RTL
 const isRTL = I18nManager.isRTL;

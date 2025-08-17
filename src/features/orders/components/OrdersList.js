@@ -12,7 +12,7 @@ import { useTheme, Chip } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import OrderCardItem from './OrderCardItem';
 import OrderDetailsModal from './OrderDetailsModal';
-import { ORDER_STATUS, ORDER_STATUS_LABELS } from '../types/orderTypes';
+import { ORDER_STATUS, ORDER_STATUS_LABELS } from '../../../utils/enums';
 
 /**
  * OrdersList Component
@@ -24,6 +24,8 @@ const OrdersList = ({
   onRefresh, 
   onStatusUpdate,
   onCancelOrder,
+  restaurantStatus,
+  socketDebugger,
   style 
 }) => {
   const theme = useTheme();
@@ -77,10 +79,10 @@ const OrdersList = ({
   const filterOptions = [
     { key: 'all', label: 'جميع الطلبات', count: orders.length },
     { key: ORDER_STATUS.PENDING, label: ORDER_STATUS_LABELS[ORDER_STATUS.PENDING], count: orders.filter(o => o.status === ORDER_STATUS.PENDING).length },
-    { key: ORDER_STATUS.CONFIRMED, label: ORDER_STATUS_LABELS[ORDER_STATUS.CONFIRMED], count: orders.filter(o => o.status === ORDER_STATUS.CONFIRMED).length },
     { key: ORDER_STATUS.PREPARING, label: ORDER_STATUS_LABELS[ORDER_STATUS.PREPARING], count: orders.filter(o => o.status === ORDER_STATUS.PREPARING).length },
-    { key: ORDER_STATUS.READY, label: ORDER_STATUS_LABELS[ORDER_STATUS.READY], count: orders.filter(o => o.status === ORDER_STATUS.READY).length },
-    { key: ORDER_STATUS.OUT_FOR_DELIVERY, label: ORDER_STATUS_LABELS[ORDER_STATUS.OUT_FOR_DELIVERY], count: orders.filter(o => o.status === ORDER_STATUS.OUT_FOR_DELIVERY).length },
+    { key: ORDER_STATUS.READY_FOR_PICKUP, label: ORDER_STATUS_LABELS[ORDER_STATUS.READY_FOR_PICKUP], count: orders.filter(o => o.status === ORDER_STATUS.READY_FOR_PICKUP).length },
+    { key: ORDER_STATUS.ASSIGNED_TO_DRIVER, label: ORDER_STATUS_LABELS[ORDER_STATUS.ASSIGNED_TO_DRIVER], count: orders.filter(o => o.status === ORDER_STATUS.ASSIGNED_TO_DRIVER).length },
+    { key: ORDER_STATUS.ON_THE_WAY, label: ORDER_STATUS_LABELS[ORDER_STATUS.ON_THE_WAY], count: orders.filter(o => o.status === ORDER_STATUS.ON_THE_WAY).length },
     { key: ORDER_STATUS.DELIVERED, label: ORDER_STATUS_LABELS[ORDER_STATUS.DELIVERED], count: orders.filter(o => o.status === ORDER_STATUS.DELIVERED).length },
   ];
 
@@ -148,24 +150,41 @@ const OrdersList = ({
 
   // Render list header
   const renderListHeader = () => (
-    <View style={styles.listHeader}>
-      <Text style={styles.listTitle}>الطلبات</Text>
-      <Text style={styles.listSubtitle}>
-        {filteredOrders.length} من {orders.length} طلب
-      </Text>
+    <View>
+      {/* Restaurant Status */}
+      {restaurantStatus}
+      
+      {/* Socket Debugger */}
+      {socketDebugger}
+      
+      {/* Filter Chips */}
+      {renderFilterChips()}
+      
+      {/* List Title */}
+      <View style={styles.listHeader}>
+        <Text style={styles.listTitle}>الطلبات</Text>
+        <Text style={styles.listSubtitle}>
+          {filteredOrders.length} من {orders.length} طلب
+        </Text>
+      </View>
     </View>
   );
 
+  // Improved key extractor to ensure unique keys
+  const keyExtractor = (item, index) => {
+    if (item.id) return item.id.toString();
+    if (item.orderNumber) return item.orderNumber.toString();
+    if (item._id) return item._id.toString();
+    return `order-${index}`;
+  };
+
   return (
     <View style={[styles.container, style]}>
-      {/* Filter Chips */}
-      {renderFilterChips()}
-
       {/* Orders List */}
       <FlatList
         data={filteredOrders}
         renderItem={renderOrderItem}
-        keyExtractor={(item) => item.id?.toString() || item.orderNumber}
+        keyExtractor={keyExtractor}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshControl={

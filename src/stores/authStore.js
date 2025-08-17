@@ -12,7 +12,7 @@ const useAuthStore = create((set, get) => ({
   initializeAuth: async () => {
     try {
       const [token, userData, firstTimeFlag] = await Promise.all([
-        AsyncStorage.getItem('accessToken'),
+        AsyncStorage.getItem('access_token'),
         AsyncStorage.getItem('userData'),
         AsyncStorage.getItem('isFirstTimeUser')
       ]);
@@ -36,7 +36,7 @@ const useAuthStore = create((set, get) => ({
   // Login function
   login: async (token) => {
     try {
-      await AsyncStorage.setItem('accessToken', token);
+      await AsyncStorage.setItem('access_token', token);
       set({ isAuthenticated: true, accessToken: token });
     } catch (error) {
       console.error('Error saving token:', error);
@@ -71,7 +71,7 @@ const useAuthStore = create((set, get) => ({
       
       // Clear authentication data
       await Promise.all([
-        AsyncStorage.removeItem('accessToken'),
+        AsyncStorage.removeItem('access_token'),
         AsyncStorage.removeItem('userData')
       ]);
       
@@ -103,6 +103,15 @@ const useAuthStore = create((set, get) => ({
     } catch (error) {
       console.error('Error during logout:', error);
     }
+  },
+  
+  // Immediately mark user as unauthenticated in store (used on 401 interceptors)
+  setUnauthenticated: () => {
+    set({ 
+      isAuthenticated: false,
+      accessToken: null,
+      user: null
+    });
   },
 }));
 

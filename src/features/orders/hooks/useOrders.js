@@ -5,6 +5,7 @@ import useAlertStore from '../../../stores/alertStore';
 import { transformApiOrder } from '../utils/orderUtils';
 import { getOrders } from '../api/order';
 import axiosInstance from '../../../services/axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * Hook for managing restaurant orders with real-time updates via Socket.io
@@ -96,39 +97,30 @@ export const useOrders = () => {
       // Listen for new orders
       socketRef.current.on('new_order', (newOrder) => {
         console.log('📦 New order received via socket:', newOrder);
-        const transformedOrder = transformApiOrder(newOrder);
-        if (transformedOrder) {
-          setOrders(prevOrders => [transformedOrder, ...prevOrders]);
-          triggerAlert('success', 'طلب جديد تم استلامه!');
-        }
+        setOrders(prevOrders => [newOrder, ...prevOrders]);
+        triggerAlert('success', 'طلب جديد تم استلامه!');
       });
 
       // Listen for order updates
       socketRef.current.on('order_updated', (updatedOrder) => {
         console.log('📝 Order updated via socket:', updatedOrder);
-        const transformedOrder = transformApiOrder(updatedOrder);
-        if (transformedOrder) {
-          setOrders(prevOrders =>
-            prevOrders.map(order =>
-              order.id === transformedOrder.id ? transformedOrder : order
-            )
-          );
-          triggerAlert('success', 'تم تحديث حالة الطلب');
-        }
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order._id === updatedOrder._id ? updatedOrder : order
+          )
+        );
+        triggerAlert('success', 'تم تحديث حالة الطلب');
       });
 
       // Listen for order cancellations
       socketRef.current.on('order_cancelled', (cancelledOrder) => {
         console.log('❌ Order cancelled via socket:', cancelledOrder);
-        const transformedOrder = transformApiOrder(cancelledOrder);
-        if (transformedOrder) {
-          setOrders(prevOrders =>
-            prevOrders.map(order =>
-              order.id === transformedOrder.id ? transformedOrder : order
-            )
-          );
-          triggerAlert('warning', 'تم إلغاء الطلب');
-        }
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order._id === cancelledOrder._id ? cancelledOrder : order
+          )
+        );
+        triggerAlert('warning', 'تم إلغاء الطلب');
       });
 
       // Listen for order status changes
@@ -138,28 +130,38 @@ export const useOrders = () => {
 
         setOrders(prevOrders =>
           prevOrders.map(order =>
-            order.id === orderId
+            order._id === orderId
               ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
               : order
           )
         );
 
-        // Show appropriate alert based on status change
+        // Show appropriate alert based on status change with enhanced UX
         const statusMessages = {
-          'accepted': 'تم قبول الطلب',
-          'preparing': 'تم بدء تحضير الطلب',
-          'ready_for_pickup': 'الطلب جاهز للاستلام',
-          'assigned_to_driver': 'تم تعيين سائق للطلب',
-          'picked_up_by_driver': 'تم استلام الطلب من السائق',
-          'on_the_way': 'الطلب في الطريق',
-          'delivered': 'تم توصيل الطلب',
+          'accepted': 'تم قبول الطلب بنجاح! 🎉',
+          'preparing': 'تم بدء تحضير الطلب! 👨‍🍳',
+          'ready_for_pickup': 'الطلب جاهز للاستلام! ✅',
+          'assigned_to_driver': 'تم تعيين سائق للطلب! 🚗',
+          'picked_up_by_driver': 'تم استلام الطلب من السائق! 📦',
+          'on_the_way': 'الطلب في الطريق! 🚚',
+          'delivered': 'تم توصيل الطلب بنجاح! 🎊',
           'cancelled_by_customer': 'تم إلغاء الطلب من العميل',
           'cancelled_by_restaurant': 'تم إلغاء الطلب من المطعم',
           'cancelled_by_admin': 'تم إلغاء الطلب من الإدارة'
         };
 
         if (statusMessages[newStatus]) {
-          triggerAlert('success', statusMessages[newStatus]);
+          if (newStatus === 'preparing') {
+            // Special enhanced feedback for preparing status
+            triggerAlert('success', statusMessages[newStatus], {
+              duration: 3000,
+              showIcon: true,
+              autoClose: true
+            });
+          } else {
+            // Standard feedback for other statuses
+            triggerAlert('success', statusMessages[newStatus]);
+          }
         }
       });
 
@@ -185,13 +187,10 @@ export const useOrders = () => {
       // Make actual API call to get restaurant orders
       const ordersData = await getOrders();
 
-      console.log('📦 Orders received from API:', ordersData);
 
       if (ordersData) {
-        // Transform API orders to component format
-        const transformedOrders = ordersData.map(order => transformApiOrder(order)).filter(Boolean);
-        console.log('🔄 Transformed orders:', transformedOrders);
-        setOrders(transformedOrders);
+        // Store raw API orders, let components handle transformation
+        setOrders(ordersData);
       } else {
         throw new Error('فشل في تحميل الطلبات');
       }
@@ -212,30 +211,63 @@ export const useOrders = () => {
 
       console.log('🔄 Updating order status:', { orderId, newStatus });
 
-      // Make actual API call to update order status
-      const response = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authorization header if needed
-          // 'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
+      // Debug: Check API endpoints
+      console.log('🔍 API_ENDPOINTS available:', Object.keys(API_ENDPOINTS));
+      console.log('🔍 ORDERS endpoints available:', Object.keys(API_ENDPOINTS.ORDERS || {}));
+      console.log('🔍 UPDATE_STATUS function:', typeof API_ENDPOINTS.ORDERS?.UPDATE_STATUS);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // Fallback: Use hardcoded endpoints if API_ENDPOINTS is undefined
+      const updateStatusEndpoint = API_ENDPOINTS.ORDERS?.UPDATE_STATUS?.(orderId) || `/orders/${orderId}/status`;
+      console.log('🔍 Using endpoint:', updateStatusEndpoint);
+
+      // Debug: Check if we have authentication headers
+      const token = await AsyncStorage.getItem('access_token');
+      console.log('🔑 Token available:', !!token);
+      if (token) {
+        console.log('🔑 Token preview:', token.substring(0, 20) + '...');
       }
 
-      const result = await response.json();
-      
-      if (result.status === 'success') {
+      // Use axiosInstance instead of raw fetch to include authentication headers
+      const response = await axiosInstance.patch(updateStatusEndpoint, {
+        status: newStatus
+      });
+
+      if (response.data.status === 'success') {
         console.log('✅ Order status updated successfully');
+        
+        // Provide immediate feedback based on the new status
+        const statusMessages = {
+          'accepted': 'تم قبول الطلب بنجاح! 🎉',
+          'preparing': 'تم بدء تحضير الطلب! 👨‍🍳',
+          'ready_for_pickup': 'الطلب جاهز للاستلام! ✅',
+          'assigned_to_driver': 'تم تعيين سائق للطلب! 🚗',
+          'picked_up_by_driver': 'تم استلام الطلب من السائق! 📦',
+          'on_the_way': 'الطلب في الطريق! 🚚',
+          'delivered': 'تم توصيل الطلب بنجاح! 🎊',
+          'cancelled_by_customer': 'تم إلغاء الطلب من العميل',
+          'cancelled_by_restaurant': 'تم إلغاء الطلب من المطعم',
+          'cancelled_by_admin': 'تم إلغاء الطلب من الإدارة'
+        };
+
+        // Show appropriate alert with enhanced UX for preparing status
+        if (statusMessages[newStatus]) {
+          if (newStatus === 'preparing') {
+            // Special enhanced feedback for preparing status
+            triggerAlert('success', statusMessages[newStatus], {
+              duration: 3000, // Show for 3 seconds
+              showIcon: true,
+              autoClose: true
+            });
+          } else {
+            // Standard feedback for other statuses
+            triggerAlert('success', statusMessages[newStatus]);
+          }
+        }
         
         // Update locally
         setOrders(prevOrders =>
           prevOrders.map(order =>
-            order.id === orderId
+            order._id === orderId
               ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
               : order
           )
@@ -251,7 +283,7 @@ export const useOrders = () => {
 
         return { success: true };
       } else {
-        throw new Error(result.message || 'فشل في تحديث حالة الطلب');
+        throw new Error(response.data.message || 'فشل في تحديث حالة الطلب');
       }
 
     } catch (error) {
@@ -271,33 +303,42 @@ export const useOrders = () => {
 
       console.log('❌ Cancelling order:', orderId);
 
-      // Make actual API call to cancel order
-      const response = await fetch(`${API_BASE_URL}/orders/${orderId}/cancel`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authorization header if needed
-          // 'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          status: 'cancelled_by_restaurant',
-          reason: 'Cancelled by restaurant'
-        })
-      });
+      // Debug: Check API endpoints
+      console.log('🔍 API_ENDPOINTS available for cancellation:', Object.keys(API_ENDPOINTS));
+      console.log('🔍 ORDERS endpoints available for cancellation:', Object.keys(API_ENDPOINTS.ORDERS || {}));
+      console.log('🔍 CANCEL function:', typeof API_ENDPOINTS.ORDERS?.CANCEL);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // Fallback: Use hardcoded endpoints if API_ENDPOINTS is undefined
+      const cancelEndpoint = API_ENDPOINTS.ORDERS?.CANCEL?.(orderId) || `/orders/${orderId}/cancel`;
+      console.log('🔍 Using cancel endpoint:', cancelEndpoint);
+
+      // Debug: Check if we have authentication headers
+      const token = await AsyncStorage.getItem('access_token');
+      console.log('🔑 Token available for cancellation:', !!token);
+      if (token) {
+        console.log('🔑 Token preview for cancellation:', token.substring(0, 20) + '...');
       }
 
-      const result = await response.json();
-      
-      if (result.status === 'success') {
+      // Use axiosInstance instead of raw fetch to include authentication headers
+      const response = await axiosInstance.patch(cancelEndpoint, {
+        status: 'cancelled_by_restaurant',
+        reason: 'Cancelled by restaurant'
+      });
+
+      if (response.data.status === 'success') {
         console.log('✅ Order cancelled successfully');
+        
+        // Provide immediate feedback for cancellation
+        triggerAlert('warning', 'تم إلغاء الطلب بنجاح! ⚠️', {
+          duration: 3000,
+          showIcon: true,
+          autoClose: true
+        });
         
         // Update locally
         setOrders(prevOrders =>
           prevOrders.map(order =>
-            order.id === orderId
+            order._id === orderId
               ? { ...order, status: 'cancelled_by_restaurant', updatedAt: new Date().toISOString() }
               : order
           )
@@ -313,7 +354,7 @@ export const useOrders = () => {
 
         return { success: true };
       } else {
-        throw new Error(result.message || 'فشل في إلغاء الطلب');
+        throw new Error(response.data.message || 'فشل في إلغاء الطلب');
       }
 
     } catch (error) {

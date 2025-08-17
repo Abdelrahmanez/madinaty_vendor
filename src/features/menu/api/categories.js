@@ -3,11 +3,17 @@ import { API_ENDPOINTS } from '../../../config/api';
 
 export const fetchCategories = async (type) => {
     try {
+        console.log('🔍 Fetching categories with type:', type);
         const response = await axiosInstance.get(API_ENDPOINTS.CATEGORIES.LIST(type));
-        console.log(response.data);
+        console.log('✅ Categories API Response:', JSON.stringify(response.data, null, 2));
         return response.data;
     } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('❌ Error fetching categories:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data
+        });
         throw error;
     }
 }

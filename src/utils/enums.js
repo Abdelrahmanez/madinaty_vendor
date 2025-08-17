@@ -17,7 +17,6 @@ export const USER_ROLES = {
 // Order statuses - Updated to match backend
 export const ORDER_STATUS = {
   PENDING: 'pending',
-  ACCEPTED: 'accepted',
   PREPARING: 'preparing',
   READY_FOR_PICKUP: 'ready_for_pickup',
   ASSIGNED_TO_DRIVER: 'assigned_to_driver',
@@ -33,7 +32,6 @@ export const ORDER_STATUS = {
 // Order status labels in Arabic
 export const ORDER_STATUS_LABELS = {
   [ORDER_STATUS.PENDING]: 'في الانتظار',
-  [ORDER_STATUS.ACCEPTED]: 'مقبول',
   [ORDER_STATUS.PREPARING]: 'قيد التحضير',
   [ORDER_STATUS.READY_FOR_PICKUP]: 'جاهز للاستلام',
   [ORDER_STATUS.ASSIGNED_TO_DRIVER]: 'تم تعيين سائق',
@@ -49,7 +47,6 @@ export const ORDER_STATUS_LABELS = {
 // Order status colors
 export const ORDER_STATUS_COLORS = {
   [ORDER_STATUS.PENDING]: '#FFA726',      // Orange
-  [ORDER_STATUS.ACCEPTED]: '#42A5F5',     // Blue
   [ORDER_STATUS.PREPARING]: '#7E57C2',    // Purple
   [ORDER_STATUS.READY_FOR_PICKUP]: '#66BB6A', // Green
   [ORDER_STATUS.ASSIGNED_TO_DRIVER]: '#26A69A', // Teal

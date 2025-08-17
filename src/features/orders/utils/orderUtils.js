@@ -106,28 +106,18 @@ export const getItemsSummary = (items) => {
 export const canCancelOrder = (status) => {
   const cancellableStatuses = [
     ORDER_STATUS.PENDING,
-    ORDER_STATUS.ACCEPTED,
     ORDER_STATUS.PREPARING
   ];
   return cancellableStatuses.includes(status);
 };
 
 /**
- * Check if order can be accepted
- * @param {string} status - Current order status
- * @returns {boolean} Whether order can be accepted
- */
-export const canAcceptOrder = (status) => {
-  return status === ORDER_STATUS.PENDING;
-};
-
-/**
- * Check if order can be prepared
+ * Check if order can be prepared (start preparing)
  * @param {string} status - Current order status
  * @returns {boolean} Whether order can be prepared
  */
 export const canPrepareOrder = (status) => {
-  return status === ORDER_STATUS.ACCEPTED;
+  return status === ORDER_STATUS.PENDING;
 };
 
 /**

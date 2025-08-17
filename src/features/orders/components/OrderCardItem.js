@@ -7,7 +7,7 @@ import {
   ORDER_STATUS_COLORS,
   PAYMENT_METHOD_LABELS,
   PAYMENT_STATUS_LABELS
-} from '../types/orderTypes';
+} from '../../../utils/enums';
 import { 
   formatOrderNumber, 
   formatCurrency, 

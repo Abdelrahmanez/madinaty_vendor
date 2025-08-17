@@ -6,10 +6,11 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Alert,
-  Linking
+  Linking,
+  Modal as RNModal
 } from 'react-native';
-import { useTheme, Portal, Modal } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from 'react-native-paper';
 import { 
   ORDER_STATUS_LABELS, 
   ORDER_STATUS_COLORS,
@@ -20,10 +21,7 @@ import {
 import { 
   formatOrderNumber, 
   formatCurrency, 
-  formatOrderDate,
-  formatOrderTime,
   canCancelOrder,
-  canAcceptOrder,
   canPrepareOrder,
   canMarkAsReady,
   canAssignToDriver,
@@ -36,7 +34,7 @@ import { PrimaryButton, SecondaryButton } from '../../../components/AppButton';
 
 /**
  * OrderDetailsModal Component
- * Displays comprehensive order details and allows order actions
+ * Follows Expo Modal patterns exactly
  */
 const OrderDetailsModal = ({ 
   visible, 
@@ -45,21 +43,13 @@ const OrderDetailsModal = ({
   onStatusUpdate,
   onCancelOrder 
 }) => {
-  const theme = useTheme();
-  const styles = createStyles(theme);
   const [updating, setUpdating] = useState(false);
-  const [showAllItems, setShowAllItems] = useState(false);
+  const theme = useTheme();
 
-  if (!order) {
-    return null;
-  }
+  if (!order) return null;
 
-  // Transform API order data to component format
   const transformedOrder = transformApiOrder(order);
-  
-  if (!transformedOrder) {
-    return null;
-  }
+  if (!transformedOrder) return null;
 
   const {
     id,
@@ -68,50 +58,64 @@ const OrderDetailsModal = ({
     items = [],
     totalAmount,
     subtotal,
-    tax,
     deliveryFee,
     discount,
     paymentMethod,
     paymentStatus,
-    createdAt,
-    updatedAt,
     customerName,
     customerPhone,
     deliveryAddress,
-    specialInstructions,
-    itemsCount,
-    itemsSummary
+    specialInstructions
   } = transformedOrder;
 
   const statusLabel = ORDER_STATUS_LABELS[status] || 'غير معروف';
-  const statusColor = ORDER_STATUS_COLORS[status] || theme.colors.outline;
+  const statusColor = ORDER_STATUS_COLORS[status] || '#666';
   const paymentLabel = PAYMENT_METHOD_LABELS[paymentMethod] || 'غير محدد';
   const paymentStatusLabel = PAYMENT_STATUS_LABELS[paymentStatus] || 'غير محدد';
 
-  // Action handlers
-  const handleAcceptOrder = async () => {
-    if (!canAcceptOrder(status)) return;
+  // Helper function to render item details including size, addons and notes
+  const renderItemDetails = (item) => {
+    const hasSize = item.selectedSize;
+    const hasAddons = item.addons && item.addons.length > 0;
+    const hasNotes = item.notes && item.notes.trim().length > 0;
     
-    Alert.alert(
-      'قبول الطلب',
-      'هل تريد قبول هذا الطلب؟',
-      [
-        { text: 'إلغاء', style: 'cancel' },
-        {
-          text: 'قبول',
-          onPress: async () => {
-            setUpdating(true);
-            try {
-              await onStatusUpdate?.(id, ORDER_STATUS.ACCEPTED);
-            } finally {
-              setUpdating(false);
-            }
-          }
-        }
-      ]
+    return (
+      <View style={styles.itemInfo}>
+        <Text style={styles.itemName}>
+          {item.dish?.name || 'طبق غير محدد'}
+        </Text>
+        <Text style={styles.itemQuantity}>الكمية: {item.quantity}</Text>
+        
+        {/* Display selected size if available */}
+        {hasSize && (
+          <Text style={[styles.itemSize, themedStyles.itemSize]}>
+            الحجم: {item.selectedSize.name} (+{formatCurrency(item.selectedSize.price)})
+          </Text>
+        )}
+        
+        {/* Display selected addons if available */}
+        {hasAddons && (
+          <View style={styles.addonsContainer}>
+            <Text style={styles.addonsLabel}>الإضافات:</Text>
+            {item.addons.map((addonItem, addonIndex) => (
+              <Text key={addonIndex} style={styles.addonItem}>
+                • {addonItem.addon.name} x{addonItem.quantity} (+{formatCurrency(addonItem.price)})
+              </Text>
+            ))}
+          </View>
+        )}
+        
+        {/* Display item notes if available */}
+        {hasNotes && (
+          <Text style={[styles.itemNotes, themedStyles.itemNotes]}>
+            📝 {item.notes}
+          </Text>
+        )}
+      </View>
     );
   };
 
+  // Action handlers
   const handleStartPreparing = async () => {
     if (!canPrepareOrder(status)) return;
     
@@ -125,7 +129,16 @@ const OrderDetailsModal = ({
           onPress: async () => {
             setUpdating(true);
             try {
-              await onStatusUpdate?.(id, ORDER_STATUS.PREPARING);
+              const result = await onStatusUpdate?.(id, ORDER_STATUS.PREPARING);
+              
+              // Enhanced UX: Show success feedback
+              if (result?.success) {
+                // Small delay to show the loading state
+                setTimeout(() => {
+                  // The success alert will be shown by the useOrders hook
+                  // This provides immediate visual feedback
+                }, 500);
+              }
             } finally {
               setUpdating(false);
             }
@@ -275,11 +288,8 @@ const OrderDetailsModal = ({
     );
   };
 
-  // Determine the primary next action to keep UI simple and focused
+  // Determine the primary next action
   const getNextPrimaryAction = () => {
-    if (canAcceptOrder(status)) {
-      return { label: 'قبول الطلب', handler: handleAcceptOrder };
-    }
     if (canPrepareOrder(status)) {
       return { label: 'بدء التحضير', handler: handleStartPreparing };
     }
@@ -303,231 +313,215 @@ const OrderDetailsModal = ({
 
   const primaryAction = getNextPrimaryAction();
 
+  // Generate themed styles
+  const themedStyles = {
+    sectionTitle: { color: theme.colors.primary },
+    itemPrice: { color: theme.colors.primary },
+    totalText: { color: theme.colors.primary },
+    phoneNumber: { color: theme.colors.primary },
+    totalLabel: { color: theme.colors.primary },
+    itemNotes: { color: theme.colors.primary },
+    itemSize: { color: theme.colors.primary },
+  };
+
   return (
-    <Portal>
-      <Modal
-        visible={visible}
-        onDismiss={onDismiss}
-        contentContainerStyle={styles.modalContainer}
-      >
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+    <RNModal
+      visible={visible}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={onDismiss}
+    >
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.modalTitle}>تفاصيل الطلب</Text>
+            <Text style={styles.title}>تفاصيل الطلب</Text>
             <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
               <MaterialCommunityIcons name="close" size={24} color={theme.colors.onSurface} />
             </TouchableOpacity>
           </View>
 
-          {/* Customer Information (placed first per priority) */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>معلومات العميل</Text>
-            <View style={styles.customerInfo}>
-              <View style={styles.infoRow}>
-                <MaterialCommunityIcons name="account" size={20} color={theme.colors.primary} />
-                <Text style={styles.infoLabel}>الاسم:</Text>
-                <Text style={styles.infoValue}>{customerName}</Text>
+          {/* Content */}
+          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+            {/* Order Info - Most Important */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>📋 معلومات الطلب الأساسية</Text>
+              <View style={styles.twoColumnRow}>
+                <View style={styles.infoColumn}>
+                  <Text style={styles.infoLabel}>رقم الطلب:</Text>
+                  <Text style={styles.infoValueBold}>{orderNumber}</Text>
+                </View>
+                <View style={styles.infoColumn}>
+                  <Text style={styles.infoLabel}>الحالة:</Text>
+                  <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
+                </View>
+              </View>
+              <View style={styles.twoColumnRow}>
+                <View style={styles.infoColumn}>
+                  <Text style={styles.infoLabel}>العميل:</Text>
+                  <Text style={styles.infoValueBold}>{customerName}</Text>
+                </View>
+                <View style={styles.infoColumn}>
+                  <Text style={styles.infoLabel}>المجموع:</Text>
+                  <Text style={styles.infoValueBold}>{formatCurrency(totalAmount)}</Text>
+                </View>
               </View>
               {customerPhone && (
-                <TouchableOpacity
-                  style={styles.infoRow}
-                  onPress={() => Linking.openURL(`tel:${customerPhone}`)}
-                  activeOpacity={0.7}
-                >
-                  <MaterialCommunityIcons name="phone" size={20} color={theme.colors.primary} />
-                  <Text style={styles.infoLabel}>الهاتف:</Text>
-                  <Text style={[styles.infoValue, { color: theme.colors.primary }]}>
-                    {customerPhone}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-
-          {/* Order Basic Info */}
-          <View style={styles.section}>
-            <View style={styles.orderHeader}>
-              <Text style={styles.orderNumber}>
-                {orderNumber}
-              </Text>
-              <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-                <Text style={styles.statusText}>{statusLabel}</Text>
-              </View>
-            </View>
-            <View style={styles.orderMetaRow}>
-              <View style={styles.metaChip}>
-                <MaterialCommunityIcons name="calendar" size={14} color={theme.colors.onSurfaceVariant} />
-                <Text style={styles.metaText}>{formatOrderDate(createdAt)}</Text>
-              </View>
-              <View style={styles.metaChip}>
-                <MaterialCommunityIcons name="clock-outline" size={14} color={theme.colors.onSurfaceVariant} />
-                <Text style={styles.metaText}>{formatOrderTime(createdAt)}</Text>
-              </View>
-              {typeof itemsCount === 'number' && (
-                <View style={styles.metaChip}>
-                  <MaterialCommunityIcons name="silverware-fork-knife" size={14} color={theme.colors.onSurfaceVariant} />
-                  <Text style={styles.metaText}>{itemsCount} صنف</Text>
+                <View style={styles.twoColumnRow}>
+                  <View style={styles.infoColumn}>
+                    <Text style={styles.infoLabel}>الهاتف:</Text>
+                    <TouchableOpacity onPress={() => Linking.openURL(`tel:${customerPhone}`)}>
+                      <Text style={[styles.infoValueBold, styles.phoneNumber, themedStyles.phoneNumber]}>{customerPhone}</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.infoColumn}>
+                    <Text style={styles.infoLabel}>رسوم التوصيل:</Text>
+                    <Text style={styles.infoValueBold}>{formatCurrency(deliveryFee || 0)}</Text>
+                  </View>
                 </View>
               )}
             </View>
-            {itemsSummary && (
-              <Text style={styles.itemsSummaryText}>{itemsSummary}</Text>
-            )}
-            <View style={styles.paymentStatusRow}>
-              <View style={[styles.paymentStatusBadge, { 
-                backgroundColor: paymentStatus === 'paid' ? theme.colors.success : theme.colors.warning 
-              }]}>
-                <Text style={styles.paymentStatusText}>{paymentStatusLabel}</Text>
-              </View>
-            </View>
-          </View>
 
-          {/* Delivery Information */}
-          {deliveryAddress && (
+            {/* Separator */}
+            <View style={styles.sectionSeparator} />
+
+            {/* Order Items - Second Most Important */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>معلومات التوصيل</Text>
-              <View style={styles.deliveryInfo}>
-                <View style={styles.infoRow}>
-                  <MaterialCommunityIcons name="map-marker" size={20} color={theme.colors.primary} />
-                  <Text style={styles.infoLabel}>العنوان:</Text>
-                  <Text style={styles.infoValue}>{deliveryAddress}</Text>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* Order Items */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>الأطباق المطلوبة</Text>
-            {(showAllItems ? items : items.slice(0, 3)).map((item, index) => (
-              <View key={index} style={styles.itemRow}>
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemName}>{item.dish?.name || 'طبق غير محدد'}</Text>
-                  {item.notes && (
-                    <Text style={styles.itemNotes}>{item.notes}</Text>
-                  )}
-                  {item.addons && item.addons.length > 0 && (
-                    <View style={styles.addonsContainer}>
-                      <Text style={styles.addonsTitle}>الإضافات:</Text>
-                      {item.addons.map((addon, addonIndex) => (
-                        <Text key={addonIndex} style={styles.addonText}>
-                          • {addon.addon?.name} x{addon.quantity}
-                        </Text>
-                      ))}
-                    </View>
-                  )}
-                </View>
-                <View style={styles.itemQuantity}>
-                  <Text style={styles.quantityText}>x{item.quantity}</Text>
-                  <Text style={styles.itemPrice}>
+              <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>🍽️ الأطباق المطلوبة</Text>
+              {items.map((item, index) => (
+                <View key={index} style={styles.itemRow}>
+                  {renderItemDetails(item)}
+                  <Text style={[styles.itemPrice, themedStyles.itemPrice]}>
                     {formatCurrency(item.totalPrice)}
                   </Text>
                 </View>
+              ))}
+            </View>
+
+            {/* Separator */}
+            <View style={styles.sectionSeparator} />
+
+            {/* Payment Info - Third Most Important */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>💳 معلومات الدفع</Text>
+              <View style={styles.twoColumnRow}>
+                <View style={styles.infoColumn}>
+                  <Text style={styles.infoLabel}>طريقة الدفع:</Text>
+                  <Text style={styles.infoValue}>{paymentLabel}</Text>
+                </View>
+                <View style={styles.infoColumn}>
+                  <Text style={styles.infoLabel}>حالة الدفع:</Text>
+                  <Text style={styles.infoValue}>{paymentStatusLabel}</Text>
+                </View>
               </View>
-            ))}
-            {items.length > 3 && (
-              <TouchableOpacity
-                onPress={() => setShowAllItems((prev) => !prev)}
-                style={styles.showMoreButton}
-                activeOpacity={0.7}
+              {typeof subtotal === 'number' && (
+                <View style={styles.twoColumnRow}>
+                  <View style={styles.infoColumn}>
+                    <Text style={styles.infoLabel}>المجموع الفرعي:</Text>
+                    <Text style={styles.infoValue}>{formatCurrency(subtotal)}</Text>
+                  </View>
+                  <View style={styles.infoColumn}>
+                    <Text style={styles.infoLabel}>رسوم التوصيل:</Text>
+                    <Text style={styles.infoValue}>{formatCurrency(deliveryFee || 0)}</Text>
+                  </View>
+                </View>
+              )}
+              {typeof discount === 'number' && discount > 0 && (
+                <View style={styles.twoColumnRow}>
+                  <View style={styles.infoColumn}>
+                    <Text style={styles.infoLabel}>الخصم:</Text>
+                    <Text style={[styles.infoValue, styles.discountText]}>-{formatCurrency(discount)}</Text>
+                  </View>
+                  <View style={styles.infoColumn} />
+                </View>
+              )}
+              <View style={styles.totalRow}>
+                <Text style={[styles.totalLabel, themedStyles.totalLabel]}>المجموع الكلي:</Text>
+                <Text style={[styles.totalText, themedStyles.totalText]}>{formatCurrency(totalAmount)}</Text>
+              </View>
+            </View>
+
+            {/* Separator */}
+            {deliveryAddress && <View style={styles.sectionSeparator} />}
+
+            {/* Delivery Address - Fourth Most Important */}
+            {deliveryAddress && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>📍 عنوان التوصيل</Text>
+                <Text style={styles.infoText}>{deliveryAddress}</Text>
+              </View>
+            )}
+
+            {/* Separator */}
+            {specialInstructions && <View style={styles.sectionSeparator} />}
+
+            {/* Special Instructions - Least Important */}
+            {specialInstructions && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>📝 تعليمات خاصة</Text>
+                <Text style={styles.infoText}>{specialInstructions}</Text>
+              </View>
+            )}
+          </ScrollView>
+
+          {/* Action Buttons */}
+          <View style={styles.actionsContainer}>
+            {primaryAction && (
+              <PrimaryButton
+                mode="contained"
+                onPress={primaryAction.handler}
+                loading={updating}
+                disabled={updating}
+                style={[
+                  styles.actionButton,
+                  updating && styles.actionButtonLoading
+                ]}
+                labelStyle={[
+                  updating && styles.actionButtonLabelLoading
+                ]}
               >
-                <Text style={styles.showMoreText}>
-                  {showAllItems ? 'عرض أقل' : `عرض الكل (${items.length})`}
-                </Text>
-              </TouchableOpacity>
+                {updating ? 'جاري التحديث...' : primaryAction.label}
+              </PrimaryButton>
+            )}
+            {canCancelOrder(status) && (
+              <SecondaryButton
+                mode="outlined"
+                onPress={handleCancelOrder}
+                loading={updating}
+                disabled={updating}
+                style={[
+                  styles.actionButton, 
+                  styles.cancelButton,
+                  updating && styles.actionButtonLoading
+                ]}
+                labelStyle={[
+                  styles.cancelButtonLabel,
+                  updating && styles.actionButtonLabelLoading
+                ]}
+              >
+                {updating ? 'جاري الإلغاء...' : 'إلغاء الطلب'}
+              </SecondaryButton>
             )}
           </View>
-
-          {/* Special Instructions */}
-          {specialInstructions && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>تعليمات خاصة</Text>
-              <Text style={styles.specialInstructions}>{specialInstructions}</Text>
-            </View>
-          )}
-
-          {/* Payment Information */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>معلومات الدفع</Text>
-            <View style={styles.paymentInfo}>
-              <View style={styles.infoRow}>
-                <MaterialCommunityIcons name="credit-card" size={20} color={theme.colors.primary} />
-                <Text style={styles.infoLabel}>طريقة الدفع:</Text>
-                <Text style={styles.infoValue}>{paymentLabel}</Text>
-              </View>
-              
-              {typeof subtotal === 'number' && (
-                <View style={styles.priceRow}>
-                  <Text style={styles.priceLabel}>المجموع الفرعي:</Text>
-                  <Text style={styles.priceValue}>{formatCurrency(subtotal)}</Text>
-                </View>
-              )}
-              
-              {typeof deliveryFee === 'number' && (
-                <View style={styles.priceRow}>
-                  <Text style={styles.priceLabel}>رسوم التوصيل:</Text>
-                  <Text style={styles.priceValue}>{formatCurrency(deliveryFee)}</Text>
-                </View>
-              )}
-              
-              {typeof discount === 'number' && discount > 0 && (
-                <View style={styles.priceRow}>
-                  <Text style={styles.priceLabel}>الخصم:</Text>
-                  <Text style={styles.priceValue}>-{formatCurrency(discount)}</Text>
-                </View>
-              )}
-              
-              <View style={[styles.priceRow, styles.totalRow]}>
-                <Text style={styles.totalLabel}>المجموع الكلي:</Text>
-                <Text style={styles.totalValue}>{formatCurrency(totalAmount)}</Text>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-
-        {/* Action Buttons (Apple-like: one primary, one secondary) */}
-        <View style={styles.actionsContainer}>
-          {primaryAction && (
-            <PrimaryButton
-              mode="contained"
-              onPress={primaryAction.handler}
-              loading={updating}
-              disabled={updating}
-              style={styles.actionButton}
-            >
-              {primaryAction.label}
-            </PrimaryButton>
-          )}
-          {canCancelOrder(status) && (
-            <SecondaryButton
-              mode="outlined"
-              onPress={handleCancelOrder}
-              loading={updating}
-              disabled={updating}
-              style={[styles.actionButton, styles.cancelButton]}
-              labelStyle={styles.cancelButtonLabel}
-            >
-              إلغاء الطلب
-            </SecondaryButton>
-          )}
         </View>
-      </Modal>
-    </Portal>
+      </View>
+    </RNModal>
   );
 };
 
-const createStyles = (theme) => StyleSheet.create({
-  modalContainer: {
-    backgroundColor: theme.colors.background,
-    margin: 20,
-    borderRadius: 20,
-    maxHeight: '90%',
-    width: '94%',
-    maxWidth: 600,
-    alignSelf: 'center',
-  },
-  scrollView: {
+const styles = StyleSheet.create({
+  overlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    width: '95%',
+    height: '85%',
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
@@ -535,238 +529,186 @@ const createStyles = (theme) => StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.outlineVariant,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#f8f9fa',
   },
-  modalTitle: {
+  title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: theme.colors.onSurface,
+    color: '#000',
+    flex: 1,
+    textAlign: 'center',
   },
   closeButton: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 22,
+    borderRadius: 20,
+    backgroundColor: '#e9ecef',
+  },
+  content: {
+    flex: 1,
+    padding: 20,
   },
   section: {
+    marginBottom: 16,
     padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.outlineVariant,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 1,
+    borderBottomWidth: 2,
+    borderBottomColor: '#f8f9fa',
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.onSurface,
-    marginBottom: 12,
-  },
-  orderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  orderMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginVertical: 8,
-  },
-  metaChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.surfaceVariant,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  metaText: {
-    fontSize: 12,
-    color: theme.colors.onSurfaceVariant,
-    marginLeft: 6,
-  },
-  itemsSummaryText: {
-    fontSize: 12,
-    color: theme.colors.onSurfaceVariant,
-    marginBottom: 6,
-  },
-  orderNumber: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: theme.colors.onSurface,
+    fontWeight: '700',
+    marginBottom: 16,
+    paddingBottom: 8,
   },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'white',
-    textAlign: 'center',
-  },
-  paymentStatusRow: {
+  infoText: {
+    fontSize: 14,
+    color: '#000',
     marginBottom: 8,
-  },
-  paymentStatusBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  paymentStatusText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: 'white',
-    textAlign: 'center',
-  },
-  orderDate: {
-    fontSize: 14,
-    color: theme.colors.onSurfaceVariant,
-  },
-  customerInfo: {
-    gap: 8,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  infoLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: theme.colors.onSurface,
-    minWidth: 80,
-  },
-  infoValue: {
-    fontSize: 14,
-    color: theme.colors.onSurface,
-    flex: 1,
-    textAlign: 'right',
-  },
-  deliveryInfo: {
-    gap: 8,
+    lineHeight: 20,
   },
   itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingVertical: 8,
+    alignItems: 'center',
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.outlineVariant,
+    borderBottomColor: '#f1f3f4',
+  },
+  itemName: {
+    fontSize: 15,
+    color: '#000',
+    fontWeight: '600',
+    flex: 1,
+  },
+  itemPrice: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginLeft: 16,
+  },
+  totalText: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 2,
+    borderTopColor: '#e9ecef',
+  },
+  actionsContainer: {
+    padding: 20,
+    gap: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+    backgroundColor: '#f8f9fa',
+  },
+  actionButton: {
+    borderRadius: 10,
+    minHeight: 50,
+  },
+  cancelButton: {
+    borderColor: '#dc3545',
+  },
+  cancelButtonLabel: {
+    color: '#dc3545',
+  },
+  twoColumnRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  infoColumn: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: '500',
+  },
+  infoValueBold: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  statusText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  phoneNumber: {
+    textDecorationLine: 'underline',
+  },
+  discountText: {
+    color: '#dc3545',
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   itemInfo: {
     flex: 1,
   },
-  itemName: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: theme.colors.onSurface,
-    marginBottom: 4,
-  },
-  itemNotes: {
+  itemQuantity: {
     fontSize: 12,
-    color: theme.colors.onSurfaceVariant,
-    fontStyle: 'italic',
+    color: '#666',
+    marginTop: 4,
   },
   addonsContainer: {
     marginTop: 4,
+    paddingLeft: 10,
   },
-  addonsTitle: {
+  addonsLabel: {
     fontSize: 12,
-    fontWeight: '500',
-    color: theme.colors.onSurfaceVariant,
+    color: '#666',
+    marginBottom: 4,
+  },
+  addonItem: {
+    fontSize: 12,
+    color: '#000',
     marginBottom: 2,
   },
-  addonText: {
-    fontSize: 11,
-    color: theme.colors.onSurfaceVariant,
-    marginLeft: 8,
-  },
-  itemQuantity: {
-    alignItems: 'flex-end',
-  },
-  quantityText: {
+  itemNotes: {
     fontSize: 12,
-    color: theme.colors.onSurfaceVariant,
-    marginBottom: 2,
+    marginTop: 4,
   },
-  itemPrice: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: theme.colors.primary,
+  itemSize: {
+    fontSize: 12,
+    marginTop: 4,
   },
-  showMoreButton: {
-    marginTop: 8,
-    alignSelf: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+  sectionSeparator: {
+    height: 1,
+    backgroundColor: '#e9ecef',
+    marginVertical: 8,
+    marginHorizontal: 20,
+    borderRadius: 0.5,
   },
-  showMoreText: {
-    fontSize: 13,
-    color: theme.colors.primary,
-    fontWeight: '600',
+  actionButtonLoading: {
+    opacity: 0.7,
   },
-  specialInstructions: {
-    fontSize: 14,
-    color: theme.colors.onSurface,
-    fontStyle: 'italic',
-    backgroundColor: theme.colors.surfaceVariant,
-    padding: 12,
-    borderRadius: 8,
-  },
-  paymentInfo: {
-    gap: 8,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  priceLabel: {
-    fontSize: 14,
-    color: theme.colors.onSurfaceVariant,
-  },
-  priceValue: {
-    fontSize: 14,
-    color: theme.colors.onSurface,
-    fontWeight: '500',
-  },
-  totalRow: {
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.outlineVariant,
-    paddingTop: 8,
-    marginTop: 8,
-  },
-  totalLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.onSurface,
-  },
-  totalValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-  },
-  actionsContainer: {
-    padding: 20,
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.outlineVariant,
-  },
-  actionButton: {
-    borderRadius: 12,
-    minHeight: 48,
-    justifyContent: 'center',
-  },
-  cancelButton: {
-    borderColor: theme.colors.error,
-  },
-  cancelButtonLabel: {
-    color: theme.colors.error,
+  actionButtonLabelLoading: {
+    color: 'transparent',
   },
 });
 

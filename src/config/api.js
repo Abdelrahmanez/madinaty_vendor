@@ -5,7 +5,7 @@
  */
 
 // Base URL for all API requests
-export const API_BASE_URL = "http://192.168.1.19:8000/api/v1";
+export const API_BASE_URL = "http://192.168.3.10:8000/api/v1";
 
 // API Endpoints organized by module
 export const API_ENDPOINTS = {
@@ -38,7 +38,6 @@ export const API_ENDPOINTS = {
       return `/restaurants/${id}`;
     },
     MY_RESTAURANT: "/restaurants/my-restaurant",
-
   },
   CATEGORIES: {
     LIST: (type) => `/categories?type=${type}`,
@@ -47,6 +46,10 @@ export const API_ENDPOINTS = {
   DISHES: {
     LIST: "/dishes",
     DETAIL: (id) => `/dishes/${id}`,
+    CREATE: "/dishes",
+    UPDATE: (id) => `/dishes/${id}`,
+    DELETE: (id) => `/dishes/${id}`,
+    TOGGLE_AVAILABILITY: (id) => `/dishes/${id}/toggle-availability`,
   },
   CART: {
     GET: "/cart",
@@ -59,6 +62,8 @@ export const API_ENDPOINTS = {
     LIST: "/orders",
     CREATE: "/orders",
     DETAIL: (id) => `/orders/${id}`,
+    UPDATE_STATUS: (id) => `/orders/${id}/status`,
+    CANCEL: (id) => `/orders/${id}/cancel`,
   },
   NOTIFICATION: {
     REGISTER_TOKEN: "/users/push-token",  // تحديث للنقطة النهائية الصحيحة
@@ -82,6 +87,12 @@ export const API_ENDPOINTS = {
     VALIDATE: "/promocodes/validate",
   },
 };
+
+// Debug: Log the API endpoints to verify they're loaded correctly
+console.log('🔍 API_ENDPOINTS loaded:', Object.keys(API_ENDPOINTS));
+console.log('🔍 ORDERS endpoints loaded:', Object.keys(API_ENDPOINTS.ORDERS));
+console.log('🔍 UPDATE_STATUS function type:', typeof API_ENDPOINTS.ORDERS.UPDATE_STATUS);
+console.log('🔍 CANCEL function type:', typeof API_ENDPOINTS.ORDERS.CANCEL);
 
 export default {
   BASE_URL: API_BASE_URL,
