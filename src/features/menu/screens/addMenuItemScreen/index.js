@@ -4,8 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, Text, Button, TextInput, HelperText, Switch, Divider, Chip, SegmentedButtons, ActivityIndicator } from 'react-native-paper';
 import TopBar from '../../../../components/TopBar';
 import ImageUploader from '../../../../components/ImageUploader';
-import axiosInstance from '../../../../services/axios';
-import { API_ENDPOINTS } from '../../../../config/api';
 import { fetchCategories } from '../../api/categories';
 import { getRestaurantAddons } from '../../api/addons';
 import { createDish, updateDishOffer } from '../../api/dish';
@@ -13,7 +11,6 @@ import useRestaurantStore from '../../../../stores/restaurantStore';
 import useAlertStore from '../../../../stores/alertStore';
 import OfferManager from '../../components/OfferManager';
 import { normalizeNumericString } from '../../../../utils/numberUtils';
-import { extractFilenameFromPathOrUrl } from '../../../../utils/pathUtils';
 
 const AddMenuItemScreen = ({ navigation }) => {
   const theme = useTheme();
@@ -22,7 +19,6 @@ const AddMenuItemScreen = ({ navigation }) => {
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [submitAttempted, setSubmitAttempted] = useState(false);
   const { restaurant, fetchMyRestaurant, getRestaurantId } = useRestaurantStore();
   const triggerAlert = useAlertStore((s) => s.triggerAlert);
 
@@ -119,10 +115,8 @@ const AddMenuItemScreen = ({ navigation }) => {
   const isNameValid = name.trim().length >= 2 && name.trim().length <= 100;
   const isCategoryValid = !!categoryId;
   const isDescriptionValid = description.trim().length > 0;
-  // Image valid if remote URL or at least one local file picked
-  const hasRemoteUrl = typeof imageUrl === 'string' && imageUrl.trim().length > 0;
-  const hasLocalFiles = Array.isArray(images) && images.some(u => typeof u === 'string' && (u.startsWith('file://') || u.startsWith('content://')));
-  const isImageUrlValid = hasRemoteUrl || hasLocalFiles;
+  // Accept either main imageUrl or at least one gallery image
+  const isImageUrlValid = (imageUrl && String(imageUrl).trim().length > 0) || (images && images.length > 0);
   const normalizedSizes = useMemo(() =>
     sizes
       .map((s) => ({
@@ -146,7 +140,6 @@ const AddMenuItemScreen = ({ navigation }) => {
   const canSubmit = isNameValid && isCategoryValid && isDescriptionValid && isImageUrlValid && isSizesValid;
 
   const handleSubmit = useCallback(async () => {
-    setSubmitAttempted(true);
     if (!canSubmit) {
       triggerAlert && triggerAlert('warning', 'يرجى إكمال الحقول المطلوبة', { autoClose: true, duration: 3000, showIcon: true });
       return;
@@ -155,39 +148,30 @@ const AddMenuItemScreen = ({ navigation }) => {
     try {
       setSubmitting(true);
       const restaurantId = getRestaurantId();
-      // Build multipart form-data
-      const form = new FormData();
-      form.append('name', name.trim());
-      if (restaurantId) form.append('restaurant', restaurantId);
-      form.append('category', categoryId);
-      form.append('description', description.trim());
-      if (hasRemoteUrl) {
-        form.append('imageUrl', imageUrl.trim());
-      }
-      form.append('sizes', JSON.stringify(normalizedSizes));
-      if (tags.length) form.append('tags', JSON.stringify(tags));
-      form.append('unitType', unitType);
-      form.append('isAvailable', String( isAvailable ));
-      if (extraDeliveryFee !== '' && !isNaN(parseFloat(extraDeliveryFee))) form.append('extraDeliveryFee', String(parseFloat(extraDeliveryFee)));
-      if (ingredients.length) form.append('ingredients', JSON.stringify(ingredients));
-      form.append('isFeatured', String( isFeatured ));
-      if (allowedAddons.length) form.append('allowedAddons', JSON.stringify(allowedAddons));
-      if (displayOrder !== '' && !isNaN(parseInt(displayOrder, 10))) form.append('displayOrder', String(parseInt(displayOrder, 10)));
+      const resolvedImageUrl = (imageUrl && String(imageUrl).trim().length > 0)
+        ? String(imageUrl).trim()
+        : (images && images.length > 0 ? images[0] : '');
 
-      // Append local image files to 'images' field
-      const toUpload = (Array.isArray(images) ? images : []).filter(u => typeof u === 'string' && (u.startsWith('file://') || u.startsWith('content://')));
-      toUpload.forEach((uri, idx) => {
-        const filename = extractFilenameFromPathOrUrl(uri) || `image_${idx}.jpg`;
-        const lower = filename.toLowerCase();
-        const mime = lower.endsWith('.png') ? 'image/png' : lower.endsWith('.jpg') || lower.endsWith('.jpeg') ? 'image/jpeg' : 'image/*';
-        form.append('images', { uri, name: filename, type: mime });
-      });
-      if (!hasRemoteUrl && toUpload.length > 0) {
-        const firstFilename = extractFilenameFromPathOrUrl(toUpload[0]) || 'image_0.jpg';
-        form.append('imageUrl', firstFilename);
-      }
+      const payload = {
+        name: name.trim(),
+        restaurant: restaurantId,
+        category: categoryId,
+        description: description.trim(),
+        imageUrl: resolvedImageUrl,
+        sizes: normalizedSizes,
+        tags,
+        unitType,
+        isAvailable,
+        extraDeliveryFee: extraDeliveryFee === '' ? undefined : parseFloat(extraDeliveryFee),
+        ingredients,
+        isFeatured,
+        allowedAddons,
+        displayOrder: displayOrder === '' ? undefined : parseInt(displayOrder, 10),
+        // images are optional array of strings (URIs); backend also supports processing uploaded files separately
+        images,
+      };
 
-      const res = await axiosInstance.post(API_ENDPOINTS.DISHES.CREATE, form);
+      const res = await createDish(payload);
       const createdId = res?.data?.data?._id || res?.data?._id;
 
       // If offer is prepared, attach it after creation
@@ -257,9 +241,6 @@ const AddMenuItemScreen = ({ navigation }) => {
             onChange={setImageUrl}
             compact
           />
-          {!isImageUrlValid && submitAttempted && (
-            <HelperText type="error">يلزم إدخال رابط صورة أو اختيار صورة من الجهاز</HelperText>
-          )}
 
           <Text style={styles.sectionTitle}>صور إضافية (اختياري)</Text>
           <ImageUploader
@@ -285,7 +266,7 @@ const AddMenuItemScreen = ({ navigation }) => {
               </Chip>
             ))}
           </View>
-          {!isCategoryValid && submitAttempted && (
+          {!isCategoryValid && (
             <HelperText type="error">يرجى اختيار تصنيف</HelperText>
           )}
 
@@ -333,7 +314,7 @@ const AddMenuItemScreen = ({ navigation }) => {
             </View>
           ))}
           <Button mode="outlined" onPress={addSize} icon="plus">إضافة حجم</Button>
-          {!isSizesValid && submitAttempted && (
+          {!isSizesValid && (
             <HelperText type="error">يجب إضافة حجم واحد على الأقل مع اسم وسعر صحيحين</HelperText>
           )}
 
@@ -436,12 +417,12 @@ const AddMenuItemScreen = ({ navigation }) => {
           mode="contained" 
             onPress={handleSubmit}
             loading={submitting}
-            disabled={submitting}
+            disabled={submitting || !canSubmit}
             style={styles.submitBtn}
           >
             إنشاء العنصر
         </Button>
-          {!canSubmit && submitAttempted && (
+          {!canSubmit && (
             <HelperText type="error">تحقق من الحقول المطلوبة قبل الإرسال</HelperText>
           )}
         </ScrollView>

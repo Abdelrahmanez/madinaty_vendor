@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NavigationService from "../navigation/NavigationService";
-import { API_BASE_URL, API_ENDPOINTS } from "../config/api";
+import { API_BASE_URL } from "../config/api";
 import useAuthStore from "../stores/authStore";
 
 export const mainUrl = API_BASE_URL;
@@ -70,18 +70,9 @@ axiosInstance.interceptors.request.use(request => {
   console.log('🔄 إرسال طلب API:', request.method?.toUpperCase(), request.url);
   console.log('🧩 ترويسات الطلب:', JSON.stringify(request.headers));
   
-  // ضبط Content-Type فقط إذا لم يكن Multipart
+  // التأكد من أن Content-Type مضبوط بشكل صحيح لطلبات POST
   if (request.method === 'post' || request.method === 'put' || request.method === 'patch') {
-    const explicitHeader = request.headers && (request.headers["Content-Type"] || request.headers["content-type"]);
-    const isMultipart = explicitHeader && String(explicitHeader).toLowerCase().includes('multipart/form-data');
-    const isFormData = typeof FormData !== 'undefined' && request.data instanceof FormData;
-    // If sending FormData, let axios set the correct boundary automatically
-    if (isFormData) {
-      if (request.headers["Content-Type"]) delete request.headers["Content-Type"];
-      if (request.headers["content-type"]) delete request.headers["content-type"];
-    } else if (!isMultipart) {
-      request.headers["Content-Type"] = "application/json";
-    }
+    request.headers["Content-Type"] = "application/json";
   }
   
   return request;
@@ -117,79 +108,57 @@ axiosInstance.interceptors.response.use(
       );
     }
 
-    const originalRequest = error.config || {};
+    const originalRequest = error.config;
 
-    // Queue-based refresh handling
+    // إذا كان الخطأ بسبب عدم وجود مصادقة، قم بتوجيه المستخدم لتسجيل الدخول
     if (error.response.status === 401) {
+      await AsyncStorage.removeItem("access_token");
+      await AsyncStorage.removeItem("refresh_token");
+      try {
+        // mark user unauthenticated to avoid loops
+        const setUnauthenticated = useAuthStore.getState()?.setUnauthenticated;
+        setUnauthenticated && setUnauthenticated();
+      } catch {}
+      NavigationService.navigate("Auth");
+      return Promise.reject(error);
+    }
+
+    // محاولة تحديث الرمز المميز إذا كان غير صالح
+    if (
+      error.response.status === 401 &&
+      (error.response.data.code === "token_not_valid" || error.response.data.detail === "Invalid token")
+    ) {
       const refreshToken = await AsyncStorage.getItem("refresh_token");
 
-      // Do not attempt refresh for auth endpoints to avoid loops
-      const isAuthEndpoint = (originalRequest.url || '').includes(API_ENDPOINTS.AUTH.LOGIN)
-        || (originalRequest.url || '').includes(API_ENDPOINTS.AUTH.SIGNUP)
-        || (originalRequest.url || '').includes(API_ENDPOINTS.AUTH.REFRESH_TOKEN);
-
-      if (!refreshToken || isAuthEndpoint) {
-        // Hard logout
-        await AsyncStorage.removeItem("access_token");
-        await AsyncStorage.removeItem("refresh_token");
+      if (refreshToken) {
         try {
-          const setUnauthenticated = useAuthStore.getState()?.setUnauthenticated;
-          setUnauthenticated && setUnauthenticated();
-        } catch {}
-        NavigationService.navigate("Auth");
-        return Promise.reject(error);
-      }
-
-      if (originalRequest._retry) {
-        // Already retried once; avoid loops
-        await AsyncStorage.removeItem("access_token");
-        await AsyncStorage.removeItem("refresh_token");
-        NavigationService.navigate("Auth");
-        return Promise.reject(error);
-      }
-      originalRequest._retry = true;
-
-      // Shared refresh state
-      if (!customInstance.__isRefreshing) {
-        customInstance.__isRefreshing = true;
-        customInstance.__refreshPromise = (async () => {
-          try {
-            const res = await customInstance.post(API_ENDPOINTS.AUTH.REFRESH_TOKEN, { refreshToken });
-            const newAccess = res?.data?.accessToken || res?.data?.access || res?.accessToken;
-            const newRefresh = res?.data?.refreshToken || res?.data?.refresh || res?.refreshToken;
-            if (newAccess) {
-              await AsyncStorage.setItem("access_token", newAccess);
-              axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${newAccess}`;
-            }
-            if (newRefresh) {
-              await AsyncStorage.setItem("refresh_token", newRefresh);
-            }
-            return newAccess;
-          } catch (rfErr) {
-            // Hard logout on refresh failure
-            await AsyncStorage.removeItem("access_token");
-            await AsyncStorage.removeItem("refresh_token");
-            try {
-              const setUnauthenticated = useAuthStore.getState()?.setUnauthenticated;
-              setUnauthenticated && setUnauthenticated();
-            } catch {}
-            NavigationService.navigate("Auth");
-            throw rfErr;
-          } finally {
-            customInstance.__isRefreshing = false;
+          // محاولة تحديث الرمز المميز
+          const response = await customInstance.post(API_BASE_URL + "/api/token/refresh/", {
+            refresh: refreshToken,
+          });
+          
+          // تخزين الرموز المميزة الجديدة
+          await AsyncStorage.setItem("access_token", response.data.access);
+          if (response.data.refresh) {
+            await AsyncStorage.setItem("refresh_token", response.data.refresh);
           }
-        })();
-      }
 
-      try {
-        const token = await customInstance.__refreshPromise;
-        if (token) {
-          originalRequest.headers = originalRequest.headers || {};
-          originalRequest.headers.Authorization = `Bearer ${token}`;
+          // تحديث ترويسات المصادقة
+          axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
+          originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
+
+          // إعادة محاولة الطلب الأصلي
+          return axiosInstance(originalRequest);
+        } catch (err) {
+          console.error('❌ فشل تحديث الرمز المميز:', err);
+          // مسح الرموز المميزة وتوجيه المستخدم لتسجيل الدخول مجدداً
+          await AsyncStorage.removeItem("access_token");
+          await AsyncStorage.removeItem("refresh_token");
+          NavigationService.navigate("Auth");
         }
-        return axiosInstance(originalRequest);
-      } catch (e2) {
-        return Promise.reject(e2);
+      } else {
+        console.log("رمز التحديث غير متوفر.");
+        NavigationService.navigate("Auth");
       }
     }
 
