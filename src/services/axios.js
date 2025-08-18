@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NavigationService from "../navigation/NavigationService";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL, API_ENDPOINTS } from "../config/api";
 import useAuthStore from "../stores/authStore";
 
 export const mainUrl = API_BASE_URL;
@@ -28,6 +28,39 @@ const customInstance = axios.create({
     "Accept": "application/json",
   },
 });
+
+// Flag to prevent multiple refresh attempts
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
+/**
+ * التحقق من إمكانية إعادة محاولة الطلب
+ */
+const canRetryRequest = (request) => {
+  // لا نعيد محاولة طلبات تحديث الرمز المميز
+  if (request.url === API_ENDPOINTS.AUTH.REFRESH_TOKEN) {
+    return false;
+  }
+  
+  // لا نعيد محاولة الطلبات التي تمت محاولتها بالفعل
+  if (request._retry) {
+    return false;
+  }
+  
+  return true;
+};
 
 /**
  * تعيين ترويسات المصادقة لنسخة Axios محددة
@@ -62,6 +95,78 @@ const setAuthHeaders = async (instance) => {
 export const refreshAuthHeaders = async () => {
   await setAuthHeaders(axiosInstance);
   await setAuthHeaders(customInstance);
+};
+
+/**
+ * تحديث الرمز المميز باستخدام رمز التحديث
+ */
+const refreshAccessToken = async () => {
+  try {
+    const refreshToken = await AsyncStorage.getItem("refresh_token");
+    
+    if (!refreshToken) {
+      throw new Error("No refresh token available");
+    }
+
+    console.log('🔄 محاولة تحديث الرمز المميز...');
+    
+    const response = await customInstance.post(API_ENDPOINTS.AUTH.REFRESH_TOKEN, {
+      refresh: refreshToken,
+    });
+
+    const { access, refresh } = response.data;
+    
+    // حفظ الرموز المميزة الجديدة
+    await AsyncStorage.setItem("access_token", access);
+    if (refresh) {
+      await AsyncStorage.setItem("refresh_token", refresh);
+    }
+
+    // تحديث حالة المصادقة في المتجر
+    const updateTokens = useAuthStore.getState()?.updateTokens;
+    if (updateTokens) {
+      await updateTokens(access, refresh);
+    }
+
+    // تحديث ترويسات المصادقة
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+    customInstance.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+
+    console.log('✅ تم تحديث الرمز المميز بنجاح');
+    
+    return access;
+  } catch (error) {
+    console.error('❌ فشل تحديث الرمز المميز:', error);
+    throw error;
+  }
+};
+
+/**
+ * مسح جميع بيانات المصادقة وتوجيه المستخدم للصفحة الرئيسية
+ */
+const clearAuthAndNavigateHome = async () => {
+  try {
+    console.log('🚪 مسح بيانات المصادقة وتوجيه المستخدم للصفحة الرئيسية...');
+    
+    // مسح الرموز المميزة
+    await AsyncStorage.removeItem("access_token");
+    await AsyncStorage.removeItem("refresh_token");
+    await AsyncStorage.removeItem("userData");
+    
+    // تحديث حالة المصادقة في المتجر
+    const clearAuthData = useAuthStore.getState()?.clearAuthData;
+    if (clearAuthData) {
+      await clearAuthData();
+    }
+    
+    // توجيه المستخدم للصفحة الرئيسية
+    NavigationService.navigate("Home");
+    
+  } catch (error) {
+    console.error('❌ خطأ أثناء مسح بيانات المصادقة:', error);
+    // محاولة التوجيه حتى لو فشل مسح البيانات
+    NavigationService.navigate("Home");
+  }
 };
 
 // إضافة معترض لتسجيل تفاصيل الطلبات قبل إرسالها
@@ -110,55 +215,71 @@ axiosInstance.interceptors.response.use(
 
     const originalRequest = error.config;
 
-    // إذا كان الخطأ بسبب عدم وجود مصادقة، قم بتوجيه المستخدم لتسجيل الدخول
+    // إذا كان الخطأ بسبب عدم وجود مصادقة (401)
     if (error.response.status === 401) {
-      await AsyncStorage.removeItem("access_token");
-      await AsyncStorage.removeItem("refresh_token");
-      try {
-        // mark user unauthenticated to avoid loops
-        const setUnauthenticated = useAuthStore.getState()?.setUnauthenticated;
-        setUnauthenticated && setUnauthenticated();
-      } catch {}
-      NavigationService.navigate("Auth");
-      return Promise.reject(error);
-    }
+      console.log('🔐 خطأ 401 - محاولة معالجة المصادقة...');
+      
+      // التحقق من إمكانية إعادة محاولة الطلب
+      if (!canRetryRequest(originalRequest)) {
+        console.log('🔄 الطلب لا يمكن إعادة محاولته، مسح المصادقة...');
+        await clearAuthAndNavigateHome();
+        return Promise.reject(error);
+      }
 
-    // محاولة تحديث الرمز المميز إذا كان غير صالح
-    if (
-      error.response.status === 401 &&
-      (error.response.data.code === "token_not_valid" || error.response.data.detail === "Invalid token")
-    ) {
-      const refreshToken = await AsyncStorage.getItem("refresh_token");
+      // التحقق من نوع خطأ 401
+      const errorData = error.response.data;
+      const isTokenExpired = errorData?.code === "token_not_valid" || 
+                            errorData?.detail === "Invalid token" ||
+                            errorData?.message === "Token is invalid or expired";
+      
+      if (!isTokenExpired) {
+        console.log('🔐 خطأ 401 غير متعلق بانتهاء صلاحية الرمز المميز:', errorData);
+        await clearAuthAndNavigateHome();
+        return Promise.reject(error);
+      }
 
-      if (refreshToken) {
-        try {
-          // محاولة تحديث الرمز المميز
-          const response = await customInstance.post(API_BASE_URL + "/api/token/refresh/", {
-            refresh: refreshToken,
-          });
-          
-          // تخزين الرموز المميزة الجديدة
-          await AsyncStorage.setItem("access_token", response.data.access);
-          if (response.data.refresh) {
-            await AsyncStorage.setItem("refresh_token", response.data.refresh);
-          }
+      console.log('🔄 انتهت صلاحية الرمز المميز، محاولة التحديث...');
 
-          // تحديث ترويسات المصادقة
-          axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
-          originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
-
-          // إعادة محاولة الطلب الأصلي
+      if (isRefreshing) {
+        // إذا كان هناك تحديث جاري، أضف الطلب إلى قائمة الانتظار
+        console.log('⏳ هناك تحديث جاري، إضافة الطلب لقائمة الانتظار...');
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
           return axiosInstance(originalRequest);
-        } catch (err) {
-          console.error('❌ فشل تحديث الرمز المميز:', err);
-          // مسح الرموز المميزة وتوجيه المستخدم لتسجيل الدخول مجدداً
-          await AsyncStorage.removeItem("access_token");
-          await AsyncStorage.removeItem("refresh_token");
-          NavigationService.navigate("Auth");
-        }
-      } else {
-        console.log("رمز التحديث غير متوفر.");
-        NavigationService.navigate("Auth");
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // محاولة تحديث الرمز المميز
+        const newToken = await refreshAccessToken();
+        
+        // معالجة قائمة الانتظار
+        processQueue(null, newToken);
+        
+        // إعادة محاولة الطلب الأصلي
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        console.log('🔄 إعادة محاولة الطلب الأصلي مع الرمز المميز الجديد');
+        return axiosInstance(originalRequest);
+        
+      } catch (refreshError) {
+        console.error('❌ فشل تحديث الرمز المميز:', refreshError);
+        
+        // معالجة قائمة الانتظار مع الخطأ
+        processQueue(refreshError, null);
+        
+        // مسح المصادقة وتوجيه المستخدم للصفحة الرئيسية
+        await clearAuthAndNavigateHome();
+        
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

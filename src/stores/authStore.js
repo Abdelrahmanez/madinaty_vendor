@@ -113,6 +113,46 @@ const useAuthStore = create((set, get) => ({
       user: null
     });
   },
+
+  // Update tokens after refresh
+  updateTokens: async (accessToken, refreshToken = null) => {
+    try {
+      await AsyncStorage.setItem('access_token', accessToken);
+      if (refreshToken) {
+        await AsyncStorage.setItem('refresh_token', refreshToken);
+      }
+      
+      set({ 
+        isAuthenticated: true,
+        accessToken: accessToken
+      });
+      
+      console.log('✅ Tokens updated successfully in store');
+    } catch (error) {
+      console.error('Error updating tokens in store:', error);
+    }
+  },
+
+  // Clear all auth data and navigate to home (used when refresh fails)
+  clearAuthData: async () => {
+    try {
+      await Promise.all([
+        AsyncStorage.removeItem('access_token'),
+        AsyncStorage.removeItem('refresh_token'),
+        AsyncStorage.removeItem('userData')
+      ]);
+      
+      set({ 
+        isAuthenticated: false,
+        accessToken: null,
+        user: null
+      });
+      
+      console.log('✅ Auth data cleared from store');
+    } catch (error) {
+      console.error('Error clearing auth data from store:', error);
+    }
+  },
 }));
 
 export default useAuthStore;
