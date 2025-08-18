@@ -271,6 +271,28 @@ export const ENTITY_TYPES = {
   DELIVERY_PARTNER: 'DeliveryPartner'
 };
 
+ // Addon categories - Updated to match backend
+export const ADDON_CATEGORIES = {
+  GENERAL: 'General',
+  SAUCES: 'Sauces',
+  TOPPINGS: 'Toppings',
+  SIDES: 'Sides',
+  DRINKS: 'Drinks',
+  DESSERTS: 'Desserts',
+  EXTRAS: 'Extras'
+};
+
+// Addon category labels in Arabic
+export const ADDON_CATEGORY_LABELS = {
+  [ADDON_CATEGORIES.GENERAL]: 'عام',
+  [ADDON_CATEGORIES.SAUCES]: 'صلصات',
+  [ADDON_CATEGORIES.TOPPINGS]: 'إضافات',
+  [ADDON_CATEGORIES.SIDES]: 'أطباق جانبية',
+  [ADDON_CATEGORIES.DRINKS]: 'مشروبات',
+  [ADDON_CATEGORIES.DESSERTS]: 'حلويات',
+  [ADDON_CATEGORIES.EXTRAS]: 'إضافات أخرى'
+};
+
 // GeoJSON types - Updated to match backend
 export const GEOJSON_TYPES = {
   POINT: 'Point'

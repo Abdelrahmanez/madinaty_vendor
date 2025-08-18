@@ -5,7 +5,7 @@
  */
 
 // Base URL for all API requests
-export const API_BASE_URL = "http://192.168.3.10:8000/api/v1";
+export const API_BASE_URL = "http://192.168.1.17:8000/api/v1";
 
 // API Endpoints organized by module
 export const API_ENDPOINTS = {
@@ -50,6 +50,16 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/dishes/${id}`,
     DELETE: (id) => `/dishes/${id}`,
     TOGGLE_AVAILABILITY: (id) => `/dishes/${id}/toggle-availability`,
+    // Size management
+    UPDATE_SIZE: (dishId, sizeId) => `/dishes/${dishId}/sizes/${sizeId}`,
+    UPDATE_SIZE_STOCK: (dishId, sizeId) => `/dishes/${dishId}/sizes/${sizeId}/stock`,
+    ADD_SIZE: (dishId) => `/dishes/${dishId}/sizes`,
+    // Addon management
+    ADD_ADDONS: (dishId) => `/dishes/${dishId}/addons`,
+    REMOVE_ADDONS: (dishId) => `/dishes/${dishId}/addons`,
+    // Offer management
+    UPDATE_OFFER: (dishId) => `/dishes/${dishId}/offer`,
+    DELETE_OFFER: (dishId) => `/dishes/${dishId}/offer`,
   },
   CART: {
     GET: "/cart",
@@ -85,6 +95,14 @@ export const API_ENDPOINTS = {
   },
   PROMOCODE: {
     VALIDATE: "/promocodes/validate",
+  },
+  ADDONS: {
+    LIST: "/addons",
+    DETAIL: (id) => `/addons/${id}`,
+    RESTAURANT_ADDONS: (restaurantId) => `/restaurants/${restaurantId}/addons`,
+    CREATE: (restaurantId) => `/restaurants/${restaurantId}/addons`,
+    UPDATE: (restaurantId, addonId) => `/restaurants/${restaurantId}/addons/${addonId}`,
+    DELETE: (restaurantId, addonId) => `/restaurants/${restaurantId}/addons/${addonId}`,
   },
 };
 

@@ -38,3 +38,34 @@ export const deleteDish = (id) => {
 export const toggleDishAvailability = (id) => {
     return axiosInstance.patch(API_ENDPOINTS.DISHES.TOGGLE_AVAILABILITY(id));
 };
+
+// Size management
+export const updateDishSize = (dishId, sizeId, data) => {
+    return axiosInstance.put(API_ENDPOINTS.DISHES.UPDATE_SIZE(dishId, sizeId), data);
+};
+
+export const updateDishSizeStock = (dishId, sizeId, data) => {
+    return axiosInstance.patch(API_ENDPOINTS.DISHES.UPDATE_SIZE_STOCK(dishId, sizeId), data);
+};
+
+export const addDishSize = (dishId, data) => {
+    return axiosInstance.post(API_ENDPOINTS.DISHES.ADD_SIZE(dishId), data);
+};
+
+// Addon management
+export const addDishAddons = (dishId, data) => {
+    return axiosInstance.post(API_ENDPOINTS.DISHES.ADD_ADDONS(dishId), data);
+};
+
+export const removeDishAddons = (dishId, data) => {
+    return axiosInstance.delete(API_ENDPOINTS.DISHES.REMOVE_ADDONS(dishId), { data });
+};
+
+// Offer management
+export const updateDishOffer = (dishId, data) => {
+    return axiosInstance.patch(API_ENDPOINTS.DISHES.UPDATE_OFFER(dishId), data);
+};
+
+export const deleteDishOffer = (dishId) => {
+    return axiosInstance.delete(API_ENDPOINTS.DISHES.DELETE_OFFER(dishId));
+};

@@ -1,12 +1,23 @@
 import axiosInstance from '../../../services/axios';
 import { API_ENDPOINTS } from '../../../config/api';
 
+// Returns an ARRAY of categories, normalized to match backend sample:
+// { data: { status: 'success', results: N, data: [ ... ] } }
 export const fetchCategories = async (type) => {
     try {
         console.log('🔍 Fetching categories with type:', type);
         const response = await axiosInstance.get(API_ENDPOINTS.CATEGORIES.LIST(type));
-        console.log('✅ Categories API Response:', JSON.stringify(response.data, null, 2));
-        return response.data;
+        const payload = response?.data;
+        // Normalize to array regardless of nesting
+        const categories = Array.isArray(payload?.data?.data)
+            ? payload.data.data
+            : Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload)
+            ? payload
+            : [];
+        console.log('✅ Categories parsed length:', categories.length);
+        return categories;
     } catch (error) {
         console.error('❌ Error fetching categories:', error);
         console.error('❌ Error details:', {

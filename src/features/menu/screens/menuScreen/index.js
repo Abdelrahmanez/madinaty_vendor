@@ -95,6 +95,16 @@ const MenuScreen = ({ navigation }) => {
         onPress={handleAddItem}
         color={theme.colors.onPrimary}
       />
+
+      {/* Addon Management FAB */}
+      <FAB
+        icon="plus-circle-multiple"
+        style={[styles.fab, styles.addonFab]}
+        onPress={() => navigation.navigate('RestaurantAddons')}
+        color={theme.colors.onPrimary}
+        label="إدارة الإضافات"
+        small
+      />
     </View>
   );
 };
@@ -110,6 +120,10 @@ const createStyles = (theme, insets) => StyleSheet.create({
     right: 0,
     bottom: insets.bottom + 16,
     backgroundColor: theme.colors.primary,
+  },
+  addonFab: {
+    bottom: insets.bottom + 80, // Position above the main FAB
+    backgroundColor: theme.colors.secondary,
   },
 });
 

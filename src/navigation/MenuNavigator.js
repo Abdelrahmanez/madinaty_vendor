@@ -5,6 +5,7 @@ import MenuScreen from '../features/menu/screens/menuScreen';
 import MenuItemDetailsScreen from '../features/menu/screens/menuItemDetailsScreen';
 import AddMenuItemScreen from '../features/menu/screens/addMenuItemScreen';
 import EditMenuItemScreen from '../features/menu/screens/editMenuItemScreen';
+import RestaurantAddonsScreen from '../features/menu/screens/restaurantAddonsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,6 +15,7 @@ const MenuNavigator = () => (
     <Stack.Screen name="MenuItemDetails" component={MenuItemDetailsScreen} />
     <Stack.Screen name="AddMenuItem" component={AddMenuItemScreen} />
     <Stack.Screen name="EditMenuItem" component={EditMenuItemScreen} />
+    <Stack.Screen name="RestaurantAddons" component={RestaurantAddonsScreen} />
   </Stack.Navigator>
 );
 
