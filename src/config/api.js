@@ -5,7 +5,7 @@
  */
 
 // Base URL for all API requests
-export const API_BASE_URL = "http://192.168.1.17:8000/api/v1";
+export const API_BASE_URL = "http://192.168.3.10:8000/api/v1";
 
 // API Endpoints organized by module
 export const API_ENDPOINTS = {

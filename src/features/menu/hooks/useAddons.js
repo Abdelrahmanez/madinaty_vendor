@@ -7,11 +7,11 @@ export const useAddons = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  const { getRestaurantId } = useRestaurantStore();
+  // Select a stable primitive value to avoid re-creating callbacks unnecessarily
+  const restaurantId = useRestaurantStore((state) => state.restaurant?._id);
 
   // Fetch all available addons for the restaurant
   const fetchAvailableAddons = useCallback(async () => {
-    const restaurantId = getRestaurantId();
     if (!restaurantId) {
       console.log('🏪 No restaurant ID available for fetching addons');
       return;
@@ -41,7 +41,7 @@ export const useAddons = () => {
     } finally {
       setLoading(false);
     }
-  }, [getRestaurantId]);
+  }, [restaurantId]);
 
   // Initialize addons data
   useEffect(() => {

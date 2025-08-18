@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getDishes, toggleDishAvailability } from '../api/dish';
 import { fetchCategories } from '../api/categories';
 import useAuthStore from '../../../stores/authStore';
@@ -15,6 +15,7 @@ export const useMenu = () => {
   const [sortBy, setSortBy] = useState('name'); // name, price, popularity, date
   
   const { isAuthenticated } = useAuthStore();
+  const hasSetCategoriesRef = useRef(false);
 
   // Fetch dishes
   const fetchDishes = useCallback(async (params = {}) => {
@@ -65,23 +66,25 @@ export const useMenu = () => {
       const dishesData = response.data?.data || response.data || [];
       setDishes(dishesData);
       
-      // Extract unique categories from dishes as fallback
-      const uniqueCategories = [];
-      const categoryMap = new Map();
-      
-      dishesData.forEach(dish => {
-        if (dish.category && dish.category._id && dish.category.name) {
-          if (!categoryMap.has(dish.category._id)) {
-            categoryMap.set(dish.category._id, dish.category);
-            uniqueCategories.push(dish.category);
+      // Extract unique categories from dishes as fallback (only once)
+      if (!hasSetCategoriesRef.current) {
+        const uniqueCategories = [];
+        const categoryMap = new Map();
+        
+        dishesData.forEach(dish => {
+          if (dish.category && dish.category._id && dish.category.name) {
+            if (!categoryMap.has(dish.category._id)) {
+              categoryMap.set(dish.category._id, dish.category);
+              uniqueCategories.push(dish.category);
+            }
           }
+        });
+        
+        if (uniqueCategories.length > 0) {
+          console.log('📋 Using categories extracted from dishes (first time only):', uniqueCategories);
+          setCategories(uniqueCategories);
+          hasSetCategoriesRef.current = true;
         }
-      });
-      
-      // If we have categories from dishes and no categories from API, use them
-      if (uniqueCategories.length > 0 && categories.length === 0) {
-        console.log('📋 Using categories extracted from dishes:', uniqueCategories);
-        setCategories(uniqueCategories);
       }
     } catch (err) {
       console.error('❌ Error fetching dishes:', err);
@@ -89,7 +92,7 @@ export const useMenu = () => {
     } finally {
       setLoading(false);
     }
-  }, [categories.length, isAuthenticated]);
+  }, [isAuthenticated]);
 
   // Fetch categories
   const fetchCategoriesData = useCallback(async () => {
@@ -227,7 +230,7 @@ export const useMenu = () => {
     } else {
       console.log('⚠️ User not authenticated, skipping menu data fetch');
     }
-  }, [fetchDishes, fetchCategoriesData, isAuthenticated]);
+  }, [isAuthenticated, fetchDishes, fetchCategoriesData]);
 
   return {
     // Data
