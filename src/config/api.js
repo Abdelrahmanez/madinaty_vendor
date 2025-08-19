@@ -21,6 +21,12 @@ export const API_ENDPOINTS = {
     LIST: "/delivery-zones",
     ACTIVE: "/delivery-zones/active",
     DETAIL: (id) => `/delivery-zones/${id}`,
+    // Restaurant delivery zones endpoints
+    RESTAURANT_ZONES: "/delivery-zones/restaurant/zones",
+    SET_ZONE_PRICE: "/delivery-zones/restaurant/zones/set-price",
+    UPDATE_ZONE_PRICE: (id) => `/delivery-zones/restaurant/zones/${id}/price`,
+    DEACTIVATE_ZONE: "/delivery-zones/restaurant/zones/deactivate",
+    VALIDATE_RESTAURANT_ZONES: "/delivery-zones/restaurant/zones/validate",
   },
   USER: {
     PROFILE: "/users/me",

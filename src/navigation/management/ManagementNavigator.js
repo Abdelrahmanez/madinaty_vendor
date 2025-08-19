@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import useManagementStore from '../../stores/financeStore';
 import { verifyFinancialPinRequest } from '../../features/auth/api/auth';
 import TopBar from '../../components/TopBar';
+import DeliveryZonesManagementScreen from '../../features/deliveryZones/screens/DeliveryZonesManagementScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -305,12 +306,6 @@ const PromoCodeManagementScreen = ({ navigation }) => {
     </View>
   );
 };
-
-const DeliveryZonesManagementScreen = () => (
-  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    <Text>إدارة مناطق التوصيل - قيد التطوير</Text>
-  </View>
-);
 
 const DeliveryManagementScreen = () => (
   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
