@@ -228,7 +228,7 @@ axiosInstance.interceptors.response.use(
 
       // التحقق من نوع خطأ 401
       const errorData = error.response.data;
-      const isTokenExpired = errorData?.code === "token_not_valid" || 
+      const isTokenExpired = errorData?.code === "Invalid token. Please log in again" || 
                             errorData?.detail === "Invalid token" ||
                             errorData?.message === "Token is invalid or expired";
       

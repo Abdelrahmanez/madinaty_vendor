@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 
-const useFinanceStore = create((set, get) => ({
-  isFinanceUnlocked: false,
-  unlockFinance: () => set({ isFinanceUnlocked: true }),
-  lockFinance: () => set({ isFinanceUnlocked: false }),
+const useManagementStore = create((set, get) => ({
+  isManagementUnlocked: false,
+  unlockManagement: () => set({ isManagementUnlocked: true }),
+  lockManagement: () => set({ isManagementUnlocked: false }),
 }));
 
-export default useFinanceStore;
+export default useManagementStore;
 
 

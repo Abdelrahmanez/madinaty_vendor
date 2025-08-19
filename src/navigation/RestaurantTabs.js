@@ -6,7 +6,7 @@ import { useTheme } from 'react-native-paper';
 import OrdersNavigator from './OrdersNavigator';
 import MenuNavigator from './MenuNavigator';
 import { View, Text } from 'react-native';
-import FinanceNavigator from './finance/FinanceNavigator';
+import ManagementNavigator from './management/ManagementNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -28,7 +28,7 @@ const RestaurantTabs = () => {
           let iconName = 'home';
           if (route.name === 'OrdersTab') iconName = 'clipboard-list-outline';
           if (route.name === 'MenuTab') iconName = 'silverware';
-          if (route.name === 'FinanceTab') iconName = 'cash-multiple';
+          if (route.name === 'ManagementTab') iconName = 'shield-account';
           if (route.name === 'MoreTab') iconName = 'dots-horizontal-circle-outline';
           return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
         },
@@ -37,7 +37,7 @@ const RestaurantTabs = () => {
     >
       <Tab.Screen name="OrdersTab" component={OrdersNavigator} options={{ title: 'الطلبات' }} />
       <Tab.Screen name="MenuTab" component={MenuNavigator} options={{ title: 'المنيو' }} />
-      <Tab.Screen name="FinanceTab" component={FinanceNavigator} options={{ title: 'الماليات' }} />
+      <Tab.Screen name="ManagementTab" component={ManagementNavigator} options={{ title: 'الإدارة' }} />
       <Tab.Screen name="MoreTab" children={() => <Placeholder label="المزيد" />} options={{ title: 'المزيد' }} />
     </Tab.Navigator>
   );
