@@ -14,16 +14,41 @@ const ManagementUnlockScreen = () => {
   const styles = createStyles(theme);
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
-  const { unlockManagement } = useManagementStore();
+  const { unlockManagement, isManagementUnlocked } = useManagementStore();
+
+  const clearPin = () => {
+    setPin('');
+  };
+
+  // مسح حقل PIN عند إغلاق الجلسة أو فتح الشاشة
+  React.useEffect(() => {
+    if (!isManagementUnlocked) {
+      clearPin();
+    }
+  }, [isManagementUnlocked]);
+
+  // مسح حقل PIN عند فتح الشاشة لأول مرة
+  React.useEffect(() => {
+    clearPin();
+  }, []);
+
+  // مسح حقل PIN عند كل تغيير في حالة الإدارة
+  React.useEffect(() => {
+    clearPin();
+  }, [isManagementUnlocked]);
 
   const handleVerify = async () => {
     if (!pin || pin.length !== 4) {
       Alert.alert('تنبيه', 'أدخل رمز PIN مكون من 4 أرقام فقط');
       return;
     }
+    
+    // مسح الحقل قبل التحقق لضمان عدم الاحتفاظ بالقيمة السابقة
+    const currentPin = pin;
+    clearPin();
     try {
       setLoading(true);
-      const res = await verifyFinancialPinRequest(pin);
+      const res = await verifyFinancialPinRequest(currentPin);
       const ok = res?.status === 'success' || res?.valid === true;
       if (ok) {
         unlockManagement();

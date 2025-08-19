@@ -230,7 +230,7 @@ axiosInstance.interceptors.response.use(
       const errorData = error.response.data;
       const isTokenExpired = errorData?.code === "Invalid token. Please log in again" || 
                             errorData?.detail === "Invalid token" ||
-                            errorData?.message === "Token is invalid or expired";
+                            errorData?.message === "You are not logged in! Please log in to get access";
       
       if (!isTokenExpired) {
         console.log('🔐 خطأ 401 غير متعلق بانتهاء صلاحية الرمز المميز:', errorData);
