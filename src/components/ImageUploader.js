@@ -7,11 +7,10 @@ import { useTheme, Text, Button, TextInput, Chip, IconButton } from 'react-nativ
  * A reusable image uploader that supports:
  * - Single or multiple selection (via `multiple` prop)
  * - Picking from library using expo-image-picker
- * - Adding image URLs manually
  * - Preview, remove, and clear
  *
- * NOTE: Backend currently expects string URLs for images. If you pick local images,
- * their `file://` URIs will be sent as strings. Prefer remote URLs where possible.
+ * NOTE: Only supports photo picking from device gallery/library.
+ * Selected images will be uploaded to the backend for processing.
  */
 const ImageUploader = ({
   label = 'الصور',
@@ -20,12 +19,11 @@ const ImageUploader = ({
   max = 5,
   value,
   onChange,
-  allowUrlInput = true,
+  allowUrlInput = false,
   compact = false,
 }) => {
   const theme = useTheme();
   const styles = createStyles(theme, compact);
-  const [urlInput, setUrlInput] = useState('');
   const images = useMemo(() => (multiple ? (Array.isArray(value) ? value : []) : value ? [value] : []), [value, multiple]);
 
   const requestPermissionIfNeeded = useCallback(async () => {
@@ -60,17 +58,7 @@ const ImageUploader = ({
     }
   }, [images, max, multiple, onChange, requestPermissionIfNeeded]);
 
-  const handleAddUrl = useCallback(() => {
-    const trimmed = (urlInput || '').trim();
-    if (!trimmed) return;
-    if (multiple) {
-      const next = [...images, trimmed].slice(0, max);
-      onChange && onChange(next);
-    } else {
-      onChange && onChange(trimmed);
-    }
-    setUrlInput('');
-  }, [images, max, multiple, onChange, urlInput]);
+
 
   const removeAt = useCallback((index) => {
     if (multiple) {
@@ -100,20 +88,6 @@ const ImageUploader = ({
         <Button mode="outlined" icon="image" onPress={handlePick} style={styles.actionBtn}>
           اختر صورة
         </Button>
-        {allowUrlInput && (
-          <View style={styles.urlRow}>
-            <TextInput
-              mode="outlined"
-              placeholder="أدخل رابط الصورة (URL)"
-              value={urlInput}
-              onChangeText={setUrlInput}
-              style={styles.urlInput}
-            />
-            <Button mode="contained" onPress={handleAddUrl} disabled={!urlInput.trim()}>
-              إضافة
-            </Button>
-          </View>
-        )}
       </View>
 
       {helperText ? (
@@ -163,15 +137,7 @@ const createStyles = (theme, compact) => StyleSheet.create({
   actionBtn: {
     alignSelf: 'flex-start',
   },
-  urlRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 8,
-    alignItems: 'center',
-  },
-  urlInput: {
-    flex: 1,
-  },
+
   helperText: {
     color: theme.colors.onSurfaceVariant,
     marginTop: 6,

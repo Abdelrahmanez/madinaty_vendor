@@ -24,7 +24,18 @@ export const getDish = (id) => {
 };
 
 export const createDish = (data) => {
-    return axiosInstance.post(API_ENDPOINTS.DISHES.CREATE, data);
+    const isFormData = data instanceof FormData;
+    console.log('🍽️ Creating dish with data type:', isFormData ? 'FormData' : 'JSON');
+    
+    const config = {};
+    if (isFormData) {
+        // For FormData, let the browser set the Content-Type with boundary
+        config.headers = {
+            'Content-Type': 'multipart/form-data',
+        };
+    }
+    
+    return axiosInstance.post(API_ENDPOINTS.DISHES.CREATE, data, config);
 };
 
 export const updateDish = (id, data) => {

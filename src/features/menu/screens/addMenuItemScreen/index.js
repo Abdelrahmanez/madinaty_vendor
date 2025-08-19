@@ -1,7 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme, Text, Button, TextInput, HelperText, Switch, Divider, Chip, SegmentedButtons, ActivityIndicator } from 'react-native-paper';
+import {
+  useTheme,
+  Text,
+  Button,
+  TextInput,
+  HelperText,
+  Switch,
+  Divider,
+  Chip,
+  SegmentedButtons,
+  ActivityIndicator,
+} from 'react-native-paper';
+
 import TopBar from '../../../../components/TopBar';
 import ImageUploader from '../../../../components/ImageUploader';
 import { fetchCategories } from '../../api/categories';
@@ -39,7 +51,7 @@ const AddMenuItemScreen = ({ navigation }) => {
   const [isFeatured, setIsFeatured] = useState(false);
   const [displayOrder, setDisplayOrder] = useState('');
   const [allowedAddons, setAllowedAddons] = useState([]);
-  const [offer, setOffer] = useState(null); // Will be applied after creation if provided
+  const [offer, setOffer] = useState(null);
 
   // Reference data
   const [dishCategories, setDishCategories] = useState([]);
@@ -65,7 +77,12 @@ const AddMenuItemScreen = ({ navigation }) => {
         }
       } catch (e) {
         console.error('Error loading refs:', e?.response?.data || e?.message || e);
-        triggerAlert && triggerAlert('error', 'تعذر تحميل البيانات المرجعية. حاول لاحقاً.', { autoClose: true, duration: 4000, showIcon: true });
+        triggerAlert &&
+          triggerAlert('error', 'تعذر تحميل البيانات المرجعية. حاول لاحقاً.', {
+            autoClose: true,
+            duration: 4000,
+            showIcon: true,
+          });
       } finally {
         setLoading(false);
       }
@@ -110,71 +127,102 @@ const AddMenuItemScreen = ({ navigation }) => {
     setAllowedAddons((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }, []);
 
-  // Using shared normalizer from utils
-
+  // Validations
   const isNameValid = name.trim().length >= 2 && name.trim().length <= 100;
   const isCategoryValid = !!categoryId;
   const isDescriptionValid = description.trim().length > 0;
-  // Accept either main imageUrl or at least one gallery image
-  const isImageUrlValid = (imageUrl && String(imageUrl).trim().length > 0) || (images && images.length > 0);
-  const normalizedSizes = useMemo(() =>
-    sizes
-      .map((s) => ({
-        name: s.name?.trim(),
-        price: (() => {
-          const normalized = normalizeNumericString(s.price);
-          const num = parseFloat(normalized);
-          return isNaN(num) ? null : num;
-        })(),
-        currentStock: (() => {
-          if (s.currentStock === '' || s.currentStock === undefined || s.currentStock === null) return undefined;
-          const normalized = normalizeNumericString(s.currentStock);
-          const num = parseInt(normalized, 10);
-          return isNaN(num) ? undefined : num;
-        })(),
-      }))
-      .filter((s) => s.name && s.name.length > 0 && s.price !== null)
-  , [sizes, normalizeNumericString]);
-  const isSizesValid = normalizedSizes.length > 0;
+  const isImageValid =
+    (imageUrl && String(imageUrl).trim().length > 0) || (images && images.length > 0);
 
-  const canSubmit = isNameValid && isCategoryValid && isDescriptionValid && isImageUrlValid && isSizesValid;
+  const normalizedSizes = useMemo(
+    () =>
+      sizes
+        .map((s) => ({
+          name: s.name?.trim(),
+          price: (() => {
+            const normalized = normalizeNumericString(s.price);
+            const num = parseFloat(normalized);
+            return isNaN(num) ? null : num;
+          })(),
+          currentStock: (() => {
+            if (s.currentStock === '' || s.currentStock === undefined || s.currentStock === null)
+              return undefined;
+            const normalized = normalizeNumericString(s.currentStock);
+            const num = parseInt(normalized, 10);
+            return isNaN(num) ? undefined : num;
+          })(),
+        }))
+        .filter((s) => s.name && s.name.length > 0 && s.price !== null),
+    [sizes]
+  );
+
+  const isSizesValid = normalizedSizes.length > 0;
+  const canSubmit = isNameValid && isCategoryValid && isDescriptionValid && isImageValid && isSizesValid;
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit) {
-      triggerAlert && triggerAlert('warning', 'يرجى إكمال الحقول المطلوبة', { autoClose: true, duration: 3000, showIcon: true });
+      triggerAlert &&
+        triggerAlert('warning', 'يرجى إكمال الحقول المطلوبة', {
+          autoClose: true,
+          duration: 3000,
+          showIcon: true,
+        });
       return;
     }
 
     try {
       setSubmitting(true);
       const restaurantId = getRestaurantId();
-      const resolvedImageUrl = (imageUrl && String(imageUrl).trim().length > 0)
-        ? String(imageUrl).trim()
-        : (images && images.length > 0 ? images[0] : '');
+      const resolvedImage =
+        imageUrl && String(imageUrl).trim().length > 0
+          ? String(imageUrl).trim()
+          : images && images.length > 0
+          ? images[0]
+          : '';
 
-      const payload = {
-        name: name.trim(),
-        restaurant: restaurantId,
-        category: categoryId,
-        description: description.trim(),
-        imageUrl: resolvedImageUrl,
-        sizes: normalizedSizes,
-        tags,
-        unitType,
-        isAvailable,
-        extraDeliveryFee: extraDeliveryFee === '' ? undefined : parseFloat(extraDeliveryFee),
-        ingredients,
-        isFeatured,
-        allowedAddons,
-        displayOrder: displayOrder === '' ? undefined : parseInt(displayOrder, 10),
-        // images are optional array of strings (URIs); backend also supports processing uploaded files separately
-        images,
-      };
+      const formData = new FormData();
 
-      const res = await createDish(payload);
+      // Text fields
+      formData.append('name', name.trim());
+      formData.append('restaurant', restaurantId);
+      formData.append('category', categoryId);
+      formData.append('description', description.trim());
+      formData.append('sizes', JSON.stringify(normalizedSizes));
+      formData.append('unitType', unitType);
+      formData.append('isAvailable', isAvailable.toString());
+      formData.append('isFeatured', isFeatured.toString());
+
+      if (resolvedImage) {
+        formData.append('imageUrl', resolvedImage);
+      }
+
+      if (tags.length > 0) formData.append('tags', JSON.stringify(tags));
+      if (ingredients.length > 0) formData.append('ingredients', JSON.stringify(ingredients));
+      if (allowedAddons.length > 0) {
+        allowedAddons.forEach((addonId) => {
+          formData.append('allowedAddons[]', addonId);
+        });
+      }
+      if (extraDeliveryFee !== '') formData.append('extraDeliveryFee', extraDeliveryFee);
+      if (displayOrder !== '') formData.append('displayOrder', displayOrder);
+
+      
+
+      if (images && images.length > 0) {
+        images.forEach((imageFile, index) => {
+          if (imageFile.startsWith('file://')) {
+            formData.append('images[]', {
+              uri: imageFile, 
+              type: 'image/jpeg',
+              name: imageFile.split('/').pop() || `gallery_${index}.jpg`,
+            });
+          }
+        });
+      }
+
+      const res = await createDish(formData);
       const createdId = res?.data?.data?._id || res?.data?._id;
 
-      // If offer is prepared, attach it after creation
       if (offer && createdId) {
         try {
           await updateDishOffer(createdId, offer);
@@ -182,17 +230,50 @@ const AddMenuItemScreen = ({ navigation }) => {
           console.error('Failed to attach offer:', offerErr?.response?.data || offerErr?.message || offerErr);
         }
       }
-      triggerAlert && triggerAlert('success', 'تم إنشاء العنصر بنجاح', { autoClose: true, duration: 2500, showIcon: true });
+
+      triggerAlert &&
+        triggerAlert('success', 'تم إنشاء العنصر بنجاح', {
+          autoClose: true,
+          duration: 2500,
+          showIcon: true,
+        });
       navigation.goBack();
       return res;
     } catch (e) {
-      const msg = e?.response?.data?.message || 'تعذر إنشاء العنصر. تحقق من البيانات والمحاولة لاحقاً.';
-      triggerAlert && triggerAlert('error', msg, { autoClose: true, duration: 4500, showIcon: true });
+      const msg =
+        e?.response?.data?.message || 'تعذر إنشاء العنصر. تحقق من البيانات والمحاولة لاحقاً.';
+      triggerAlert &&
+        triggerAlert('error', msg, {
+          autoClose: true,
+          duration: 4500,
+          showIcon: true,
+        });
       console.error('Create dish error:', e?.response?.data || e?.message || e);
     } finally {
       setSubmitting(false);
     }
-  }, [allowedAddons, canSubmit, categoryId, description, displayOrder, extraDeliveryFee, getRestaurantId, imageUrl, images, ingredients, isAvailable, isFeatured, name, navigation, normalizedSizes, tags, triggerAlert, unitType]);
+  }, [
+    allowedAddons,
+    canSubmit,
+    categoryId,
+    description,
+    displayOrder,
+    extraDeliveryFee,
+    getRestaurantId,
+    imageUrl,
+    images,
+    ingredients,
+    isAvailable,
+    isFeatured,
+    name,
+    navigation,
+    normalizedSizes,
+    offer,
+    tags,
+    triggerAlert,
+    unitType,
+  ]);
+
 
   return (
     <View style={styles.container}>
@@ -239,17 +320,6 @@ const AddMenuItemScreen = ({ navigation }) => {
             multiple={false}
             value={imageUrl}
             onChange={setImageUrl}
-            compact
-          />
-
-          <Text style={styles.sectionTitle}>صور إضافية (اختياري)</Text>
-          <ImageUploader
-            label="صور إضافية"
-            helperText="يمكنك إضافة حتى 5 صور كحد أقصى"
-            multiple
-            max={5}
-            value={images}
-            onChange={setImages}
             compact
           />
 
