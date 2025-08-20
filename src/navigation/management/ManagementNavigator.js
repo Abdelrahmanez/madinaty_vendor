@@ -16,6 +16,9 @@ import {
   PromocodeDetailsScreen 
 } from '../../features/promocodes';
 
+// Import delivery screens
+import { DriversManagementScreen } from '../../features/delivery';
+
 const Stack = createNativeStackNavigator();
 
 const ManagementUnlockScreen = () => {
@@ -308,11 +311,72 @@ const PromoCodeManagementScreen = ({ navigation }) => {
   );
 };
 
-const DeliveryManagementScreen = () => (
-  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    <Text>إدارة التوصيل - قيد التطوير</Text>
-  </View>
-);
+const DeliveryManagementScreen = ({ navigation }) => {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
+  const deliveryFeatures = [
+    {
+      title: 'إدارة السائقين',
+      icon: 'account-group',
+      description: 'إضافة وإدارة سائقين المطعم',
+      onPress: () => navigation.navigate('DriversManagement'),
+      color: '#2196F3'
+    },
+    {
+      title: 'تخصيص الطلبات',
+      icon: 'truck-delivery',
+      description: 'تخصيص الطلبات للسائقين',
+      onPress: () => navigation.navigate('OrderAssignment'),
+      color: '#4CAF50'
+    },
+  ];
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <TopBar 
+        title="إدارة التوصيل"
+        showBackButton={true}
+        backgroundColor={theme.colors.primary}
+        titleColor={theme.colors.onPrimary}
+      />
+      
+      <View style={styles.header}>
+        <Text style={[styles.headerSubtitle, { color: theme.colors.onSurfaceVariant }]}>
+          إدارة السائقين وتخصيص الطلبات
+        </Text>
+      </View>
+
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.featuresGrid}>
+          {deliveryFeatures.map((feature, index) => (
+            <Card
+              key={index}
+              style={[styles.featureCard, { backgroundColor: theme.colors.surface }]}
+              onPress={feature.onPress}
+            >
+              <Card.Content style={styles.cardContent}>
+                <View style={[styles.iconContainer, { backgroundColor: feature.color + '20' }]}>
+                  <MaterialCommunityIcons 
+                    name={feature.icon} 
+                    size={28} 
+                    color={feature.color} 
+                  />
+                </View>
+                <Text style={[styles.featureTitle, { color: theme.colors.onSurface }]}>
+                  {feature.title}
+                </Text>
+                <Text style={[styles.featureDescription, { color: theme.colors.onSurfaceVariant }]}>
+                  {feature.description}
+                </Text>
+              </Card.Content>
+            </Card>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
 
 const FinancialReportsScreen = () => (
   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -343,6 +407,7 @@ const ManagementNavigator = () => {
           <Stack.Screen name="PromocodeDetails" component={PromocodeDetailsScreen} />
           <Stack.Screen name="DeliveryZonesManagement" component={DeliveryZonesManagementScreen} />
           <Stack.Screen name="DeliveryManagement" component={DeliveryManagementScreen} />
+          <Stack.Screen name="DriversManagement" component={DriversManagementScreen} />
           <Stack.Screen name="FinancialReports" component={FinancialReportsScreen} />
           <Stack.Screen name="SystemSettings" component={SystemSettingsScreen} />
         </>

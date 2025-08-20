@@ -106,6 +106,12 @@ export const API_ENDPOINTS = {
     RESTAURANT_UPDATE: (id) => `/promocodes/restaurant/${id}`,
     RESTAURANT_DELETE: (id) => `/promocodes/restaurant/${id}`,
   },
+  DRIVERS: {
+    ADD_DRIVER: "/drivers/restaurant/add-driver-by-phone",
+    REMOVE_DRIVER: "/drivers/restaurant/remove-driver-by-phone",
+    GET_ALL_DRIVERS: "/drivers/restaurant/drivers",
+    GET_AVAILABLE_DRIVERS: "/drivers/restaurant/available",
+  },
   ADDONS: {
     LIST: "/addons",
     DETAIL: (id) => `/addons/${id}`,
