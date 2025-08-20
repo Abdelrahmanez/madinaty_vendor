@@ -24,6 +24,8 @@ const OrdersList = ({
   onRefresh, 
   onStatusUpdate,
   onCancelOrder,
+  onAssignDriver,
+  onUpdateStatus,
   restaurantStatus,
   socketDebugger,
   style 
@@ -33,7 +35,7 @@ const OrdersList = ({
   
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState(ORDER_STATUS.PENDING);
 
   // Filter orders based on active filter
   const filteredOrders = React.useMemo(() => {
@@ -127,6 +129,8 @@ const OrdersList = ({
       order={item}
       onPress={handleOrderPress}
       style={styles.orderCard}
+      onAssignDriver={onAssignDriver}
+      onUpdateStatus={onUpdateStatus}
     />
   );
 

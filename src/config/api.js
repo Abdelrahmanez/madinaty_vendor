@@ -80,6 +80,8 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/orders/${id}`,
     UPDATE_STATUS: (id) => `/orders/${id}/status`,
     CANCEL: (id) => `/orders/${id}/cancel`,
+    ASSIGN_DRIVER: (id) => `/orders/${id}/assign-driver`,
+    UPDATE_STATUS_BY_RESTAURANT: (id) => `/orders/${id}/status-by-restaurant`,
   },
   NOTIFICATION: {
     REGISTER_TOKEN: "/users/push-token",  // تحديث للنقطة النهائية الصحيحة

@@ -1,211 +1,105 @@
-# Order Management System
+# Orders Feature
 
-## نظرة عامة
-نظام إدارة الطلبات الكامل للمطعم مع تحديثات فورية عبر Socket.io وتصميم نظيف وسهل الاستخدام.
+This feature handles all order-related functionality for the restaurant vendor app.
 
-## المكونات
+## Components
 
-### 1. OrderCardItem
-**الموقع**: `components/OrderCardItem.js`
+### OrderCardItem
+- Displays order information in a card format
+- Shows customer details, order items, and status
+- Includes action buttons for order management
+- **New**: Action buttons for driver assignment and status updates
 
-**الوصف**: مكون بطاقة يعرض ملخص الطلب مع إمكانية الضغط لفتح التفاصيل.
+### OrderDetailsModal
+- Detailed view of order information
+- Allows status updates and order cancellation
+- **New**: Enhanced with driver assignment capabilities
 
-**الميزات**:
-- عرض رقم الطلب والوقت
-- حالة الطلب مع ألوان مميزة
-- أولوية الطلب (عاجل، عالي، متوسط، منخفض)
-- معلومات العميل (الاسم، الهاتف)
-- ملخص الأطباق والمبلغ الإجمالي
-- طريقة الدفع وعنوان التوصيل
-- وقت التوصيل المتوقع
+### OrderAssignmentModal
+- **New Component**: Modal for assigning drivers to orders
+- Shows available drivers for selection
+- Allows restaurant to update order status
+- Integrates with driver management system
 
-### 2. OrderDetailsModal
-**الموقع**: `components/OrderDetailsModal.js`
+### OrdersList
+- List view of all orders with filtering
+- **New**: Supports driver assignment actions
+- **New**: Supports status update actions
 
-**الوصف**: نافذة منبثقة تعرض جميع تفاصيل الطلب مع إمكانية اتخاذ إجراءات.
+## Screens
 
-**الميزات**:
-- عرض كامل تفاصيل الطلب
-- معلومات العميل والتوصيل
-- قائمة الأطباق مع الملاحظات
-- معلومات الدفع المفصلة
-- معلومات السائق (إن وجدت)
-- أزرار الإجراءات حسب حالة الطلب
+### OrdersScreen
+- Main orders management screen
+- **New**: Navigation to order assignment screen
+- **New**: Integration with driver assignment actions
 
-**الإجراءات المتاحة**:
-- تأكيد الطلب (pending → confirmed)
-- بدء التحضير (confirmed → preparing)
-- تحديد الطلب جاهز (preparing → ready)
-- إلغاء الطلب (مع تأكيد)
+### OrderAssignmentScreen
+- **New Screen**: Dedicated screen for order assignment management
+- Shows orders that can be assigned to drivers
+- Provides search and filtering capabilities
+- Integrates with OrderAssignmentModal
 
-### 3. OrdersList
-**الموقع**: `components/OrdersList.js`
+## API Integration
 
-**الوصف**: قائمة الطلبات مع فلاتر وتحديث فوري.
+### New Endpoints
+- `PATCH /orders/{order_id}/assign-driver` - Assign driver to order
+- `PATCH /orders/{order_id}/status-by-restaurant` - Update order status by restaurant
 
-**الميزات**:
-- عرض جميع الطلبات
-- فلاتر حسب الحالة مع العد
-- تحديث فوري (pull-to-refresh)
-- حالة فارغة عند عدم وجود طلبات
-- تكامل مع OrderDetailsModal
+### API Functions
+- `assignDriverToOrder(orderId, driverId)` - Assigns a driver to an order
+- `updateOrderStatusByRestaurant(orderId, status)` - Updates order status
 
-## الأنواع والثوابت
-
-### Order Types
-**الموقع**: `types/orderTypes.js`
-
-**حالات الطلب**:
-- `pending` - في الانتظار
-- `confirmed` - مؤكد
-- `preparing` - قيد التحضير
-- `ready` - جاهز
-- `out_for_delivery` - خارج للتوصيل
-- `delivered` - تم التوصيل
-- `cancelled` - ملغي
-- `rejected` - مرفوض
-
-**أولويات الطلب**:
-- `low` - منخفض
-- `medium` - متوسط
-- `high` - عالي
-- `urgent` - عاجل
-
-**طرق الدفع**:
-- `cash` - نقداً
-- `card` - بطاقة ائتمان
-- `online` - دفع إلكتروني
-
-## الأدوات المساعدة
-
-### Order Utils
-**الموقع**: `utils/orderUtils.js`
-
-**الوظائف**:
-- `formatOrderNumber()` - تنسيق رقم الطلب
-- `formatCurrency()` - تنسيق العملة
-- `calculateOrderTotal()` - حساب المجموع
-- `getPriorityColor()` - لون الأولوية
-- `canCancelOrder()` - إمكانية الإلغاء
-- `canConfirmOrder()` - إمكانية التأكيد
-- `canPrepareOrder()` - إمكانية التحضير
-- `canMarkAsReady()` - إمكانية تحديد الجاهزية
-- `formatOrderDate()` - تنسيق التاريخ
-- `formatOrderTime()` - تنسيق الوقت
-
-## Hook إدارة الطلبات
+## Hooks
 
 ### useOrders
-**الموقع**: `hooks/useOrders.js`
+- **New**: `assignDriver(orderId, driverId)` - Assign driver to order
+- **New**: `updateOrderStatusByRestaurant(orderId, status)` - Update order status
+- Real-time updates via Socket.io
+- Local state management for immediate UI updates
 
-**الميزات**:
-- إدارة حالة الطلبات
-- تكامل Socket.io للتحديثات الفورية
-- استماع لأحداث الطلبات الجديدة
-- استماع لتحديثات الحالة
-- استماع لإلغاء الطلبات
-- تحديث فوري للواجهة
-- رسائل تنبيه مناسبة
+## Order Status Flow
 
-**الأحداث المدعومة**:
-- `new_order` - طلب جديد
-- `order_updated` - تحديث الطلب
-- `order_cancelled` - إلغاء الطلب
-- `order_status_changed` - تغيير الحالة
+1. **pending** → **preparing** (Restaurant starts preparing)
+2. **preparing** → **ready_for_pickup** (Order ready for driver pickup)
+3. **ready_for_pickup** → **assigned_to_driver** (Driver assigned)
+4. **assigned_to_driver** → **picked_up_by_driver** (Driver picked up)
+5. **picked_up_by_driver** → **on_the_way** (Driver en route)
+6. **on_the_way** → **delivered** (Order delivered)
 
-## التكامل مع الشاشة الرئيسية
+## Driver Assignment
 
-### Home Screen
-**الموقع**: `features/home/screens/homeScreen/index.js`
+- Drivers are manually selected from available drivers list
+- Only orders with status `ready_for_pickup` can be assigned to drivers
+- Restaurant can update order status at any stage if needed
+- Real-time updates ensure all connected clients see changes immediately
 
-**الميزات**:
-- عرض حالة المطعم
-- قائمة الطلبات الحالية
-- تحديث فوري
-- تنبيهات مناسبة
+## Usage
 
-## مبادئ SOLID المطبقة
+### From Orders Screen
+- Orders with actionable statuses show action buttons
+- "تعيين سائق" (Assign Driver) button for ready orders
+- "جاهز للاستلام" (Ready for Pickup) button for preparing orders
 
-### 1. Single Responsibility Principle (SRP)
-- كل مكون له مسؤولية واحدة واضحة
-- `OrderCardItem` - عرض ملخص الطلب
-- `OrderDetailsModal` - عرض التفاصيل والإجراءات
-- `OrdersList` - إدارة القائمة والفلترة
+### From Management Screen
+- Navigate to "تخصيص الطلبات" (Order Assignment) from Delivery Management
+- Dedicated interface for order assignment management
+- Search and filter orders by status
 
-### 2. Open/Closed Principle (OCP)
-- النظام قابل للتوسيع بدون تعديل
-- إضافة حالات طلب جديدة
-- إضافة إجراءات جديدة
-- إضافة فلاتر جديدة
+### From Order Cards
+- Direct action buttons on order cards
+- Immediate status updates and driver assignment
+- Seamless integration with existing order flow
 
-### 3. Liskov Substitution Principle (LSP)
-- جميع المكونات قابلة للاستبدال
-- واجهات موحدة للطلبات
-- أنواع بيانات متسقة
+## Error Handling
 
-### 4. Interface Segregation Principle (ISP)
-- واجهات صغيرة ومتخصصة
-- `onPress` للبطاقات
-- `onStatusUpdate` للتحديث
-- `onCancelOrder` للإلغاء
+- API error messages are displayed to users
+- Network failures are handled gracefully
+- Loading states provide user feedback
+- Validation ensures only valid actions are performed
 
-### 5. Dependency Inversion Principle (DIP)
-- الاعتماد على التجريدات
-- Hook `useOrders` لإدارة البيانات
-- Store `useAlertStore` للتنبيهات
-- Theme `useTheme` للألوان
+## Real-time Updates
 
-## التصميم والتفاعل
-
-### UI/UX Features
-- **تصميم نظيف**: ألوان متناسقة وأيقونات واضحة
-- **تفاعل سهل**: ضغط بسيط لفتح التفاصيل
-- **تنبيهات مفيدة**: رسائل واضحة لكل إجراء
-- **فلترة ذكية**: تصفية حسب الحالة مع العد
-- **تحديث فوري**: Socket.io للتحديثات المباشرة
-- **حالات التحميل**: مؤشرات واضحة للعمليات
-
-### User Actions
-- **عرض الطلبات**: قائمة منظمة مع معلومات أساسية
-- **فتح التفاصيل**: نافذة شاملة مع جميع المعلومات
-- **تحديث الحالة**: أزرار واضحة حسب الحالة الحالية
-- **إلغاء الطلب**: تأكيد مزدوج لتجنب الأخطاء
-- **تحديث فوري**: سحب للأسفل للتحديث
-
-## التثبيت والإعداد
-
-### المتطلبات
-```bash
-npm install socket.io-client
-```
-
-### الاستخدام
-```jsx
-import { OrdersList } from '../../../orders/components';
-import { useOrders } from '../../../orders/hooks/useOrders';
-
-const { orders, updateOrderStatus, cancelOrder } = useOrders();
-
-<OrdersList
-  orders={orders}
-  onStatusUpdate={updateOrderStatus}
-  onCancelOrder={cancelOrder}
-/>
-```
-
-## التطوير المستقبلي
-
-### الميزات المقترحة
-- إشعارات push للطلبات الجديدة
-- تقارير وإحصائيات الطلبات
-- إدارة المخزون المتكاملة
-- نظام تقييم العملاء
-- تكامل مع أنظمة الدفع
-- دعم الطلبات المجدولة
-
-### التحسينات التقنية
-- اختبارات وحدة شاملة
-- تحسين الأداء للقوائم الكبيرة
-- دعم الوضع غير المتصل
-- تزامن البيانات
-- أمان إضافي للعمليات الحساسة
+- Socket.io integration for live updates
+- All connected clients see changes immediately
+- Driver assignment and status updates are broadcast
+- Maintains consistency across multiple devices

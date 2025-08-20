@@ -63,10 +63,48 @@ export const getCustomerPhone = (user) => {
 export const getDeliveryAddress = (deliveryAddress) => {
   if (!deliveryAddress) return null;
   
+  // Handle case where deliveryAddress is already a string
+  if (typeof deliveryAddress === 'string') {
+    return deliveryAddress;
+  }
+  
   const parts = [];
-  if (deliveryAddress.street) parts.push(deliveryAddress.street);
-  if (deliveryAddress.areaName) parts.push(deliveryAddress.areaName);
-  if (deliveryAddress.notes) parts.push(`(${deliveryAddress.notes})`);
+  
+  // Add street if available
+  if (deliveryAddress.street && typeof deliveryAddress.street === 'string') {
+    parts.push(deliveryAddress.street.trim());
+  }
+  
+  // Add area name if available
+  if (deliveryAddress.areaName && typeof deliveryAddress.areaName === 'string') {
+    parts.push(deliveryAddress.areaName.trim());
+  }
+  
+  // Add area if areaName is not available but area exists (fallback)
+  if (!deliveryAddress.areaName && deliveryAddress.area && typeof deliveryAddress.area === 'string') {
+    parts.push(deliveryAddress.area.trim());
+  }
+  
+  // Add notes in parentheses if available
+  if (deliveryAddress.notes && typeof deliveryAddress.notes === 'string') {
+    const notes = deliveryAddress.notes.trim();
+    if (notes) {
+      parts.push(`(${notes})`);
+    }
+  }
+  
+  // Debug logging in development
+  if (__DEV__) {
+    console.log('🏠 getDeliveryAddress debug:', {
+      input: deliveryAddress,
+      street: deliveryAddress.street,
+      areaName: deliveryAddress.areaName,
+      area: deliveryAddress.area,
+      notes: deliveryAddress.notes,
+      parts,
+      result: parts.length > 0 ? parts.join('، ') : null
+    });
+  }
   
   return parts.length > 0 ? parts.join('، ') : null;
 };

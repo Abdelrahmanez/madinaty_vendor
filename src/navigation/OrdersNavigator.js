@@ -6,6 +6,7 @@ import OrderDetailsScreen from '../features/orders/screens/orderDetailsScreen';
 import OrderHistoryScreen from '../features/orders/screens/orderHistoryScreen';
 import CurrentOrdersScreen from '../features/orders/screens/currentOrdersScreen';
 import OrderTrackingScreen from '../features/orders/screens/orderTrackingScreen';
+import OrderAssignmentScreen from '../features/orders/screens/OrderAssignmentScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,6 +17,7 @@ const OrdersNavigator = () => (
     <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
     <Stack.Screen name="CurrentOrders" component={CurrentOrdersScreen} />
     <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
+    <Stack.Screen name="OrderAssignment" component={OrderAssignmentScreen} />
   </Stack.Navigator>
 );
 

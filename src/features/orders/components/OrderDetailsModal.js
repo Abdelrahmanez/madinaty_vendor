@@ -28,7 +28,8 @@ import {
   canMarkAsPickedUp,
   canMarkAsOnTheWay,
   canMarkAsDelivered,
-  transformApiOrder
+  transformApiOrder,
+  getDeliveryAddress
 } from '../utils/orderUtils';
 import { PrimaryButton, SecondaryButton } from '../../../components/AppButton';
 
@@ -448,7 +449,7 @@ const OrderDetailsModal = ({
             {deliveryAddress && (
               <View style={styles.section}>
                 <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>📍 عنوان التوصيل</Text>
-                <Text style={styles.infoText}>{deliveryAddress}</Text>
+                <Text style={styles.infoText}>{getDeliveryAddress(deliveryAddress)}</Text>
               </View>
             )}
 

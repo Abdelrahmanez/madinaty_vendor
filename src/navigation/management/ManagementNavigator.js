@@ -19,6 +19,9 @@ import {
 // Import delivery screens
 import { DriversManagementScreen } from '../../features/delivery';
 
+// Import order assignment screen
+import OrderAssignmentScreen from '../../features/orders/screens/OrderAssignmentScreen';
+
 const Stack = createNativeStackNavigator();
 
 const ManagementUnlockScreen = () => {
@@ -408,6 +411,7 @@ const ManagementNavigator = () => {
           <Stack.Screen name="DeliveryZonesManagement" component={DeliveryZonesManagementScreen} />
           <Stack.Screen name="DeliveryManagement" component={DeliveryManagementScreen} />
           <Stack.Screen name="DriversManagement" component={DriversManagementScreen} />
+          <Stack.Screen name="OrderAssignment" component={OrderAssignmentScreen} />
           <Stack.Screen name="FinancialReports" component={FinancialReportsScreen} />
           <Stack.Screen name="SystemSettings" component={SystemSettingsScreen} />
         </>

@@ -17,3 +17,16 @@ export const getOrder = (orderId) => {
 export const cancelOrder = (orderId) => {
     return axiosInstance.post(API_ENDPOINTS.ORDERS.CANCEL(orderId));
 };
+
+// New API functions for order assignment
+export const assignDriverToOrder = (orderId, driverId) => {
+    return axiosInstance.patch(API_ENDPOINTS.ORDERS.ASSIGN_DRIVER(orderId), {
+        driverId
+    });
+};
+
+export const updateOrderStatusByRestaurant = (orderId, status) => {
+    return axiosInstance.patch(API_ENDPOINTS.ORDERS.UPDATE_STATUS_BY_RESTAURANT(orderId), {
+        status
+    });
+};

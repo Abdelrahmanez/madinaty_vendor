@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import TopBar from '../../../../components/TopBar';
 import { RestaurantStatus } from '../../../restaurant/components';
 import { OrdersList } from '../../../orders/components';
@@ -11,6 +12,7 @@ import SocketDebugger from '../../../orders/components/SocketDebugger';
 const OrdersScreen = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const styles = createStyles(theme, insets);
 
   const {
@@ -43,6 +45,14 @@ const OrdersScreen = () => {
         onRefresh={refreshOrders}
         onStatusUpdate={updateOrderStatus}
         onCancelOrder={cancelOrder}
+        onAssignDriver={(order) => {
+          // Navigate to order assignment screen
+          navigation.navigate('OrderAssignment', { order });
+        }}
+        onUpdateStatus={(order, newStatus) => {
+          // Handle status update
+          updateOrderStatus(order._id, newStatus);
+        }}
         restaurantStatus={<RestaurantStatus />}
         socketDebugger={
           __DEV__ ? (

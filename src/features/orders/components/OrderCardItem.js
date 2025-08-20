@@ -6,13 +6,17 @@ import {
   ORDER_STATUS_LABELS, 
   ORDER_STATUS_COLORS,
   PAYMENT_METHOD_LABELS,
-  PAYMENT_STATUS_LABELS
+  PAYMENT_STATUS_LABELS,
+  ORDER_STATUS
 } from '../../../utils/enums';
 import { 
   formatOrderNumber, 
   formatCurrency, 
   formatOrderTime,
-  transformApiOrder
+  transformApiOrder,
+  canAssignToDriver,
+  canMarkAsReady,
+  getDeliveryAddress
 } from '../utils/orderUtils';
 
 /**
@@ -23,7 +27,9 @@ import {
 const OrderCardItem = ({ 
   order, 
   onPress, 
-  style 
+  style,
+  onAssignDriver,
+  onUpdateStatus
 }) => {
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -59,12 +65,16 @@ const OrderCardItem = ({
   const statusColor = ORDER_STATUS_COLORS[status] || theme.colors.outline;
   const paymentLabel = PAYMENT_METHOD_LABELS[paymentMethod] || 'غير محدد';
   const paymentStatusLabel = PAYMENT_STATUS_LABELS[paymentStatus] || 'غير محدد';
+  
+  // Check if order can be assigned to driver or status can be updated
+  const canAssign = canAssignToDriver(status);
+  const canMarkReady = canMarkAsReady(status);
 
 
   return (
     <TouchableOpacity
       style={[styles.container, style]}
-      onPress={() => onPress?.(order)}
+      onPress={() => onPress?.(transformedOrder)}
       activeOpacity={0.7}
     >
       {/* Header Row - Order Number, Status, Payment Status */}
@@ -156,7 +166,7 @@ const OrderCardItem = ({
               color={theme.colors.onSurfaceVariant} 
             />
             <Text style={styles.addressText} numberOfLines={1}>
-              {deliveryAddress}
+              {getDeliveryAddress(deliveryAddress)}
             </Text>
           </View>
         )}
@@ -175,6 +185,31 @@ const OrderCardItem = ({
             <Text style={styles.moreItems}>
               +{items.length - 2} طبق آخر
             </Text>
+          )}
+        </View>
+      )}
+
+      {/* Action Buttons */}
+      {(canAssign || canMarkReady) && (
+        <View style={styles.actionButtons}>
+          {canMarkReady && (
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: theme.colors.secondary }]}
+              onPress={() => onUpdateStatus?.(order, 'ready_for_pickup')}
+            >
+              <MaterialCommunityIcons name="check-circle" size={16} color="white" />
+              <Text style={styles.actionButtonText}>جاهز للاستلام</Text>
+            </TouchableOpacity>
+          )}
+          
+          {canAssign && (
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
+              onPress={() => onAssignDriver?.(order)}
+            >
+              <MaterialCommunityIcons name="truck-delivery" size={16} color="white" />
+              <Text style={styles.actionButtonText}>تعيين سائق</Text>
+            </TouchableOpacity>
           )}
         </View>
       )}
@@ -340,6 +375,30 @@ const createStyles = (theme) => StyleSheet.create({
     fontSize: 10,
     color: theme.colors.primary,
     fontStyle: 'italic',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.outlineVariant,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    flex: 1,
+    marginHorizontal: 4,
+    justifyContent: 'center',
+  },
+  actionButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
   },
 });
 

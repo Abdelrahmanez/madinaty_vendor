@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import { API_BASE_URL, API_ENDPOINTS } from '../../../config/api';
 import useAlertStore from '../../../stores/alertStore';
 import { transformApiOrder } from '../utils/orderUtils';
-import { getOrders } from '../api/order';
+import { getOrders, assignDriverToOrder, updateOrderStatusByRestaurant } from '../api/order';
 import axiosInstance from '../../../services/axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -372,6 +372,98 @@ export const useOrders = () => {
     fetchOrders();
   }, [fetchOrders]);
 
+  // Assign driver to order
+  const assignDriver = useCallback(async (orderId, driverId) => {
+    try {
+      setUpdating(true);
+      setError(null);
+      
+      console.log('🚚 Assigning driver to order:', orderId, driverId);
+      
+      const response = await assignDriverToOrder(orderId, driverId);
+      
+      if (response.data.status === 'success') {
+        console.log('✅ Driver assigned successfully');
+        
+        // Update order locally
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order._id === orderId
+              ? { 
+                  ...order, 
+                  status: 'assigned_to_driver', 
+                  driver: driverId,
+                  driverAssignedAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString() 
+                }
+              : order
+          )
+        );
+
+        // Emit socket event for real-time updates
+        if (socketRef.current?.connected) {
+          console.log('📡 Emitting socket event: driver_assigned');
+          socketRef.current.emit('driver_assigned', { orderId, driverId });
+        }
+
+        return { success: true, data: response.data.data };
+      } else {
+        throw new Error(response.data.message || 'فشل في تعيين السائق');
+      }
+    } catch (error) {
+      console.error('❌ Error assigning driver:', error);
+      setError('فشل في تعيين السائق');
+      return { success: false, error: error.message };
+    } finally {
+      setUpdating(false);
+    }
+  }, []);
+
+  // Update order status by restaurant
+  const updateOrderStatusByRestaurant = useCallback(async (orderId, newStatus) => {
+    try {
+      setUpdating(true);
+      setError(null);
+      
+      console.log('🔄 Updating order status by restaurant:', orderId, newStatus);
+      
+      const response = await updateOrderStatusByRestaurant(orderId, newStatus);
+      
+      if (response.data.status === 'success') {
+        console.log('✅ Order status updated successfully');
+        
+        // Update order locally
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order._id === orderId
+              ? { 
+                  ...order, 
+                  status: newStatus,
+                  updatedAt: new Date().toISOString() 
+                }
+              : order
+          )
+        );
+
+        // Emit socket event for real-time updates
+        if (socketRef.current?.connected) {
+          console.log('📡 Emitting socket event: order_status_updated');
+          socketRef.current.emit('order_status_updated', { orderId, newStatus });
+        }
+
+        return { success: true, data: response.data.data };
+      } else {
+        throw new Error(response.data.message || 'فشل في تحديث حالة الطلب');
+      }
+    } catch (error) {
+      console.error('❌ Error updating order status:', error);
+      setError('فشل في تحديث حالة الطلب');
+      return { success: false, error: error.message };
+    } finally {
+      setUpdating(false);
+    }
+  }, []);
+
   // Get socket connection status
   const getSocketStatus = useCallback(() => {
     if (!socketRef.current) {
@@ -412,6 +504,8 @@ export const useOrders = () => {
     socketConnected,
     updateOrderStatus,
     cancelOrder,
+    assignDriver,
+    updateOrderStatusByRestaurant,
     refreshOrders,
     getSocketStatus,
     socket: socketRef.current
