@@ -291,9 +291,11 @@ export const ADDON_CATEGORY_LABELS = {
   [ADDON_CATEGORIES.DRINKS]: 'مشروبات',
   [ADDON_CATEGORIES.DESSERTS]: 'حلويات',
   [ADDON_CATEGORIES.EXTRAS]: 'إضافات أخرى'
-};
-
-// GeoJSON types - Updated to match backend
-export const GEOJSON_TYPES = {
-  POINT: 'Point'
 }; 
+
+// Promocode types (same as offer types)
+export const PROMOCODE_TYPES = {
+  PERCENTAGE: 'percentage',
+  FIXED_AMOUNT: 'fixed_amount',
+  FREE_DELIVERY: 'free_delivery'
+};

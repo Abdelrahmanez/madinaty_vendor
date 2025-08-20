@@ -8,6 +8,14 @@ import { verifyFinancialPinRequest } from '../../features/auth/api/auth';
 import TopBar from '../../components/TopBar';
 import DeliveryZonesManagementScreen from '../../features/deliveryZones/screens/DeliveryZonesManagementScreen';
 
+// Import promocodes screens
+import { 
+  PromocodesScreen,
+  CreatePromocodeScreen,
+  EditPromocodeScreen,
+  PromocodeDetailsScreen 
+} from '../../features/promocodes';
+
 const Stack = createNativeStackNavigator();
 
 const ManagementUnlockScreen = () => {
@@ -252,13 +260,6 @@ const PromoCodeManagementScreen = ({ navigation }) => {
       onPress: () => navigation.navigate('PromoCodeList'),
       color: '#2196F3'
     },
-    {
-      title: 'إحصائيات الخصم',
-      icon: 'chart-pie',
-      description: 'إحصائيات استخدام رموز الخصم',
-      onPress: () => navigation.navigate('PromoCodeStats'),
-      color: '#FF9800'
-    }
   ];
 
   return (
@@ -336,21 +337,10 @@ const ManagementNavigator = () => {
           <Stack.Screen name="ManagementDashboard" component={ManagementDashboard} />
           <Stack.Screen name="AccountsManagement" component={AccountsManagementScreen} />
           <Stack.Screen name="PromoCodeManagement" component={PromoCodeManagementScreen} />
-          <Stack.Screen name="AddPromoCode" component={() => (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <Text>إضافة رمز خصم - قيد التطوير</Text>
-            </View>
-          )} />
-          <Stack.Screen name="PromoCodeList" component={() => (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <Text>قائمة رموز الخصم - قيد التطوير</Text>
-            </View>
-          )} />
-          <Stack.Screen name="PromoCodeStats" component={() => (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <Text>إحصائيات رموز الخصم - قيد التطوير</Text>
-            </View>
-          )} />
+          <Stack.Screen name="AddPromoCode" component={CreatePromocodeScreen} />
+          <Stack.Screen name="PromoCodeList" component={PromocodesScreen} />
+          <Stack.Screen name="EditPromocode" component={EditPromocodeScreen} />
+          <Stack.Screen name="PromocodeDetails" component={PromocodeDetailsScreen} />
           <Stack.Screen name="DeliveryZonesManagement" component={DeliveryZonesManagementScreen} />
           <Stack.Screen name="DeliveryManagement" component={DeliveryManagementScreen} />
           <Stack.Screen name="FinancialReports" component={FinancialReportsScreen} />

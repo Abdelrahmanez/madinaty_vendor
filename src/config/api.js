@@ -87,7 +87,7 @@ export const API_ENDPOINTS = {
     USER_PREFERENCES: "/notifications/preferences",
   },
   PROMO_CODES: {
-    VALIDATE: "/promo-codes/validate",
+    VALIDATE: "/promocodes/validate",
   },
   BANNER_OFFERS: {
     LIST: "/banner-offers",
@@ -101,6 +101,10 @@ export const API_ENDPOINTS = {
   },
   PROMOCODE: {
     VALIDATE: "/promocodes/validate",
+    RESTAURANT_LIST: "/promocodes/restaurant",
+    RESTAURANT_CREATE: "/promocodes/restaurant",
+    RESTAURANT_UPDATE: (id) => `/promocodes/restaurant/${id}`,
+    RESTAURANT_DELETE: (id) => `/promocodes/restaurant/${id}`,
   },
   ADDONS: {
     LIST: "/addons",
