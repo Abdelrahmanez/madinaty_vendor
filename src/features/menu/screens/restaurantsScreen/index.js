@@ -15,7 +15,7 @@ import { useRestaurants } from "../../hooks/useRestaurants";
 import { useQueryFilters } from "../../hooks/useQueryFilters";
 import RestaurantsList from "../../components/restaurants/RestaurantsList";
 import LoadingIndicator from "../../../../components/LoadingIndicator";
-import  ReusableModal  from "../../../../components/ReusableModal";
+import SharedModal from "../../../../components/SharedModal";
 import RestaurantFilter from "../../components/restaurants/RestaurantFilter";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
     
@@ -88,9 +88,13 @@ const RestaurantsScreen = () => {
         <RestaurantsList data={restaurants} />
       </View>
       {/* filters modal */}
-      <ReusableModal visible={isModalVisible} onClose={() => setModalVisible(false)}>
+      <SharedModal 
+        visible={isModalVisible} 
+        title="تعديل الفلاتر"
+        onDismiss={() => setModalVisible(false)}
+      >
         <RestaurantFilter localFilters={localFilters} setLocalFilters={setLocalFilters} applyFilters={applyFilters} setModalVisible={setModalVisible} />
-      </ReusableModal>
+      </SharedModal>
     </View>
   );
 };

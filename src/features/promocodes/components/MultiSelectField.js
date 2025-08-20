@@ -6,8 +6,9 @@
 
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { useTheme, Text, Chip, Button, Portal, Modal } from 'react-native-paper';
+import { useTheme, Text, Chip, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import SharedModal from '../../../components/SharedModal';
 
 const MultiSelectField = ({
   label,
@@ -103,55 +104,11 @@ const MultiSelectField = ({
       )}
 
       {/* Selection Modal */}
-      <Portal>
-        <Modal
-          visible={showModal}
-          onDismiss={handleCancel}
-          contentContainerStyle={[
-            styles.modalContainer,
-            { backgroundColor: theme.colors.surface }
-          ]}
-        >
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: theme.colors.onSurface }]}>
-              {label}
-            </Text>
-            <Button
-              icon="close"
-              onPress={handleCancel}
-              mode="text"
-            />
-          </View>
-
-          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
-            {availableItems.map((item, index) => {
-              const isSelected = tempSelection.some(selected => selected[itemKey] === item[itemKey]);
-              return (
-                <Button
-                  key={`${item[itemKey]}-${index}`}
-                  mode={isSelected ? "contained" : "outlined"}
-                  onPress={() => handleItemToggle(item)}
-                  style={styles.itemButton}
-                  contentStyle={styles.itemButtonContent}
-                >
-                  <View style={styles.itemContent}>
-                    <MaterialCommunityIcons 
-                      name={isSelected ? "check-circle" : "circle-outline"} 
-                      size={20} 
-                      color={isSelected ? theme.colors.onPrimary : theme.colors.onSurface} 
-                    />
-                    <Text style={[
-                      styles.itemText,
-                      { color: isSelected ? theme.colors.onPrimary : theme.colors.onSurface }
-                    ]}>
-                      {item[itemLabel]}
-                    </Text>
-                  </View>
-                </Button>
-              );
-            })}
-          </ScrollView>
-
+      <SharedModal
+        visible={showModal}
+        title={label}
+        onDismiss={handleCancel}
+        footerContent={
           <View style={styles.modalActions}>
             <Button
               mode="outlined"
@@ -168,8 +125,37 @@ const MultiSelectField = ({
               تأكيد
             </Button>
           </View>
-        </Modal>
-      </Portal>
+        }
+      >
+        <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+          {availableItems.map((item, index) => {
+            const isSelected = tempSelection.some(selected => selected[itemKey] === item[itemKey]);
+            return (
+              <Button
+                key={`${item[itemKey]}-${index}`}
+                mode={isSelected ? "contained" : "outlined"}
+                onPress={() => handleItemToggle(item)}
+                style={styles.itemButton}
+                contentStyle={styles.itemButtonContent}
+              >
+                <View style={styles.itemContent}>
+                  <MaterialCommunityIcons 
+                    name={isSelected ? "check-circle" : "circle-outline"} 
+                    size={20} 
+                    color={isSelected ? theme.colors.onPrimary : theme.colors.onSurface} 
+                  />
+                  <Text style={[
+                    styles.itemText,
+                    { color: isSelected ? theme.colors.onPrimary : theme.colors.onSurface }
+                  ]}>
+                    {item[itemLabel]}
+                  </Text>
+                </View>
+              </Button>
+            );
+          })}
+        </ScrollView>
+      </SharedModal>
     </View>
   );
 };

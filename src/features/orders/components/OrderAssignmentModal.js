@@ -3,15 +3,14 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
-  Modal as RNModal
+  ActivityIndicator
 } from 'react-native';
-import { useTheme, Surface, Divider } from 'react-native-paper';
+import { useTheme, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { PrimaryButton, SecondaryButton } from '../../../components/AppButton';
+import SharedModal from '../../../components/SharedModal';
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '../../../utils/enums';
 import { formatOrderNumber, formatCurrency, formatOrderTime, transformApiOrder, getDeliveryAddress } from '../utils/orderUtils';
 import { assignDriverToOrder } from '../api/order';
@@ -182,26 +181,36 @@ const OrderAssignmentModal = ({
     );
   };
 
-  return (
-    <RNModal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onDismiss}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
-          {/* Header */}
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: theme.colors.onSurface }]}>
-              تخصيص الطلب
-            </Text>
-            <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
-              <MaterialCommunityIcons name="close" size={24} color={theme.colors.onSurface} />
-            </TouchableOpacity>
-          </View>
+  const renderFooterContent = () => (
+    <View style={styles.modalFooter}>
+      <SecondaryButton
+        mode="outlined"
+        onPress={onDismiss}
+        disabled={assigning}
+        style={styles.footerButton}
+      >
+        إلغاء
+      </SecondaryButton>
+      
+      <PrimaryButton
+        mode="contained"
+        onPress={handleAssignDriver}
+        disabled={!selectedDriver || assigning}
+        loading={assigning}
+        style={styles.footerButton}
+      >
+        تعيين السائق
+      </PrimaryButton>
+    </View>
+  );
 
-          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+  return (
+    <SharedModal
+      visible={visible}
+      title="تخصيص الطلب"
+      onDismiss={onDismiss}
+      footerContent={renderFooterContent()}
+    >
             {/* Order Information */}
             <Surface style={styles.orderInfoCard} elevation={1}>
               <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
@@ -327,32 +336,7 @@ const OrderAssignmentModal = ({
                 </SecondaryButton>
               </View>
             </View>
-          </ScrollView>
-
-          {/* Footer Actions */}
-          <View style={styles.modalFooter}>
-            <SecondaryButton
-              mode="outlined"
-              onPress={onDismiss}
-              disabled={assigning}
-              style={styles.footerButton}
-            >
-              إلغاء
-            </SecondaryButton>
-            
-            <PrimaryButton
-              mode="contained"
-              onPress={handleAssignDriver}
-              disabled={!selectedDriver || assigning}
-              loading={assigning}
-              style={styles.footerButton}
-            >
-              تعيين السائق
-            </PrimaryButton>
-          </View>
-        </View>
-      </View>
-    </RNModal>
+        </SharedModal>
   );
 };
 

@@ -9,8 +9,7 @@ import {
   View, 
   StyleSheet, 
   FlatList, 
-  TouchableOpacity,
-  Modal as RNModal
+  TouchableOpacity
 } from 'react-native';
 import { 
   useTheme, 
@@ -22,6 +21,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DriverCard from './DriverCard';
 import useDrivers from '../hooks/useDrivers';
+import SharedModal from '../../../components/SharedModal';
 import { 
   filterDrivers, 
   sortDrivers, 
@@ -124,53 +124,40 @@ const DriverSelectionModal = ({
   );
 
   return (
-    <RNModal
+    <SharedModal
       visible={visible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={onDismiss}
+      title="اختيار سائق"
+      onDismiss={onDismiss}
     >
-      <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          {/* Header */}
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>اختيار سائق</Text>
-            <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
-              <MaterialCommunityIcons name="close" size={24} color={theme.colors.onSurface} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Content */}
-          {driversLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={theme.colors.primary} />
-              <Text style={[styles.loadingText, { color: theme.colors.onSurfaceVariant }]}>
-                جاري تحميل السائقين المتاحين...
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={filteredDrivers}
-              renderItem={renderDriverCard}
-              keyExtractor={(item) => item._id || item.phoneNumber}
-              ListHeaderComponent={renderHeader}
-              ListEmptyComponent={renderEmptyState}
-              contentContainerStyle={styles.listContainer}
-              showsVerticalScrollIndicator={false}
-              refreshing={driversLoading}
-              onRefresh={refreshDrivers}
-            />
-          )}
-
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Text style={[styles.footerText, { color: theme.colors.onSurfaceVariant }]}>
-              اضغط على السائق لتخصيص الطلب له
-            </Text>
-          </View>
+      {/* Content */}
+      {driversLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={[styles.loadingText, { color: theme.colors.onSurfaceVariant }]}>
+            جاري تحميل السائقين المتاحين...
+          </Text>
         </View>
+      ) : (
+        <FlatList
+          data={filteredDrivers}
+          renderItem={renderDriverCard}
+          keyExtractor={(item) => item._id || item.phoneNumber}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={renderEmptyState}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          refreshing={driversLoading}
+          onRefresh={refreshDrivers}
+        />
+      )}
+
+      {/* Footer */}
+      <View style={styles.footer}>
+        <Text style={[styles.footerText, { color: theme.colors.onSurfaceVariant }]}>
+          اضغط على السائق لتخصيص الطلب له
+        </Text>
       </View>
-    </RNModal>
+    </SharedModal>
   );
 };
 

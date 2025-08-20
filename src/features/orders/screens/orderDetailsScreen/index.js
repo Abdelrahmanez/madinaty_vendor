@@ -16,7 +16,6 @@ import {
   Surface,
   Button,
   Divider,
-  Modal,
   Portal,
   IconButton
 } from 'react-native-paper';
@@ -28,6 +27,7 @@ import axiosInstance from '../../../../services/axios';
 import { API_ENDPOINTS } from '../../../../config/api';
 import useStyles from './styles';
 import { OrderStatus, StatusColors } from '../../../../utils/enums';
+import SharedModal from '../../../../components/SharedModal';
 
 // مكون لعرض حالة الطلب
 const OrderStatusChip = ({ status, styles, theme }) => {
@@ -735,39 +735,19 @@ const OrderDetailsScreen = ({ route, navigation }) => {
       </ScrollView>
       
       {/* نافذة الفاتورة */}
-      <Portal>
-        <Modal 
-          visible={showReceipt} 
-          onDismiss={() => setShowReceipt(false)}
-          contentContainerStyle={{ 
-            margin: 24, 
-            backgroundColor: theme.colors.background,
-            borderRadius: 12,
-            maxHeight: '80%'
-          }}
-        >
-          <ScrollView>
-            <View style={{ padding: 16 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.onSurface }}>
-                  {t('orderDetailsScreen.receipt')}
-                </Text>
-                <IconButton 
-                  icon="close" 
-                  size={24} 
-                  onPress={() => setShowReceipt(false)} 
-                />
-              </View>
-              <OrderReceipt 
-                order={order} 
-                t={t} 
-                styles={styles} 
-                theme={theme} 
-              />
-            </View>
-          </ScrollView>
-        </Modal>
-      </Portal>
+      <SharedModal
+        visible={showReceipt}
+        title={t('orderDetailsScreen.receipt')}
+        onDismiss={() => setShowReceipt(false)}
+        height={80}
+      >
+        <OrderReceipt 
+          order={order} 
+          t={t} 
+          styles={styles} 
+          theme={theme} 
+        />
+      </SharedModal>
       
       {/* الأزرار السفلية */}
       {actionButtons.length > 0 && (

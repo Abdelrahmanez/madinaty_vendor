@@ -9,8 +9,7 @@ import {
   View, 
   StyleSheet, 
   ScrollView, 
-  TouchableOpacity,
-  Modal as RNModal
+  TouchableOpacity
 } from 'react-native';
 import { 
   useTheme, 
@@ -21,6 +20,7 @@ import {
   TextInput
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import SharedModal from '../../../components/SharedModal';
 
 const DriverFilters = ({ 
   filters, 
@@ -102,24 +102,31 @@ const DriverFilters = ({
       </Button>
 
       {/* Filter Modal */}
-      <RNModal
+      <SharedModal
         visible={visible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={onDismiss}
+        title="فلاتر السائقين"
+        onDismiss={onDismiss}
+        footerContent={
+          <View style={styles.actionsContainer}>
+            <Button
+              mode="outlined"
+              onPress={clearFilters}
+              style={[styles.actionButton, styles.clearButton]}
+              textColor={theme.colors.error}
+            >
+              مسح الكل
+            </Button>
+            <Button
+              mode="contained"
+              onPress={applyFilters}
+              style={[styles.actionButton, styles.applyButton]}
+            >
+              تطبيق الفلاتر
+            </Button>
+          </View>
+        }
       >
-        <View style={styles.overlay}>
-          <View style={styles.modalContainer}>
-            {/* Header */}
-            <View style={styles.header}>
-              <Text style={styles.title}>فلاتر السائقين</Text>
-              <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
-                <MaterialCommunityIcons name="close" size={24} color={theme.colors.onSurface} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Content */}
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
               {/* Search Section */}
               <View style={styles.section}>
                 <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>🔍 البحث</Text>
@@ -176,29 +183,8 @@ const DriverFilters = ({
                   />
                 </ScrollView>
               </View>
-            </ScrollView>
-
-            {/* Action Buttons */}
-            <View style={styles.actionsContainer}>
-              <Button
-                mode="outlined"
-                onPress={clearFilters}
-                style={[styles.actionButton, styles.clearButton]}
-                textColor={theme.colors.error}
-              >
-                مسح الكل
-              </Button>
-              <Button
-                mode="contained"
-                onPress={applyFilters}
-                style={[styles.actionButton, styles.applyButton]}
-              >
-                تطبيق الفلاتر
-              </Button>
-            </View>
-          </View>
-        </View>
-      </RNModal>
+        </ScrollView>
+      </SharedModal>
     </>
   );
 };

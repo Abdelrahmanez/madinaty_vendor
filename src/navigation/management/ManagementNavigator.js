@@ -22,6 +22,9 @@ import { DriversManagementScreen } from '../../features/delivery';
 // Import order assignment screen
 import OrderAssignmentScreen from '../../features/orders/screens/OrderAssignmentScreen';
 
+// Import restaurant management screen
+import RestaurantManagementScreen from '../../features/restaurant/screens/RestaurantManagementScreen';
+
 const Stack = createNativeStackNavigator();
 
 const ManagementUnlockScreen = () => {
@@ -139,6 +142,13 @@ const ManagementDashboard = ({ navigation }) => {
   const { lockManagement } = useManagementStore();
 
   const managementFeatures = [
+    {
+      title: 'إدارة المطعم',
+      icon: 'store',
+      description: 'إدارة معلومات المطعم والإعدادات',
+      onPress: () => navigation.navigate('RestaurantManagement'),
+      color: '#00BCD4'
+    },
     {
       title: 'إدارة الحسابات',
       icon: 'account-group',
@@ -408,6 +418,7 @@ const ManagementNavigator = () => {
           <Stack.Screen name="PromoCodeList" component={PromocodesScreen} />
           <Stack.Screen name="EditPromocode" component={EditPromocodeScreen} />
           <Stack.Screen name="PromocodeDetails" component={PromocodeDetailsScreen} />
+          <Stack.Screen name="RestaurantManagement" component={RestaurantManagementScreen} />
           <Stack.Screen name="DeliveryZonesManagement" component={DeliveryZonesManagementScreen} />
           <Stack.Screen name="DeliveryManagement" component={DeliveryManagementScreen} />
           <Stack.Screen name="DriversManagement" component={DriversManagementScreen} />

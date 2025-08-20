@@ -6,8 +6,7 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Alert,
-  Linking,
-  Modal as RNModal
+  Linking
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from 'react-native-paper';
@@ -32,6 +31,7 @@ import {
   getDeliveryAddress
 } from '../utils/orderUtils';
 import { PrimaryButton, SecondaryButton } from '../../../components/AppButton';
+import SharedModal from '../../../components/SharedModal';
 
 /**
  * OrderDetailsModal Component
@@ -326,24 +326,12 @@ const OrderDetailsModal = ({
   };
 
   return (
-    <RNModal
+    <SharedModal
       visible={visible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={onDismiss}
+      title="تفاصيل الطلب"
+      onDismiss={onDismiss}
     >
-      <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>تفاصيل الطلب</Text>
-            <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
-              <MaterialCommunityIcons name="close" size={24} color={theme.colors.onSurface} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Content */}
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
             {/* Order Info - Most Important */}
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>📋 معلومات الطلب الأساسية</Text>
@@ -504,9 +492,7 @@ const OrderDetailsModal = ({
               </SecondaryButton>
             )}
           </View>
-        </View>
-      </View>
-    </RNModal>
+      </SharedModal>
   );
 };
 

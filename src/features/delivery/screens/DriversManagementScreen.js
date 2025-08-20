@@ -10,7 +10,6 @@ import {
   StyleSheet, 
   FlatList, 
   Alert,
-  Modal as RNModal,
   TouchableOpacity
 } from 'react-native';
 import { 
@@ -27,6 +26,7 @@ import TopBar from '../../../components/TopBar';
 import DriverCard from '../components/DriverCard';
 import DriverFilters from '../components/DriverFilters';
 import useDrivers from '../hooks/useDrivers';
+import SharedModal from '../../../components/SharedModal';
 import { 
   filterDrivers, 
   sortDrivers, 
@@ -228,66 +228,47 @@ const DriversManagementScreen = ({ navigation }) => {
       )}
 
       {/* Add Driver Modal */}
-      <RNModal
+      <SharedModal
         visible={showAddDriverModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowAddDriverModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            {/* Header */}
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>إضافة سائق جديد</Text>
-              <TouchableOpacity 
-                onPress={() => setShowAddDriverModal(false)}
-                style={styles.modalCloseButton}
-              >
-                <MaterialCommunityIcons name="close" size={24} color={theme.colors.onSurface} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Content */}
-            <View style={styles.modalContent}>
-              <Text style={[styles.modalDescription, { color: theme.colors.onSurfaceVariant }]}>
-                أدخل رقم هاتف السائق لإضافته للمطعم
-              </Text>
-              
-              <TextInput
-                label="رقم الهاتف"
-                value={newDriverPhone}
-                onChangeText={setNewDriverPhone}
-                mode="outlined"
-                style={styles.phoneInput}
-                keyboardType="phone-pad"
-                placeholder="مثال: 01012345678"
-                left={<TextInput.Icon icon="phone" />}
-              />
-            </View>
-
-            {/* Action Buttons */}
-            <View style={styles.modalActions}>
-              <Button
-                mode="outlined"
-                onPress={() => setShowAddDriverModal(false)}
-                style={[styles.modalButton, styles.cancelButton]}
-                disabled={addingDriver}
-              >
-                إلغاء
-              </Button>
-              <Button
-                mode="contained"
-                onPress={handleAddDriver}
-                loading={addingDriver}
-                disabled={addingDriver || !newDriverPhone.trim()}
-                style={[styles.modalButton, styles.addButton]}
-              >
-                {addingDriver ? 'جاري الإضافة...' : 'إضافة'}
-              </Button>
-            </View>
+        title="إضافة سائق جديد"
+        onDismiss={() => setShowAddDriverModal(false)}
+        footerContent={
+          <View style={styles.modalActions}>
+            <Button
+              mode="outlined"
+              onPress={() => setShowAddDriverModal(false)}
+              style={[styles.modalButton, styles.cancelButton]}
+              disabled={addingDriver}
+            >
+              إلغاء
+            </Button>
+            <Button
+              mode="contained"
+              onPress={handleAddDriver}
+              loading={addingDriver}
+              disabled={addingDriver || !newDriverPhone.trim()}
+              style={[styles.modalButton, styles.addButton]}
+            >
+              {addingDriver ? 'جاري الإضافة...' : 'إضافة'}
+            </Button>
           </View>
-        </View>
-      </RNModal>
+        }
+      >
+        <Text style={[styles.modalDescription, { color: theme.colors.onSurfaceVariant }]}>
+          أدخل رقم هاتف السائق لإضافته للمطعم
+        </Text>
+        
+        <TextInput
+          label="رقم الهاتف"
+          value={newDriverPhone}
+          onChangeText={setNewDriverPhone}
+          mode="outlined"
+          style={styles.phoneInput}
+          keyboardType="phone-pad"
+          placeholder="مثال: 01012345678"
+          left={<TextInput.Icon icon="phone" />}
+        />
+      </SharedModal>
     </View>
   );
 };

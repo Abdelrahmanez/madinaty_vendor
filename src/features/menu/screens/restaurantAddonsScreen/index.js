@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Keyboard, KeyboardAvoidingView, Platform, Modal as RNModal } from 'react-native';
+import { View, StyleSheet, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { useTheme, Text, Appbar, Snackbar } from 'react-native-paper';
 import { useAddons } from '../../hooks/useAddons';
 import { AddonList, AddonForm } from '../../components';
 import { createRestaurantAddon, updateRestaurantAddon, deleteRestaurantAddon } from '../../api/addons';
 import useRestaurantStore from '../../../../stores/restaurantStore';
 import { Alert } from 'react-native';
+import SharedModal from '../../../../components/SharedModal';
 
 const RestaurantAddonsScreen = ({ navigation }) => {
   const theme = useTheme();
@@ -154,33 +155,26 @@ const RestaurantAddonsScreen = ({ navigation }) => {
       />
 
       {/* Addon Form Modal */}
-      <RNModal
+      <SharedModal
         visible={showAddonForm}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={handleCancelForm}
+        title={editingAddon ? "تعديل الإضافة" : "إضافة جديدة"}
+        onDismiss={handleCancelForm}
+        height={keyboardVisible ? 75 : 85}
       >
-        <View style={styles.overlay}>
-          <View style={[
-            styles.modalContainer,
-            keyboardVisible && styles.modalContainerKeyboardVisible
-          ]}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.keyboardAvoidingView}
-              keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-            >
-              <AddonForm
-                addon={editingAddon}
-                onSave={handleSaveAddon}
-                onCancel={handleCancelForm}
-                loading={formLoading}
-                isEditing={!!editingAddon}
-              />
-            </KeyboardAvoidingView>
-          </View>
-        </View>
-      </RNModal>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoidingView}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
+          <AddonForm
+            addon={editingAddon}
+            onSave={handleSaveAddon}
+            onCancel={handleCancelForm}
+            loading={formLoading}
+            isEditing={!!editingAddon}
+          />
+        </KeyboardAvoidingView>
+      </SharedModal>
 
       {/* Snackbar for feedback */}
       <Snackbar
