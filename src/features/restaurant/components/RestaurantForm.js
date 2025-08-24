@@ -133,26 +133,49 @@ const RestaurantForm = ({
       // Create FormData for multipart/form-data submission
       const formDataToSend = new FormData();
       
+      // Add basic restaurant data
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('phoneNumber', formData.phoneNumber);
+      
+      // Add address data
       formDataToSend.append('address[street]', formData.address.street);
       formDataToSend.append('address[notes]', formData.address.notes);
       
-      // Add image if selected - following the same pattern as dish upload
+      // Add image if selected - this is the key part for the backend
       if (formData.image && formData.image.uri) {
-        formDataToSend.append('image', {
+        console.log('📸 Adding image to FormData:', formData.image);
+        // Create the file object correctly for React Native
+        const imageFile = {
           uri: formData.image.uri,
           type: formData.image.type || 'image/jpeg',
           name: formData.image.name || 'restaurant-image.jpg'
-        });
+        };
+        formDataToSend.append('image', imageFile);
+        console.log('📸 Image file object created:', imageFile);
+      } else {
+        console.log('⚠️ No image selected for upload');
       }
       
       // Add categories
-      formData.categories.forEach(categoryId => {
-        formDataToSend.append('categories[]', categoryId);
-      });
+      if (formData.categories && formData.categories.length > 0) {
+        formData.categories.forEach(categoryId => {
+          formDataToSend.append('categories[]', categoryId);
+        });
+      }
 
+      console.log('📤 Submitting FormData with fields:', Array.from(formDataToSend._parts || []).map(part => part[0]));
+      console.log('📤 FormData content type will be: multipart/form-data');
+      
+      // Debug: Check if image is properly added to FormData
+      const formDataEntries = Array.from(formDataToSend._parts || []);
+      const imageEntry = formDataEntries.find(entry => entry[0] === 'image');
+      if (imageEntry) {
+        console.log('📸 Image entry found in FormData:', imageEntry[0], typeof imageEntry[1], imageEntry[1]);
+      } else {
+        console.log('⚠️ No image entry found in FormData');
+      }
+      
       await onSubmit(formDataToSend);
     } catch (error) {
       console.error('Error submitting form:', error);

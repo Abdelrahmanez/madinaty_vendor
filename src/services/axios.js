@@ -176,7 +176,9 @@ axiosInstance.interceptors.request.use(request => {
   console.log('🧩 ترويسات الطلب:', JSON.stringify(request.headers));
   
   // التأكد من أن Content-Type مضبوط بشكل صحيح لطلبات POST
-  if (request.method === 'post' || request.method === 'put' || request.method === 'patch') {
+  // لكن لا نعيد تعيينه إذا كان FormData (multipart/form-data)
+  if ((request.method === 'post' || request.method === 'put' || request.method === 'patch') && 
+      !request.headers["Content-Type"]?.includes('multipart/form-data')) {
     request.headers["Content-Type"] = "application/json";
   }
   
