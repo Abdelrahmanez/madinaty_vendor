@@ -40,6 +40,7 @@ export const calculateOrderTotal = (items) => {
  * @returns {string} Customer name
  */
 export const getCustomerName = (user) => {
+  console.log('User:', user?.name);
   if (!user) return 'عميل مجهول';
   const name = user.name?.toString().trim();
   return name?.length ? name : 'عميل مجهول';

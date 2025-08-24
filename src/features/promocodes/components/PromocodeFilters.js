@@ -2,9 +2,16 @@
  * PromocodeFilters Component
  * --------------------------------------------
  * مكون فلاتر أكواد الخصم
+ * 
+ * Features:
+ * - Advanced filtering for promocodes
+ * - Date range selection
+ * - Status and type filtering
+ * - Search functionality
+ * - Responsive design
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   View, 
   StyleSheet, 
@@ -23,7 +30,176 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { PROMOCODE_TYPES } from '../../../utils/enums';
 import SharedModal from '../../../components/SharedModal';
+import { FILTER_OPTIONS, DEFAULT_FILTERS } from '../constants/filterConstants';
+import { formatDate, getActiveFiltersCount } from '../utils/filterUtils';
 
+/**
+ * Custom hook for managing filter state
+ */
+const useFilterState = (initialFilters) => {
+  const [localFilters, setLocalFilters] = useState(initialFilters);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+
+  // Synchronize local filters with external filters
+  useEffect(() => {
+    setLocalFilters(initialFilters);
+  }, [initialFilters]);
+
+  const updateLocalFilters = useCallback((key, value) => {
+    setLocalFilters(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const clearFilters = useCallback(() => {
+    setLocalFilters(DEFAULT_FILTERS);
+  }, []);
+
+  return {
+    localFilters,
+    showStartDatePicker,
+    showEndDatePicker,
+    setShowStartDatePicker,
+    setShowEndDatePicker,
+    updateLocalFilters,
+    clearFilters
+  };
+};
+
+/**
+ * Utility functions are now imported from filterUtils.js
+ */
+
+/**
+ * Filter Section Component
+ */
+const FilterSection = React.memo(({ title, options, value, onValueChange, themedStyles }) => (
+  <View style={styles.section}>
+    <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>
+      {title}
+    </Text>
+    <ScrollView 
+      horizontal 
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.segmentedButtonsContainer}
+    >
+      <SegmentedButtons
+        value={value}
+        onValueChange={onValueChange}
+        buttons={options}
+        style={styles.segmentedButtons}
+        buttonStyle={styles.segmentedButton}
+        labelStyle={styles.segmentedButtonLabel}
+      />
+    </ScrollView>
+  </View>
+));
+
+/**
+ * Date Range Section Component
+ */
+const DateRangeSection = React.memo(({ 
+  startDate, 
+  endDate, 
+  onStartDatePress, 
+  onEndDatePress, 
+  themedStyles 
+}) => (
+  <View style={styles.section}>
+    <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>
+      📅 نطاق التاريخ
+    </Text>
+    
+    <View style={styles.twoColumnRow}>
+      <View style={styles.infoColumn}>
+        <Text style={styles.infoLabel}>من تاريخ:</Text>
+        <TouchableOpacity 
+          onPress={onStartDatePress}
+          style={styles.dateButton}
+        >
+          <Text style={[styles.infoValue, themedStyles.infoValue]}>
+            {formatDate(startDate)}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.infoColumn}>
+        <Text style={styles.infoLabel}>إلى تاريخ:</Text>
+        <TouchableOpacity 
+          onPress={onEndDatePress}
+          style={styles.dateButton}
+        >
+          <Text style={[styles.infoValue, themedStyles.infoValue]}>
+            {formatDate(endDate)}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+));
+
+/**
+ * Date Picker Component
+ */
+const DatePickerModal = React.memo(({ 
+  visible, 
+  title, 
+  value, 
+  onClose, 
+  onDateChange, 
+  theme 
+}) => {
+  if (!visible) return null;
+
+  return (
+    <View style={styles.datePickerOverlay}>
+      <View style={styles.datePickerContainer}>
+        <View style={styles.datePickerHeader}>
+          <Text style={styles.datePickerTitle}>{title}</Text>
+          <TouchableOpacity onPress={onClose}>
+            <MaterialCommunityIcons name="close" size={24} color={theme.colors.onSurface} />
+          </TouchableOpacity>
+        </View>
+        <DateTimePicker
+          value={value || new Date()}
+          mode="date"
+          onChange={(event, selectedDate) => {
+            onClose();
+            if (selectedDate) {
+              onDateChange(selectedDate);
+            }
+          }}
+        />
+      </View>
+    </View>
+  );
+});
+
+/**
+ * Search Section Component
+ */
+const SearchSection = React.memo(({ 
+  searchText, 
+  onSearchChange, 
+  themedStyles 
+}) => (
+  <View style={styles.section}>
+    <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>
+      🔍 البحث
+    </Text>
+    <TextInput
+      label="البحث في الكود أو الوصف"
+      value={searchText}
+      onChangeText={onSearchChange}
+      mode="outlined"
+      style={styles.input}
+      left={<TextInput.Icon icon="magnify" />}
+    />
+  </View>
+));
+
+/**
+ * Main Component
+ */
 const PromocodeFilters = ({ 
   filters, 
   onFiltersChange, 
@@ -33,99 +209,65 @@ const PromocodeFilters = ({
 }) => {
   const theme = useTheme();
   
-  const [localFilters, setLocalFilters] = useState(filters);
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  // Use custom hook for state management
+  const {
+    localFilters,
+    showStartDatePicker,
+    showEndDatePicker,
+    setShowStartDatePicker,
+    setShowEndDatePicker,
+    updateLocalFilters,
+    clearFilters
+  } = useFilterState(filters);
 
-  const statusOptions = [
-    { value: 'all', label: 'الكل' },
-    { value: 'active', label: 'مفعل' },
-    { value: 'inactive', label: 'غير مفعل' },
-    { value: 'expired', label: 'منتهي الصلاحية' },
-    { value: 'not_started', label: 'لم يبدأ بعد' },
-    { value: 'usage_limit_reached', label: 'تم استنفاذ الحد' }
-  ];
-
-  const typeOptions = [
-    { value: 'all', label: 'الكل' },
-    { value: PROMOCODE_TYPES.PERCENTAGE, label: 'نسبة مئوية' },
-    { value: PROMOCODE_TYPES.FIXED_AMOUNT, label: 'مبلغ ثابت' },
-    { value: PROMOCODE_TYPES.FREE_DELIVERY, label: 'توصيل مجاني' }
-  ];
-
-  const appliesToOptions = [
-    { value: 'all', label: 'الكل' },
-    { value: 'all_orders', label: 'جميع الطلبات' },
-    { value: 'specific_categories', label: 'فئات محددة' },
-    { value: 'specific_items', label: 'عناصر محددة' }
-  ];
-
-  const updateLocalFilters = (key, value) => {
-    setLocalFilters(prev => ({ ...prev, [key]: value }));
-  };
-
-  const applyFilters = () => {
-    onFiltersChange(localFilters);
-    onDismiss();
-  };
-
-  const clearFilters = () => {
-    const clearedFilters = {
-      status: 'all',
-      type: 'all',
-      appliesTo: 'all',
-      searchText: '',
-      startDate: null,
-      endDate: null
-    };
-    setLocalFilters(clearedFilters);
-    onClearFilters();
-    onDismiss();
-  };
-
-  const formatDate = (date) => {
-    if (!date) return 'غير محدد';
-    return date.toLocaleDateString('ar-EG', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const getActiveFiltersCount = () => {
-    let count = 0;
-    if (filters.status !== 'all') count++;
-    if (filters.type !== 'all') count++;
-    if (filters.appliesTo !== 'all') count++;
-    if (filters.searchText) count++;
-    if (filters.startDate) count++;
-    if (filters.endDate) count++;
-    return count;
-  };
-
-  // Generate themed styles
-  const themedStyles = {
+  // Memoized themed styles for performance
+  const themedStyles = useMemo(() => ({
     sectionTitle: { color: theme.colors.primary },
     infoValue: { color: theme.colors.primary },
-  };
+  }), [theme.colors.primary]);
+
+  // Memoized active filters count
+  const activeFiltersCount = useMemo(() => 
+    getActiveFiltersCount(filters), [filters]
+  );
+
+  // Event handlers
+  const handleApplyFilters = useCallback(() => {
+    onFiltersChange(localFilters);
+    onDismiss();
+  }, [localFilters, onFiltersChange, onDismiss]);
+
+  const handleClearFilters = useCallback(() => {
+    clearFilters();
+    onClearFilters();
+    onDismiss();
+  }, [clearFilters, onClearFilters, onDismiss]);
+
+  const handleDateChange = useCallback((dateType, selectedDate) => {
+    if (selectedDate) {
+      updateLocalFilters(dateType, selectedDate);
+    }
+    setShowStartDatePicker(false);
+    setShowEndDatePicker(false);
+  }, [updateLocalFilters, setShowStartDatePicker, setShowEndDatePicker]);
 
   return (
     <>
       {/* Filter Button */}
       <Button
         mode="outlined"
-        onPress={() => onDismiss()}
+        onPress={onDismiss}
         icon="filter-variant"
         style={styles.filterButton}
         contentStyle={styles.filterButtonContent}
       >
         فلاتر
-        {getActiveFiltersCount() > 0 && (
+        {activeFiltersCount > 0 && (
           <Chip 
             style={styles.filterChip} 
             textStyle={styles.filterChipText}
           >
-            {getActiveFiltersCount()}
+            {activeFiltersCount}
           </Chip>
         )}
       </Button>
@@ -139,7 +281,7 @@ const PromocodeFilters = ({
           <View style={styles.actionsContainer}>
             <Button
               mode="outlined"
-              onPress={clearFilters}
+              onPress={handleClearFilters}
               style={[styles.actionButton, styles.clearButton]}
               textColor={theme.colors.error}
             >
@@ -147,7 +289,7 @@ const PromocodeFilters = ({
             </Button>
             <Button
               mode="contained"
-              onPress={applyFilters}
+              onPress={handleApplyFilters}
               style={[styles.actionButton, styles.applyButton]}
             >
               تطبيق الفلاتر
@@ -156,184 +298,67 @@ const PromocodeFilters = ({
         }
       >
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-              {/* Search Section */}
-              <View style={styles.section}>
-                <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>🔍 البحث</Text>
-                <TextInput
-                  label="البحث في الكود أو الوصف"
-                  value={localFilters.searchText}
-                  onChangeText={(text) => updateLocalFilters('searchText', text)}
-                  mode="outlined"
-                  style={styles.input}
-                  left={<TextInput.Icon icon="magnify" />}
-                />
-              </View>
+          <SearchSection 
+            searchText={localFilters.searchText}
+            onSearchChange={(text) => updateLocalFilters('searchText', text)}
+            themedStyles={themedStyles}
+          />
+          <View style={styles.sectionSeparator} />
+          
+          <FilterSection 
+            title="📊 الحالة"
+            options={FILTER_OPTIONS.status}
+            value={localFilters.status}
+            onValueChange={(value) => updateLocalFilters('status', value)}
+            themedStyles={themedStyles}
+          />
+          <View style={styles.sectionSeparator} />
+          
+          <FilterSection 
+            title="🎫 نوع الخصم"
+            options={FILTER_OPTIONS.type}
+            value={localFilters.type}
+            onValueChange={(value) => updateLocalFilters('type', value)}
+            themedStyles={themedStyles}
+          />
+          <View style={styles.sectionSeparator} />
+          
+          <FilterSection 
+            title="🎯 ينطبق على"
+            options={FILTER_OPTIONS.appliesTo}
+            value={localFilters.appliesTo}
+            onValueChange={(value) => updateLocalFilters('appliesTo', value)}
+            themedStyles={themedStyles}
+          />
+          <View style={styles.sectionSeparator} />
+          
+          <DateRangeSection 
+            startDate={localFilters.startDate}
+            endDate={localFilters.endDate}
+            onStartDatePress={() => setShowStartDatePicker(true)}
+            onEndDatePress={() => setShowEndDatePicker(true)}
+            themedStyles={themedStyles}
+          />
+        </ScrollView>
 
-              {/* Separator */}
-              <View style={styles.sectionSeparator} />
+        {/* Date Pickers */}
+        <DatePickerModal 
+          visible={showStartDatePicker}
+          title="اختر تاريخ البداية"
+          value={localFilters.startDate}
+          onClose={() => setShowStartDatePicker(false)}
+          onDateChange={(date) => handleDateChange('startDate', date)}
+          theme={theme}
+        />
 
-              {/* Status Filter */}
-              <View style={styles.section}>
-                <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>📊 الحالة</Text>
-                <ScrollView 
-                  horizontal 
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.segmentedButtonsContainer}
-                >
-                  <SegmentedButtons
-                    value={localFilters.status}
-                    onValueChange={(value) => updateLocalFilters('status', value)}
-                    buttons={statusOptions}
-                    style={styles.segmentedButtons}
-                    buttonStyle={styles.segmentedButton}
-                    labelStyle={styles.segmentedButtonLabel}
-                  />
-                </ScrollView>
-              </View>
-
-              {/* Separator */}
-              <View style={styles.sectionSeparator} />
-
-              {/* Type Filter */}
-              <View style={styles.section}>
-                <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>🎫 نوع الخصم</Text>
-                <ScrollView 
-                  horizontal 
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.segmentedButtonsContainer}
-                >
-                  <SegmentedButtons
-                    value={localFilters.type}
-                    onValueChange={(value) => updateLocalFilters('type', value)}
-                    buttons={typeOptions}
-                    style={styles.segmentedButtons}
-                    buttonStyle={styles.segmentedButton}
-                    labelStyle={styles.segmentedButtonLabel}
-                  />
-                </ScrollView>
-              </View>
-
-              {/* Separator */}
-              <View style={styles.sectionSeparator} />
-
-              {/* Applies To Filter */}
-              <View style={styles.section}>
-                <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>🎯 ينطبق على</Text>
-                <ScrollView 
-                  horizontal 
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.segmentedButtonsContainer}
-                >
-                  <SegmentedButtons
-                    value={localFilters.appliesTo}
-                    onValueChange={(value) => updateLocalFilters('appliesTo', value)}
-                    buttons={appliesToOptions}
-                    style={styles.segmentedButtons}
-                    buttonStyle={styles.segmentedButton}
-                    labelStyle={styles.segmentedButtonLabel}
-                  />
-                </ScrollView>
-              </View>
-
-              {/* Separator */}
-              <View style={styles.sectionSeparator} />
-
-              {/* Date Range */}
-              <View style={styles.section}>
-                <Text style={[styles.sectionTitle, themedStyles.sectionTitle]}>📅 نطاق التاريخ</Text>
-                
-                <View style={styles.twoColumnRow}>
-                  <View style={styles.infoColumn}>
-                    <Text style={styles.infoLabel}>من تاريخ:</Text>
-                    <TouchableOpacity 
-                      onPress={() => setShowStartDatePicker(true)}
-                      style={styles.dateButton}
-                    >
-                      <Text style={[styles.infoValue, themedStyles.infoValue]}>
-                        {formatDate(localFilters.startDate)}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  
-                  <View style={styles.infoColumn}>
-                    <Text style={styles.infoLabel}>إلى تاريخ:</Text>
-                    <TouchableOpacity 
-                      onPress={() => setShowEndDatePicker(true)}
-                      style={styles.dateButton}
-                    >
-                      <Text style={[styles.infoValue, themedStyles.infoValue]}>
-                        {formatDate(localFilters.endDate)}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </ScrollView>
-
-            {/* Action Buttons */}
-            <View style={styles.actionsContainer}>
-              <Button
-                mode="outlined"
-                onPress={clearFilters}
-                style={[styles.actionButton, styles.clearButton]}
-                textColor={theme.colors.error}
-              >
-                مسح الكل
-              </Button>
-              <Button
-                mode="contained"
-                onPress={applyFilters}
-                style={[styles.actionButton, styles.applyButton]}
-              >
-                تطبيق الفلاتر
-              </Button>
-            </View>
-        {/* Date Pickers - Inside Modal */}
-        {showStartDatePicker && (
-          <View style={styles.datePickerOverlay}>
-            <View style={styles.datePickerContainer}>
-              <View style={styles.datePickerHeader}>
-                <Text style={styles.datePickerTitle}>اختر تاريخ البداية</Text>
-                <TouchableOpacity onPress={() => setShowStartDatePicker(false)}>
-                  <MaterialCommunityIcons name="close" size={24} color={theme.colors.onSurface} />
-                </TouchableOpacity>
-              </View>
-              <DateTimePicker
-                value={localFilters.startDate || new Date()}
-                mode="date"
-                onChange={(event, selectedDate) => {
-                  setShowStartDatePicker(false);
-                  if (selectedDate) {
-                    updateLocalFilters('startDate', selectedDate);
-                  }
-                }}
-              />
-            </View>
-          </View>
-        )}
-
-        {showEndDatePicker && (
-          <View style={styles.datePickerOverlay}>
-            <View style={styles.datePickerContainer}>
-              <View style={styles.datePickerHeader}>
-                <Text style={styles.datePickerTitle}>اختر تاريخ النهاية</Text>
-                <TouchableOpacity onPress={() => setShowEndDatePicker(false)}>
-                  <MaterialCommunityIcons name="close" size={24} color={theme.colors.onSurface} />
-                </TouchableOpacity>
-              </View>
-              <DateTimePicker
-                value={localFilters.endDate || new Date()}
-                mode="date"
-                onChange={(event, selectedDate) => {
-                  setShowEndDatePicker(false);
-                  if (selectedDate) {
-                    updateLocalFilters('endDate', selectedDate);
-                  }
-                }}
-              />
-            </View>
-          </View>
-        )}
+        <DatePickerModal 
+          visible={showEndDatePicker}
+          title="اختر تاريخ النهاية"
+          value={localFilters.endDate}
+          onClose={() => setShowEndDatePicker(false)}
+          onDateChange={(date) => handleDateChange('endDate', date)}
+          theme={theme}
+        />
       </SharedModal>
     </>
   );

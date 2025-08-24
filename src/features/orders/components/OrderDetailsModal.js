@@ -47,6 +47,7 @@ const OrderDetailsModal = ({
   const [updating, setUpdating] = useState(false);
   const theme = useTheme();
 
+
   if (!order) return null;
 
   const transformedOrder = transformApiOrder(order);
@@ -369,6 +370,9 @@ const OrderDetailsModal = ({
                   </View>
                 </View>
               )}
+              {
+                console.log('Transformed Order Customer Name:', transformedOrder)
+              }
             </View>
 
             {/* Separator */}

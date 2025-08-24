@@ -23,7 +23,7 @@ import PromocodeCard from '../components/PromocodeCard';
 import PromocodeFilters from '../components/PromocodeFilters';
 
 import usePromocodes from '../hooks/usePromocodes';
-import { filterPromocodes, getDefaultFilters, hasActiveFilters, getFilterSummary } from '../utils/filterUtils';
+import { applyFilters, resetFilters, isEmptyFilters, getFilterSummary } from '../utils/filterUtils';
 
 const PromocodesScreen = ({ navigation }) => {
   const theme = useTheme();
@@ -41,12 +41,12 @@ const PromocodesScreen = ({ navigation }) => {
   } = usePromocodes();
 
   // Filter state
-  const [filters, setFilters] = useState(getDefaultFilters());
+  const [filters, setFilters] = useState(resetFilters());
   const [showFilters, setShowFilters] = useState(false);
 
   // Filtered promocodes
   const filteredPromocodes = useMemo(() => {
-    return filterPromocodes(promocodes, filters);
+    return applyFilters(promocodes, filters);
   }, [promocodes, filters]);
 
   // These functions are no longer needed since we're using separate screens
@@ -101,7 +101,7 @@ const PromocodesScreen = ({ navigation }) => {
   };
 
   const handleClearFilters = () => {
-    setFilters(getDefaultFilters());
+    setFilters(resetFilters());
   };
 
   const renderPromocodeCard = ({ item }) => (
@@ -125,13 +125,13 @@ const PromocodesScreen = ({ navigation }) => {
         styles.emptyStateText, 
         { color: theme.colors.onSurfaceVariant }
       ]}>
-        {hasActiveFilters(filters) ? 'لا توجد نتائج للفلاتر المطبقة' : 'لا توجد أكواد خصم'}
+        {!isEmptyFilters(filters) ? 'لا توجد نتائج للفلاتر المطبقة' : 'لا توجد أكواد خصم'}
       </Text>
       <Text style={[
         styles.emptyStateSubtext, 
         { color: theme.colors.onSurfaceVariant }
       ]}>
-        {hasActiveFilters(filters) ? 'جرب تغيير الفلاتر أو مسحها' : 'اضغط على + لإنشاء كود خصم جديد'}
+        {!isEmptyFilters(filters) ? 'جرب تغيير الفلاتر أو مسحها' : 'اضغط على + لإنشاء كود خصم جديد'}
       </Text>
     </View>
   );
@@ -152,7 +152,7 @@ const PromocodesScreen = ({ navigation }) => {
       />
 
       {/* Filter Summary */}
-      {hasActiveFilters(filters) && (
+      {!isEmptyFilters(filters) && (
         <View style={[styles.filterSummary, { backgroundColor: theme.colors.surfaceVariant }]}>
           <Text style={[styles.filterSummaryText, { color: theme.colors.onSurfaceVariant }]}>
             {getFilterSummary(filters)}
