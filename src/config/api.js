@@ -122,11 +122,19 @@ export const API_ENDPOINTS = {
     UPDATE: (restaurantId, addonId) => `/restaurants/${restaurantId}/addons/${addonId}`,
     DELETE: (restaurantId, addonId) => `/restaurants/${restaurantId}/addons/${addonId}`,
   },
+  ACCOUNTS: {
+    VENDOR_FINANCIAL_DATA: (restaurantId) => `/accounts/vendors/${restaurantId}`,
+  },
+  ACCOUNTING: {
+    RESTAURANT_BALANCE: (restaurantId) => `/accounting/restaurant/${restaurantId}/balance`,
+  },
 };
 
 // Debug: Log the API endpoints to verify they're loaded correctly
 console.log('🔍 API_ENDPOINTS loaded:', Object.keys(API_ENDPOINTS));
 console.log('🔍 ORDERS endpoints loaded:', Object.keys(API_ENDPOINTS.ORDERS));
+console.log('🔍 ACCOUNTS endpoints loaded:', Object.keys(API_ENDPOINTS.ACCOUNTS));
+console.log('🔍 ACCOUNTING endpoints loaded:', Object.keys(API_ENDPOINTS.ACCOUNTING));
 console.log('🔍 UPDATE_STATUS function type:', typeof API_ENDPOINTS.ORDERS.UPDATE_STATUS);
 console.log('🔍 CANCEL function type:', typeof API_ENDPOINTS.ORDERS.CANCEL);
 
