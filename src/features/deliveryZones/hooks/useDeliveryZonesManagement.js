@@ -24,7 +24,6 @@ export const useDeliveryZonesManagement = () => {
       setLoading(true);
       setError(null);
       const response = await getRestaurantDeliveryZones();
-      console.log('response', response);
       
       if (response && response.data && Array.isArray(response.data)) {
         // تحويل البيانات من هيكل restaurantDeliveryZones إلى هيكل deliveryZone
@@ -51,7 +50,6 @@ export const useDeliveryZonesManagement = () => {
         setZones([]);
       }
     } catch (err) {
-      console.error('خطأ في جلب مناطق التوصيل:', err);
       setError(err.message || 'حدث خطأ في جلب مناطق التوصيل');
       setZones([]);
     } finally {
@@ -80,7 +78,6 @@ export const useDeliveryZonesManagement = () => {
         return response.data;
       }
     } catch (err) {
-      console.error('خطأ في تعيين سعر المنطقة:', err);
       Alert.alert('خطأ', err.message || 'حدث خطأ في تعيين سعر المنطقة');
       throw err;
     } finally {
@@ -109,7 +106,6 @@ export const useDeliveryZonesManagement = () => {
         return response.data;
       }
     } catch (err) {
-      console.error('خطأ في تحديث سعر المنطقة:', err);
       Alert.alert('خطأ', err.message || 'حدث خطأ في تحديث سعر المنطقة');
       throw err;
     } finally {
@@ -138,7 +134,6 @@ export const useDeliveryZonesManagement = () => {
         return response.data;
       }
     } catch (err) {
-      console.error('خطأ في إلغاء تفعيل المنطقة:', err);
       Alert.alert('خطأ', err.message || 'حدث خطأ في إلغاء تفعيل المنطقة');
       throw err;
     } finally {
@@ -154,7 +149,6 @@ export const useDeliveryZonesManagement = () => {
       setValidationStatus(response);
       return response;
     } catch (err) {
-      console.error('خطأ في التحقق من صحة المناطق:', err);
       setValidationStatus({ isValid: false, message: err.message });
       throw err;
     } finally {

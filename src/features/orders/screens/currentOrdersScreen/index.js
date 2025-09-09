@@ -256,7 +256,6 @@ const CurrentOrdersScreen = ({ navigation }) => {
       }
       
     } catch (error) {
-      console.error('Error fetching orders:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -312,14 +311,12 @@ const CurrentOrdersScreen = ({ navigation }) => {
   // التعامل مع الأحداث
   const handleViewDetails = (order) => {
     if (__DEV__) {
-      console.log("View order details", order._id);
     }
     navigation.navigate('OrderDetails', { orderId: order._id });
   };
   
   const handleTrackOrder = (order) => {
     if (__DEV__) {
-      console.log("Track order", order._id);
     }
     navigation.navigate('OrderTracking', { orderId: order._id });
   };
@@ -354,7 +351,6 @@ const CurrentOrdersScreen = ({ navigation }) => {
               Alert.alert(t('currentOrdersScreen.success'), t('currentOrdersScreen.orderCanceled'));
               
             } catch (error) {
-              console.error('Error canceling order:', error);
               Alert.alert(t('currentOrdersScreen.error'), t('currentOrdersScreen.cantCancel'));
             } finally {
               setLoading(false);

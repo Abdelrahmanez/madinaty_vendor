@@ -29,7 +29,6 @@ export default function useLocales() {
 
         I18nManager.forceRTL(selectedLang.value === "ar");
       } catch (error) {
-        console.error("Failed to load language from storage", error);
       }
     };
 
@@ -50,7 +49,6 @@ export default function useLocales() {
 
       Updates.reloadAsync();
     } catch (error) {
-      console.error("Failed to update language", error);
     }
   };
 

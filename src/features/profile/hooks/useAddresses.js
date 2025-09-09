@@ -12,7 +12,6 @@ export const useAddresses = () => {
             setError(null);
             
             const response = await getAddresses();
-            console.log('بيانات العناوين المستلمة:', response.data);
             
             if (response.data && response.data.data) {
                 // تحسين بيانات العناوين لضمان التوافق
@@ -28,7 +27,6 @@ export const useAddresses = () => {
                 setAddresses([]);
             }
         } catch (error) {
-            console.error('خطأ في جلب العناوين:', error);
             setError(error);
         } finally {
             setLoading(false);
@@ -39,11 +37,9 @@ export const useAddresses = () => {
         try {
             setLoading(true);
             const response = await addAddress(addressData);
-            console.log('استجابة حفظ العنوان:', response.data);
             await fetchAddresses();
             return { success: true, data: response.data };
         } catch (error) {
-            console.error('خطأ في حفظ العنوان:', error);
             return { success: false, error };
         } finally {
             setLoading(false);
@@ -54,11 +50,9 @@ export const useAddresses = () => {
         try {
             setLoading(true);
             const response = await updateAddress(addressId, addressData);
-            console.log('استجابة تحديث العنوان:', response.data);
             await fetchAddresses();
             return { success: true, data: response.data };
         } catch (error) {
-            console.error('خطأ في تحديث العنوان:', error);
             return { success: false, error };
         } finally {
             setLoading(false);
@@ -69,11 +63,9 @@ export const useAddresses = () => {
         try {
             setLoading(true);
             const response = await deleteAddress(addressId);
-            console.log('استجابة حذف العنوان:', response.data);
             await fetchAddresses();
             return { success: true, data: response.data };
         } catch (error) {
-            console.error('خطأ في حذف العنوان:', error);
             return { success: false, error };
         } finally {
             setLoading(false);
@@ -84,11 +76,9 @@ export const useAddresses = () => {
         try {
             setLoading(true);
             const response = await setDefaultAddress(addressId);
-            console.log('استجابة تعيين العنوان الحالي:', response.data);
             await fetchAddresses();
             return { success: true, data: response.data };
         } catch (error) {
-            console.error('خطأ في تعيين العنوان الحالي:', error);
             return { success: false, error };
         } finally {
             setLoading(false);

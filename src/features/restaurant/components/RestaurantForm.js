@@ -44,10 +44,8 @@ const RestaurantForm = ({
     const loadCategories = async () => {
       try {
         const categoriesData = await fetchCategories('restaurant');
-        console.log('🔍 Categories:', categoriesData);
         setCategories(categoriesData);
       } catch (error) {
-        console.error('Error loading categories:', error);
       }
     };
     loadCategories();
@@ -144,7 +142,6 @@ const RestaurantForm = ({
       
       // Add image if selected - this is the key part for the backend
       if (formData.image && formData.image.uri) {
-        console.log('📸 Adding image to FormData:', formData.image);
         // Create the file object correctly for React Native
         const imageFile = {
           uri: formData.image.uri,
@@ -152,9 +149,7 @@ const RestaurantForm = ({
           name: formData.image.name || 'restaurant-image.jpg'
         };
         formDataToSend.append('image', imageFile);
-        console.log('📸 Image file object created:', imageFile);
       } else {
-        console.log('⚠️ No image selected for upload');
       }
       
       // Add categories
@@ -164,21 +159,16 @@ const RestaurantForm = ({
         });
       }
 
-      console.log('📤 Submitting FormData with fields:', Array.from(formDataToSend._parts || []).map(part => part[0]));
-      console.log('📤 FormData content type will be: multipart/form-data');
       
       // Debug: Check if image is properly added to FormData
       const formDataEntries = Array.from(formDataToSend._parts || []);
       const imageEntry = formDataEntries.find(entry => entry[0] === 'image');
       if (imageEntry) {
-        console.log('📸 Image entry found in FormData:', imageEntry[0], typeof imageEntry[1], imageEntry[1]);
       } else {
-        console.log('⚠️ No image entry found in FormData');
       }
       
       await onSubmit(formDataToSend);
     } catch (error) {
-      console.error('Error submitting form:', error);
     }
   };
 

@@ -14,7 +14,6 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     if (__DEV__) {
-      console.error('Global ErrorBoundary caught an error:', error, errorInfo);
     }
     if (this.props.onError) {
       this.props.onError(error, errorInfo);

@@ -12,7 +12,6 @@ export const getDishes = (params = {}) => {
         limit: params.limit || 20,
     };
     
-    console.log('🍽️ Fetching dishes with params:', queryParams);
     
     return axiosInstance.get(API_ENDPOINTS.DISHES.LIST, {
         params: queryParams
@@ -25,7 +24,6 @@ export const getDish = (id) => {
 
 export const createDish = (data) => {
     const isFormData = data instanceof FormData;
-    console.log('🍽️ Creating dish with data type:', isFormData ? 'FormData' : 'JSON');
     
     const config = {};
     if (isFormData) {

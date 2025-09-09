@@ -14,12 +14,9 @@ import { API_ENDPOINTS } from "../../../config/api";
  */
 export const registerRequest = async (requestData) => {
   try {
-    console.log('Sending signup request to:', API_ENDPOINTS.AUTH.SIGNUP, requestData);
     const response = await axiosInstance.post(API_ENDPOINTS.AUTH.SIGNUP, requestData);
-    console.log('Signup API raw response:', response);
     
     const responseData = response.data;
-    console.log('Signup API response data:', responseData);
     
     // تخزين رموز المصادقة عند التسجيل الناجح
     // نتعامل مع هياكل استجابة API المختلفة
@@ -27,7 +24,6 @@ export const registerRequest = async (requestData) => {
     const refreshToken = responseData?.refreshToken || responseData?.data?.refreshToken || responseData?.refresh_token;
     
     if (accessToken) {
-      console.log('Storing auth tokens');
       await AsyncStorage.setItem("access_token", accessToken);
       
       if (refreshToken) {
@@ -36,7 +32,6 @@ export const registerRequest = async (requestData) => {
       
       axiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`;
     } else {
-      console.log('No access token found in the response');
     }
     
     // تهيئة كائن الاستجابة مع الحقول الضرورية
@@ -52,8 +47,6 @@ export const registerRequest = async (requestData) => {
     
     return formattedResponse;
   } catch (error) {
-    console.error("خطأ في طلب التسجيل:", error);
-    console.error("تفاصيل الخطأ:", error.response?.data || error.message);
     // استخراج رسالة الخطأ من الاستجابة إذا كانت موجودة
     const errorMessage = error.response?.data?.message || "حدث خطأ أثناء إنشاء الحساب";
     throw new Error(errorMessage);
@@ -69,12 +62,9 @@ export const registerRequest = async (requestData) => {
  */
 export const loginRequest = async (requestData) => {
   try {
-    console.log('Sending login request to:', API_ENDPOINTS.AUTH.LOGIN, requestData);
     const response = await axiosInstance.post(API_ENDPOINTS.AUTH.LOGIN, requestData);
-    console.log('Login API raw response:', response);
     
     const responseData = response.data;
-    console.log('Login API response data:', responseData);
     
     // تخزين رموز المصادقة
     // نتعامل مع هياكل استجابة API المختلفة
@@ -82,7 +72,6 @@ export const loginRequest = async (requestData) => {
     const refreshToken = responseData?.refreshToken || responseData?.data?.refreshToken || responseData?.refresh_token;
     
     if (accessToken) {
-      console.log('Storing auth tokens');
       await AsyncStorage.setItem("access_token", accessToken);
       
       if (refreshToken) {
@@ -91,7 +80,6 @@ export const loginRequest = async (requestData) => {
       
       axiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`;
     } else {
-      console.log('No access token found in the response');
     }
     
     // تهيئة كائن الاستجابة مع الحقول الضرورية
@@ -107,8 +95,6 @@ export const loginRequest = async (requestData) => {
     
     return formattedResponse;
   } catch (error) {
-    console.error("خطأ في طلب تسجيل الدخول:", error);
-    console.error("تفاصيل الخطأ:", error.response?.data || error.message);
     // استخراج رسالة الخطأ من الاستجابة إذا كانت موجودة
     const errorMessage = error.response?.data?.message || "رقم الهاتف أو كلمة المرور غير صحيحة";
     throw new Error(errorMessage);
@@ -139,7 +125,6 @@ export const refreshTokenRequest = async () => {
     
     return response.data;
   } catch (error) {
-    console.error("خطأ في طلب تحديث الرمز:", error);
     throw new Error("فشل تحديث جلسة الاتصال. يرجى تسجيل الدخول مرة أخرى.");
   }
 };
@@ -157,7 +142,6 @@ export const logoutRequest = async () => {
       await axiosInstance.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
     }
   } catch (error) {
-    console.error('خطأ في تسجيل الخروج:', error);
   } finally {
     // دائمًا مسح التخزين المحلي عند تسجيل الخروج
     await AsyncStorage.removeItem("access_token");
@@ -178,7 +162,6 @@ export const setFinancialPinRequest = async (pin) => {
     const response = await axiosInstance.patch(API_ENDPOINTS.AUTH.SET_FINANCIAL_PIN, { pin });
     return response.data || { status: 'success', message: 'تم تعيين رمز PIN بنجاح' };
   } catch (error) {
-    console.error("خطأ في تعيين رمز PIN المالي:", error);
     throw error;
   }
 };
@@ -193,7 +176,6 @@ export const verifyFinancialPinRequest = async (pin) => {
     const response = await axiosInstance.post(API_ENDPOINTS.AUTH.VERIFY_FINANCIAL_PIN, { pin });
     return response.data || { status: 'success', message: 'تم التحقق من رمز PIN' };
   } catch (error) {
-    console.error("خطأ في التحقق من رمز PIN المالي:", error);
     throw error;
   }
 };

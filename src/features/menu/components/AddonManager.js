@@ -43,7 +43,6 @@ const AddonManager = ({
       setShowAddForm(false);
       if (onRefresh) onRefresh();
     } catch (error) {
-      console.error('Error adding addons:', error);
     } finally {
       setInternalLoading(false);
     }
@@ -55,7 +54,6 @@ const AddonManager = ({
       await onRemoveAddons(addonIds);
       if (onRefresh) onRefresh();
     } catch (error) {
-      console.error('Error removing addons:', error);
     } finally {
       setInternalLoading(false);
     }

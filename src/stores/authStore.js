@@ -29,7 +29,6 @@ const useAuthStore = create((set, get) => ({
         set({ isFirstTimeUser: firstTimeFlag === 'false' });
       }
     } catch (error) {
-      console.error('Error initializing auth:', error);
     }
   },
   
@@ -39,7 +38,6 @@ const useAuthStore = create((set, get) => ({
       await AsyncStorage.setItem('access_token', token);
       set({ isAuthenticated: true, accessToken: token });
     } catch (error) {
-      console.error('Error saving token:', error);
     }
   },
   
@@ -49,7 +47,6 @@ const useAuthStore = create((set, get) => ({
       await AsyncStorage.setItem('userData', JSON.stringify(user));
       set({ user });
     } catch (error) {
-      console.error('Error saving user data:', error);
     }
   },
   
@@ -59,7 +56,6 @@ const useAuthStore = create((set, get) => ({
       await AsyncStorage.setItem('isFirstTimeUser', 'false');
       set({ isFirstTimeUser: false });
     } catch (error) {
-      console.error('Error saving first time flag:', error);
     }
   },
   
@@ -77,18 +73,14 @@ const useAuthStore = create((set, get) => ({
       
       // Unregister push token from backend if it exists
       if (expoPushToken) {
-        console.log('📱 Unregistering push token on logout:', expoPushToken);
         try {
           const result = await unregisterPushToken(expoPushToken);
           if (result.success) {
-            console.log('✅ Push token unregistered successfully on logout');
             // Remove the token from local storage
             await AsyncStorage.removeItem('expoPushToken');
           } else {
-            console.error('❌ Failed to unregister push token on logout:', result.error);
           }
         } catch (tokenError) {
-          console.error('❌ Error unregistering push token on logout:', tokenError);
         }
       }
       
@@ -99,9 +91,7 @@ const useAuthStore = create((set, get) => ({
         user: null 
       });
       
-      console.log('✅ Logout completed successfully');
     } catch (error) {
-      console.error('Error during logout:', error);
     }
   },
   
@@ -127,9 +117,7 @@ const useAuthStore = create((set, get) => ({
         accessToken: accessToken
       });
       
-      console.log('✅ Tokens updated successfully in store');
     } catch (error) {
-      console.error('Error updating tokens in store:', error);
     }
   },
 
@@ -148,9 +136,7 @@ const useAuthStore = create((set, get) => ({
         user: null
       });
       
-      console.log('✅ Auth data cleared from store');
     } catch (error) {
-      console.error('Error clearing auth data from store:', error);
     }
   },
 }));

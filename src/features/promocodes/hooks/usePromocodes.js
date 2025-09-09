@@ -37,7 +37,6 @@ const usePromocodes = () => {
       });
     } catch (err) {
       setError(err.message || 'حدث خطأ في جلب أكواد الخصم');
-      console.error('❌ خطأ في جلب أكواد الخصم:', err);
     } finally {
       setLoading(false);
     }
@@ -59,7 +58,6 @@ const usePromocodes = () => {
       return response.data;
     } catch (err) {
       setError(err.message || 'حدث خطأ في إنشاء كود الخصم');
-      console.error('❌ خطأ في إنشاء كود الخصم:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -86,7 +84,6 @@ const usePromocodes = () => {
       return response.data;
     } catch (err) {
       setError(err.message || 'حدث خطأ في تحديث كود الخصم');
-      console.error('❌ خطأ في تحديث كود الخصم:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -107,7 +104,6 @@ const usePromocodes = () => {
       setPromocodes(prev => prev.filter(promo => promo.id !== id));
     } catch (err) {
       setError(err.message || 'حدث خطأ في حذف كود الخصم');
-      console.error('❌ خطأ في حذف كود الخصم:', err);
       throw err;
     } finally {
       setLoading(false);
@@ -134,7 +130,6 @@ const usePromocodes = () => {
       return response.data;
     } catch (err) {
       setError(err.message || 'حدث خطأ في تغيير حالة كود الخصم');
-      console.error('❌ خطأ في تغيير حالة كود الخصم:', err);
       throw err;
     } finally {
       setLoading(false);

@@ -109,7 +109,6 @@ const useDrivers = () => {
         fetchAvailableDrivers()
       ]);
     } catch (error) {
-      console.error('Error refreshing drivers:', error);
     }
   };
 

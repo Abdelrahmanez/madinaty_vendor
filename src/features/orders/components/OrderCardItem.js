@@ -13,7 +13,10 @@ import {
   formatOrderNumber, 
   formatCurrency, 
   formatOrderTime,
-  transformApiOrder,
+  getOrderId,
+  getCustomerName,
+  getCustomerPhone,
+  getItemsSummary,
   canAssignToDriver,
   canMarkAsReady,
   getDeliveryAddress
@@ -38,28 +41,19 @@ const OrderCardItem = ({
     return null;
   }
 
-  // Transform API order data to component format
-  const transformedOrder = transformApiOrder(order);
-  
-  if (!transformedOrder) {
-    return null;
-  }
-
-  const {
-    id,
-    orderNumber,
-    status,
-    items = [],
-    totalAmount,
-    paymentMethod,
-    paymentStatus,
-    createdAt,
-    customerName,
-    customerPhone,
-    deliveryAddress,
-    itemsCount,
-    itemsSummary
-  } = transformedOrder;
+  // Read directly from raw order with safe fallbacks
+  const id = order?._id;
+  const orderNumber = formatOrderNumber(id);
+  const status = order?.status;
+  const items = Array.isArray(order?.items) ? order.items : [];
+  const totalAmount = order?.totalAmount ?? order?.total ?? 0;
+  const paymentMethod = order?.paymentMethod;
+  const paymentStatus = order?.paymentStatus;
+  const createdAt = order?.createdAt;
+  const customerName = getCustomerName(order?.user || order?.customer);
+  const customerPhone = getCustomerPhone(order?.user || order?.customer);
+  const deliveryAddress = order?.deliveryAddress || order?.address;
+  const itemsSummary = getItemsSummary(items);
 
   const statusLabel = ORDER_STATUS_LABELS[status] || 'غير معروف';
   const statusColor = ORDER_STATUS_COLORS[status] || theme.colors.outline;
@@ -74,7 +68,7 @@ const OrderCardItem = ({
   return (
     <TouchableOpacity
       style={[styles.container, style]}
-      onPress={() => onPress?.(transformedOrder)}
+      onPress={() => onPress?.(order)}
       activeOpacity={0.7}
     >
       {/* Header Row - Order Number, Status, Payment Status */}

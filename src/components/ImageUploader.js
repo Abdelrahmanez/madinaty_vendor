@@ -54,7 +54,6 @@ const ImageUploader = ({
         onChange && onChange(pickedUri);
       }
     } catch (e) {
-      console.error('Image pick error:', e?.message || e);
     }
   }, [images, max, multiple, onChange, requestPermissionIfNeeded]);
 

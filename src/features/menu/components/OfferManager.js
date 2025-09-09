@@ -48,7 +48,6 @@ const OfferManager = ({
       setShowForm(false);
       if (onRefresh) onRefresh();
     } catch (error) {
-      console.error('Error saving offer:', error);
     } finally {
       setLoading(false);
     }
@@ -60,7 +59,6 @@ const OfferManager = ({
       await onDeleteOffer();
       if (onRefresh) onRefresh();
     } catch (error) {
-      console.error('Error deleting offer:', error);
     } finally {
       setDeleteLoading(false);
     }

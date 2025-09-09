@@ -71,7 +71,6 @@ const RestaurantAddonsScreen = ({ navigation }) => {
       showSnackbar('تم حذف الإضافة بنجاح');
       refreshAddons();
     } catch (error) {
-      console.error('Error deleting addon:', error);
       showSnackbar('خطأ في حذف الإضافة', 'error');
     } finally {
       setFormLoading(false);
@@ -100,7 +99,6 @@ const RestaurantAddonsScreen = ({ navigation }) => {
       setEditingAddon(null);
       refreshAddons();
     } catch (error) {
-      console.error('Error saving addon:', error);
       showSnackbar(
         editingAddon ? 'خطأ في تحديث الإضافة' : 'خطأ في إضافة الإضافة', 
         'error'

@@ -41,6 +41,12 @@
     "extra": {
       "eas": {
         "projectId": "2c0d505e-d892-4060-8daa-c2f92ea730cf"
+      },
+      "env": {
+        "API_BASE_URL": "https://madinaty-backend.onrender.com/api/v1",
+        "SOCKET_URL": "https://madinaty-backend.onrender.com",
+        "DEBUG_MODE": "true",
+        "ENABLE_SOCKET_DEBUG": "true"
       }
     }
   }

@@ -62,7 +62,6 @@ const OrdersList = ({
       // Refresh orders after status update
       onRefresh?.();
     } catch (error) {
-      console.error('Error updating order status:', error);
     }
   };
 
@@ -73,7 +72,6 @@ const OrdersList = ({
       // Refresh orders after cancellation
       onRefresh?.();
     } catch (error) {
-      console.error('Error cancelling order:', error);
     }
   };
 

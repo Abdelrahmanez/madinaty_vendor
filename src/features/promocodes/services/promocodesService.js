@@ -10,8 +10,6 @@ import { fetchCategories } from '../../menu/api/categories';
 import { getDishes } from '../../menu/api/dish';
 
 // Debug imports
-console.log('🔍 PromocodesService - axiosInstance:', axiosInstance);
-console.log('🔍 PromocodesService - API_ENDPOINTS:', API_ENDPOINTS);
 
 class PromocodesService {
   /**
@@ -24,7 +22,6 @@ class PromocodesService {
       );
       return response.data;
     } catch (error) {
-      console.error('❌ خطأ في جلب أكواد الخصم:', error);
       throw error;
     }
   }
@@ -34,24 +31,14 @@ class PromocodesService {
    */
   async createPromocode(promocodeData) {
     try {
-      console.log('🔍 Creating promocode with data:', promocodeData);
-      console.log('🔍 Using endpoint:', API_ENDPOINTS.PROMOCODE.RESTAURANT_CREATE);
-      console.log('🔍 Axios instance:', axiosInstance);
       
       const response = await axiosInstance.post(
         API_ENDPOINTS.PROMOCODE.RESTAURANT_CREATE,
         promocodeData
       );
       
-      console.log('✅ Promocode created successfully:', response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ خطأ في إنشاء كود الخصم:', error);
-      console.error('❌ Error details:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data
-      });
       throw error;
     }
   }
@@ -67,7 +54,6 @@ class PromocodesService {
       );
       return response.data;
     } catch (error) {
-      console.error('❌ خطأ في تحديث كود الخصم:', error);
       throw error;
     }
   }
@@ -82,7 +68,6 @@ class PromocodesService {
       );
       return response.data;
     } catch (error) {
-      console.error('❌ خطأ في حذف كود الخصم:', error);
       throw error;
     }
   }
@@ -98,7 +83,6 @@ class PromocodesService {
       );
       return response.data;
     } catch (error) {
-      console.error('❌ خطأ في تغيير حالة كود الخصم:', error);
       throw error;
     }
   }
@@ -111,7 +95,6 @@ class PromocodesService {
       const categories = await fetchCategories('meal');
       return categories;
     } catch (error) {
-      console.error('❌ خطأ في جلب فئات المطعم:', error);
       throw error;
     }
   }
@@ -124,7 +107,6 @@ class PromocodesService {
       const response = await getDishes({ limit: 1000 }); // Get all menu items
       return response.data.data || [];
     } catch (error) {
-      console.error('❌ خطأ في جلب عناصر قائمة المطعم:', error);
       throw error;
     }
   }

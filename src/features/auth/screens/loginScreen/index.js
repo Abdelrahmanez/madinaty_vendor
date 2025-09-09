@@ -41,12 +41,8 @@ const LoginScreen = ({ navigation }) => {
   
   // Debug translations
   useEffect(() => {
-    console.log('Current language in LoginScreen:', i18n.language);
-    console.log('Login screen title translation:', t('loginScreen.title'));
-    console.log('Phone number translation:', t('loginScreen.phoneNumber'));
     
     // Debug server connection
-    console.log('API URL:', API_BASE_URL);
   }, []);
   
   // التحقق من صحة المدخلات

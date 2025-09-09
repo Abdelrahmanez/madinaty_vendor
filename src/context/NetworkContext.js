@@ -34,7 +34,6 @@ export const NetworkProvider = ({ children }) => {
       setConnectionType(networkState.type);
       return networkState.isConnected && networkState.isInternetReachable;
     } catch (error) {
-      console.error('خطأ في التحقق من اتصال الإنترنت:', error);
       setIsConnected(false);
       return false;
     }
@@ -47,7 +46,6 @@ export const NetworkProvider = ({ children }) => {
       setIsServerReachable(response.success);
       return response.success;
     } catch (error) {
-      console.error('خطأ في التحقق من الوصول للخادم:', error);
       setIsServerReachable(false);
       return false;
     }
@@ -69,7 +67,6 @@ export const NetworkProvider = ({ children }) => {
       setLastChecked(new Date());
       return { isConnected: internetConnected, isServerReachable: serverReachable };
     } catch (error) {
-      console.error('خطأ في فحص الاتصال:', error);
       return { isConnected: false, isServerReachable: false };
     } finally {
       setCheckingConnection(false);
@@ -100,7 +97,7 @@ export const NetworkProvider = ({ children }) => {
     // جدولة فحص دوري للاتصال كل 30 ثانية
     const intervalId = setInterval(() => {
       checkConnection();
-    }, 30000);
+    }, parseInt(process.env.API_TIMEOUT || "30000", 10));
     
     return () => {
       clearInterval(intervalId);

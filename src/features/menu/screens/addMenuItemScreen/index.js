@@ -76,7 +76,6 @@ const AddMenuItemScreen = ({ navigation }) => {
           setRestaurantAddons(addonsRes?.data?.data || addonsRes?.data || []);
         }
       } catch (e) {
-        console.error('Error loading refs:', e?.response?.data || e?.message || e);
         triggerAlert &&
           triggerAlert('error', 'تعذر تحميل البيانات المرجعية. حاول لاحقاً.', {
             autoClose: true,
@@ -227,7 +226,6 @@ const AddMenuItemScreen = ({ navigation }) => {
         try {
           await updateDishOffer(createdId, offer);
         } catch (offerErr) {
-          console.error('Failed to attach offer:', offerErr?.response?.data || offerErr?.message || offerErr);
         }
       }
 
@@ -248,7 +246,6 @@ const AddMenuItemScreen = ({ navigation }) => {
           duration: 4500,
           showIcon: true,
         });
-      console.error('Create dish error:', e?.response?.data || e?.message || e);
     } finally {
       setSubmitting(false);
     }

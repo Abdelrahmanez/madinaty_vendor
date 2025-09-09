@@ -5,16 +5,10 @@ import { useTheme } from 'react-native-paper';
 
 import OrdersNavigator from './OrdersNavigator';
 import MenuNavigator from './MenuNavigator';
-import { View, Text } from 'react-native';
 import ManagementNavigator from './management/ManagementNavigator';
+import MoreNavigator from './MoreNavigator';
 
 const Tab = createBottomTabNavigator();
-
-const Placeholder = ({ label }) => (
-  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    <Text>{label}</Text>
-  </View>
-);
 
 const RestaurantTabs = () => {
   const theme = useTheme();
@@ -38,7 +32,7 @@ const RestaurantTabs = () => {
       <Tab.Screen name="OrdersTab" component={OrdersNavigator} options={{ title: 'الطلبات' }} />
       <Tab.Screen name="MenuTab" component={MenuNavigator} options={{ title: 'المنيو' }} />
       <Tab.Screen name="ManagementTab" component={ManagementNavigator} options={{ title: 'الإدارة' }} />
-      <Tab.Screen name="MoreTab" children={() => <Placeholder label="المزيد" />} options={{ title: 'المزيد' }} />
+      <Tab.Screen name="MoreTab" component={MoreNavigator} options={{ title: 'المزيد' }} />
     </Tab.Navigator>
   );
 };

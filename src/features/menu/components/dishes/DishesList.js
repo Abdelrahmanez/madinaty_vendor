@@ -5,7 +5,6 @@ import DishItem from './DishItem';
 
 const DishesList = ({ data }) => {
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.card} onPress={() => console.log('Dish selected:', item.name)}>
       <Image source={{ uri: item.imageUrl }} style={styles.image} />
       <Text style={styles.name}>{item.name}</Text>
       <Text style={styles.price}>{item.sizes[0].price} جنيه</Text>

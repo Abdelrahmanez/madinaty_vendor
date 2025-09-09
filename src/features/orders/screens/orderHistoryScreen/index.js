@@ -202,7 +202,6 @@ const OrderHistoryScreen = ({ navigation }) => {
       }
       
     } catch (error) {
-      console.error('Error fetching orders:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -246,13 +245,11 @@ const OrderHistoryScreen = ({ navigation }) => {
   
   const handleReorder = (orderId) => {
     if (__DEV__) {
-      console.log("Reorder", orderId);
     }
   };
   
   const handleTrackOrder = (orderId) => {
     if (__DEV__) {
-      console.log("Track order", orderId);
     }
     navigation.navigate('OrderTracking', { orderId });
   };
@@ -287,7 +284,6 @@ const OrderHistoryScreen = ({ navigation }) => {
               Alert.alert(t('orderHistoryScreen.success'), t('orderHistoryScreen.orderCanceled'));
               
             } catch (error) {
-              console.error('Error canceling order:', error);
               Alert.alert(t('orderHistoryScreen.error'), t('orderHistoryScreen.cantCancel'));
             } finally {
               setLoading(false);
@@ -300,7 +296,6 @@ const OrderHistoryScreen = ({ navigation }) => {
   
   const handleRateOrder = (order) => {
     if (__DEV__) {
-      console.log("Rate order", order._id);
     }
     // navigation.navigate('RateOrder', { order });
   };

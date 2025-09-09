@@ -46,7 +46,6 @@ const RestaurantManagementScreen = ({ navigation }) => {
         Alert.alert('خطأ', result.error || 'فشل في تحديث بيانات المطعم');
       }
     } catch (error) {
-      console.error('Error updating restaurant:', error);
       Alert.alert('خطأ', 'حدث خطأ أثناء تحديث بيانات المطعم');
     }
   };

@@ -38,7 +38,6 @@ const SearchScreen = () => {
 
   useEffect(() => {
     updateFilter('keyword', query);
-    console.log(filters);
   }, [query]);
 
   useEffect(() => {

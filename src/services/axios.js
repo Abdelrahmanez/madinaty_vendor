@@ -6,7 +6,6 @@ import useAuthStore from "../stores/authStore";
 
 export const mainUrl = API_BASE_URL;
 
-console.log('🔌 API URL:', API_BASE_URL); // أظهر عنوان API في سجلات التصحيح
 
 // إنشاء نسخة من Axios مع التكوين الأساسي
 const axiosInstance = axios.create({
@@ -16,13 +15,13 @@ const axiosInstance = axios.create({
     "Accept": "application/json",
   },
   // إضافة مهلة زمنية لمنع انتظار الطلبات إلى ما لا نهاية
-  timeout: 20000, // زيادة المهلة الزمنية إلى 20 ثانية
+  timeout: parseInt(process.env.API_TIMEOUT || "20000", 10), // زيادة المهلة الزمنية إلى 20 ثانية
 });
 
 // نسخة إضافية للاستخدام في تحديث الرمز المميز
 const customInstance = axios.create({
   baseURL: mainUrl,
-  timeout: 20000,
+  timeout: parseInt(process.env.API_TIMEOUT || "20000", 10),
   headers: {
     "Content-Type": "application/json",
     "Accept": "application/json",
@@ -72,14 +71,11 @@ const setAuthHeaders = async (instance) => {
     if (accessToken) {
       // استخدام تنسيق Bearer للترويسة كما هو مطلوب في الAPI
       instance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-      console.log('🔑 تم تعيين رمز المصادقة:', `Bearer ${accessToken.substring(0, 15)}...`);
     } else {
       // مسح أي ترويسة مصادقة موجودة
       delete instance.defaults.headers.common["Authorization"];
-      console.log('ℹ️ لا يوجد رمز مصادقة محفوظ');
     }
   } catch (error) {
-    console.error("❌ خطأ أثناء إعداد ترويسات المصادقة:", error);
   }
 };
 
@@ -108,7 +104,6 @@ const refreshAccessToken = async () => {
       throw new Error("No refresh token available");
     }
 
-    console.log('🔄 محاولة تحديث الرمز المميز...');
     
     const response = await customInstance.post(API_ENDPOINTS.AUTH.REFRESH_TOKEN, {
       refresh: refreshToken,
@@ -132,11 +127,9 @@ const refreshAccessToken = async () => {
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${access}`;
     customInstance.defaults.headers.common["Authorization"] = `Bearer ${access}`;
 
-    console.log('✅ تم تحديث الرمز المميز بنجاح');
     
     return access;
   } catch (error) {
-    console.error('❌ فشل تحديث الرمز المميز:', error);
     throw error;
   }
 };
@@ -146,7 +139,6 @@ const refreshAccessToken = async () => {
  */
 const clearAuthAndNavigateHome = async () => {
   try {
-    console.log('🚪 مسح بيانات المصادقة وتوجيه المستخدم للصفحة الرئيسية...');
     
     // مسح الرموز المميزة
     await AsyncStorage.removeItem("access_token");
@@ -163,7 +155,6 @@ const clearAuthAndNavigateHome = async () => {
     NavigationService.navigate("Home");
     
   } catch (error) {
-    console.error('❌ خطأ أثناء مسح بيانات المصادقة:', error);
     // محاولة التوجيه حتى لو فشل مسح البيانات
     NavigationService.navigate("Home");
   }
@@ -172,8 +163,6 @@ const clearAuthAndNavigateHome = async () => {
 // إضافة معترض لتسجيل تفاصيل الطلبات قبل إرسالها
 axiosInstance.interceptors.request.use(request => {
   // طباعة تفاصيل الطلب للتشخيص
-  console.log('🔄 إرسال طلب API:', request.method?.toUpperCase(), request.url);
-  console.log('🧩 ترويسات الطلب:', JSON.stringify(request.headers));
   
   // التأكد من أن Content-Type مضبوط بشكل صحيح لطلبات POST
   // لكن لا نعيد تعيينه إذا كان FormData (multipart/form-data)
@@ -188,13 +177,11 @@ axiosInstance.interceptors.request.use(request => {
 // معالجة الاستجابات والأخطاء
 axiosInstance.interceptors.response.use(
   response => {
-    console.log('✅ استجابة ناجحة من API:', response.status, response.config.url);
     return response;
   },
   async (error) => {
     // تشخيص تفصيلي للأخطاء
     if (error.code === 'ECONNABORTED') {
-      console.error('⏱️ انتهت مهلة الطلب:', error.config.url);
     } else if (error.code === 'ERR_NETWORK') {
       console.error('🌐 خطأ في الشبكة (تأكد من تشغيل الخادم الخلفي):', error.message);
     } else if (error.response) {
@@ -202,10 +189,8 @@ axiosInstance.interceptors.response.use(
       console.error(`❌ خطأ في استجابة الخادم (${error.response.status}):`, error.response.data);
     } else if (error.request) {
       // تم إجراء الطلب ولكن لم يتم تلقي أي استجابة
-      console.error('⚠️ لم يتم تلقي استجابة من الخادم:', error.config.url);
     } else {
       // حدث خطأ عند إعداد الطلب
-      console.error('🔴 خطأ في إعداد الطلب:', error.message);
     }
 
     // التحقق من وجود response قبل محاولة الوصول إلى خصائصه
@@ -219,11 +204,9 @@ axiosInstance.interceptors.response.use(
 
     // إذا كان الخطأ بسبب عدم وجود مصادقة (401)
     if (error.response.status === 401) {
-      console.log('🔐 خطأ 401 - محاولة معالجة المصادقة...');
       
       // التحقق من إمكانية إعادة محاولة الطلب
       if (!canRetryRequest(originalRequest)) {
-        console.log('🔄 الطلب لا يمكن إعادة محاولته، مسح المصادقة...');
         await clearAuthAndNavigateHome();
         return Promise.reject(error);
       }
@@ -235,16 +218,13 @@ axiosInstance.interceptors.response.use(
                             errorData?.message === "You are not logged in! Please log in to get access";
       
       if (!isTokenExpired) {
-        console.log('🔐 خطأ 401 غير متعلق بانتهاء صلاحية الرمز المميز:', errorData);
         await clearAuthAndNavigateHome();
         return Promise.reject(error);
       }
 
-      console.log('🔄 انتهت صلاحية الرمز المميز، محاولة التحديث...');
 
       if (isRefreshing) {
         // إذا كان هناك تحديث جاري، أضف الطلب إلى قائمة الانتظار
-        console.log('⏳ هناك تحديث جاري، إضافة الطلب لقائمة الانتظار...');
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         }).then(token => {
@@ -267,12 +247,9 @@ axiosInstance.interceptors.response.use(
         
         // إعادة محاولة الطلب الأصلي
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        console.log('🔄 إعادة محاولة الطلب الأصلي مع الرمز المميز الجديد');
         return axiosInstance(originalRequest);
         
       } catch (refreshError) {
-        console.error('❌ فشل تحديث الرمز المميز:', refreshError);
-        
         // معالجة قائمة الانتظار مع الخطأ
         processQueue(refreshError, null);
         

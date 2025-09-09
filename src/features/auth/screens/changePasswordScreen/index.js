@@ -115,8 +115,6 @@ const ChangePasswordScreen = ({ navigation }) => {
       navigation.goBack();
       
     } catch (error) {
-      console.error("خطأ في تغيير كلمة المرور:", error);
-      
       // التعامل مع أخطاء محددة من API
       if (error.response?.data?.message) {
         if (error.response.data.message.includes("current password")) {

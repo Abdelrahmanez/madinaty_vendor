@@ -32,7 +32,6 @@ export const triggerHapticFeedback = (type = 'light') => {
         Vibration.vibrate(50);
     }
   } catch (error) {
-    console.error('Vibration not available:', error);
   }
 };
 
@@ -43,6 +42,5 @@ export const stopHapticFeedback = () => {
   try {
     Vibration.cancel();
   } catch (error) {
-    console.error('Failed to stop vibration:', error);
   }
 }; 

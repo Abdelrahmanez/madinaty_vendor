@@ -40,10 +40,13 @@ export const calculateOrderTotal = (items) => {
  * @returns {string} Customer name
  */
 export const getCustomerName = (user) => {
-  console.log('User:', user?.name);
   if (!user) return 'عميل مجهول';
-  const name = user.name?.toString().trim();
-  return name?.length ? name : 'عميل مجهول';
+  
+  // Try different possible field names for customer name
+  const name = user.name || user.customerName || user.fullName || user.firstName;
+  const trimmedName = name?.toString().trim();
+  
+  return trimmedName?.length ? trimmedName : 'عميل مجهول';
 };
 
 /**
@@ -53,7 +56,9 @@ export const getCustomerName = (user) => {
  */
 export const getCustomerPhone = (user) => {
   if (!user) return null;
-  return user.phoneNumber || null;
+  
+  // Try different possible field names for phone number
+  return user.phoneNumber || user.phone || user.mobileNumber || user.contactNumber || null;
 };
 
 /**
@@ -93,20 +98,7 @@ export const getDeliveryAddress = (deliveryAddress) => {
       parts.push(`(${notes})`);
     }
   }
-  
-  // Debug logging in development
-  if (__DEV__) {
-    console.log('🏠 getDeliveryAddress debug:', {
-      input: deliveryAddress,
-      street: deliveryAddress.street,
-      areaName: deliveryAddress.areaName,
-      area: deliveryAddress.area,
-      notes: deliveryAddress.notes,
-      parts,
-      result: parts.length > 0 ? parts.join('، ') : null
-    });
-  }
-  
+    
   return parts.length > 0 ? parts.join('، ') : null;
 };
 
@@ -135,6 +127,50 @@ export const getItemsSummary = (items) => {
   const totalQuantity = getItemsCount(items);
   
   return `${uniqueCount} طبق (${totalQuantity} قطعة)`;
+};
+
+/**
+ * Normalize incoming (socket) order payload to match API shape as much as possible
+ * This prevents UI from seeing placeholder values by ensuring consistent field names.
+ * @param {Object} incoming - Raw order from socket
+ * @returns {Object} normalized order
+ */
+export const normalizeIncomingOrder = (incoming) => {
+  if (!incoming) return incoming;
+
+  // Prefer API-like keys; fallback to alternative names if present
+  const id = incoming._id || incoming.id || incoming.orderId;
+  const user = incoming.user || incoming.customer || null;
+  const items = Array.isArray(incoming.items) ? incoming.items : [];
+  const totalAmount =
+    incoming.totalAmount !== undefined ? incoming.totalAmount :
+    incoming.total !== undefined ? incoming.total : 0;
+  const deliveryFee = incoming.deliveryFee ?? 0;
+  const discount = incoming.discount ?? 0;
+  const paymentMethod = incoming.paymentMethod ?? incoming.payment_type;
+  const paymentStatus = incoming.paymentStatus ?? incoming.payment_status;
+  const createdAt = incoming.createdAt || incoming.created_at || incoming.date;
+  const updatedAt = incoming.updatedAt || incoming.updated_at || incoming.date;
+  const deliveryAddress = incoming.deliveryAddress || incoming.address || incoming.delivery_address;
+  const status = incoming.status || incoming.orderStatus || incoming.state;
+  const customerNotes = incoming.customerNotes || incoming.notes || incoming.specialInstructions;
+
+  return {
+    ...incoming,
+    _id: id, // keep _id for API parity while preserving original fields above
+    user,
+    items,
+    totalAmount,
+    deliveryFee,
+    discount,
+    paymentMethod,
+    paymentStatus,
+    createdAt,
+    updatedAt,
+    deliveryAddress,
+    status,
+    customerNotes,
+  };
 };
 
 /**
@@ -264,25 +300,38 @@ export const formatOrderTime = (date) => {
 export const transformApiOrder = (apiOrder) => {
   if (!apiOrder) return null;
   
+  // Handle different user data structures (user vs customer)
+  const userData = apiOrder.user || apiOrder.customer;
+  
   return {
     id: apiOrder._id || apiOrder.id,
     orderNumber: formatOrderNumber(apiOrder._id || apiOrder.id),
     status: apiOrder.status,
     items: apiOrder.items || [],
-    totalAmount: apiOrder.totalAmount,
-    subtotal: apiOrder.totalAmount - (apiOrder.deliveryFee || 0) - (apiOrder.discount || 0),
+    totalAmount: apiOrder.totalAmount || apiOrder.total || 0,
+    subtotal: (apiOrder.totalAmount || apiOrder.total || 0) - (apiOrder.deliveryFee || 0) - (apiOrder.discount || 0),
     tax: 0, // Not provided in API
-    deliveryFee: apiOrder.deliveryFee,
-    discount: apiOrder.discount,
+    deliveryFee: apiOrder.deliveryFee || 0,
+    discount: apiOrder.discount || 0,
     paymentMethod: apiOrder.paymentMethod,
     paymentStatus: apiOrder.paymentStatus,
     createdAt: apiOrder.createdAt,
     updatedAt: apiOrder.updatedAt,
-    customerName: getCustomerName(apiOrder.user),
-    customerPhone: getCustomerPhone(apiOrder.user),
+    customerName: getCustomerName(userData),
+    customerPhone: getCustomerPhone(userData),
     deliveryAddress: getDeliveryAddress(apiOrder.deliveryAddress),
-    specialInstructions: apiOrder.customerNotes,
+    specialInstructions: apiOrder.customerNotes || apiOrder.notes || apiOrder.specialInstructions,
     itemsCount: apiOrder.itemsCount || getItemsCount(apiOrder.items),
     itemsSummary: getItemsSummary(apiOrder.items)
   };
+};
+
+/**
+ * Safely get order id from any order object
+ * @param {Object} order - Order object (API or socket)
+ * @returns {string|null}
+ */
+export const getOrderId = (order) => {
+  if (!order) return null;
+  return order.id || order._id || order.orderId || null;
 };

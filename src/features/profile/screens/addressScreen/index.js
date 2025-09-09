@@ -80,7 +80,6 @@ const AddressScreen = ({ navigation }) => {
       };
       
       if (__DEV__) {
-        console.log('بيانات العنوان للإرسال:', addressData);
       }
       
       let result;
@@ -107,7 +106,6 @@ const AddressScreen = ({ navigation }) => {
         );
       }
     } catch (error) {
-      console.error('خطأ في حفظ العنوان:', error);
       Alert.alert(
         t('addressScreen.error'),
         t('addressScreen.errorSavingAddress')
@@ -132,7 +130,6 @@ const AddressScreen = ({ navigation }) => {
         );
       }
     } catch (error) {
-      console.error('خطأ في تعيين العنوان الحالي:', error);
       Alert.alert(
         t('addressScreen.error'),
         t('addressScreen.errorSettingDefault')
@@ -166,7 +163,6 @@ const AddressScreen = ({ navigation }) => {
                 );
               }
             } catch (error) {
-              console.error('خطأ في حذف العنوان:', error);
               Alert.alert(
                 t('addressScreen.error'),
                 t('addressScreen.errorDeletingAddress')

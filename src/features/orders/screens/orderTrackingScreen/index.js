@@ -324,7 +324,6 @@ const OrderTrackingScreen = ({ route, navigation }) => {
         setLoading(false);
         setRefreshing(false);
     } catch (error) {
-      console.error('Error fetching order details:', error);
       setLoading(false);
       setRefreshing(false);
     }
@@ -372,7 +371,6 @@ const OrderTrackingScreen = ({ route, navigation }) => {
   const handleChat = (contact) => {
     // يمكن تنفيذ وظيفة المحادثة هنا
     if (__DEV__) {
-      console.log(`Chat with ${contact.name}`);
     }
   };
   
@@ -388,7 +386,6 @@ const OrderTrackingScreen = ({ route, navigation }) => {
     if (order) {
       // تنفيذ وظيفة إلغاء الطلب
       if (__DEV__) {
-        console.log('Cancel order', order._id);
       }
     }
   };

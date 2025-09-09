@@ -23,7 +23,6 @@ export const usePushToken = () => {
     try {
       // Check if device supports push notifications
       if (!Device.isDevice) {
-        console.log('📱 Push notifications require a physical device');
         return null;
       }
 
@@ -37,7 +36,6 @@ export const usePushToken = () => {
       }
       
       if (finalStatus !== 'granted') {
-        console.log('❌ Push notification permission denied');
         return null;
       }
 
@@ -45,7 +43,6 @@ export const usePushToken = () => {
       const projectId = Constants?.expoConfig?.extra?.eas?.projectId;
       
       if (!projectId || projectId === 'your-project-id-here') {
-        console.log('⚠️ EAS project ID not configured, skipping push token');
         return null;
       }
 
@@ -55,14 +52,12 @@ export const usePushToken = () => {
       });
 
       const pushToken = tokenData.data;
-      console.log('✅ Push token obtained:', pushToken);
       
       // Store token locally
       await AsyncStorage.setItem('expoPushToken', pushToken);
       
       return pushToken;
     } catch (error) {
-      console.error('❌ Error getting push token:', error);
       return null;
     }
   };
@@ -87,20 +82,16 @@ export const usePushToken = () => {
         return { success: false, error: 'User not authenticated' };
       }
 
-      console.log('📱 Registering push token with backend...');
       const result = await registerPushToken(tokenToRegister);
       
       if (result.success) {
-        console.log('✅ Push token registered successfully');
         setToken(tokenToRegister);
         return { success: true };
       } else {
-        console.error('❌ Failed to register push token:', result.error);
         setError(result.error);
         return { success: false, error: result.error };
       }
     } catch (error) {
-      console.error('❌ Error registering push token:', error);
       setError(error.message);
       return { success: false, error: error.message };
     } finally {
@@ -116,7 +107,6 @@ export const usePushToken = () => {
       
       if (storedToken) {
         setToken(storedToken);
-        console.log('📱 Using stored push token:', storedToken);
       } else {
         // Get new token if none stored
         const newToken = await getPushToken();
@@ -132,7 +122,6 @@ export const usePushToken = () => {
   // Auto-register token when user logs in
   useEffect(() => {
     if (isAuthenticated && token) {
-      console.log('🔐 User authenticated, registering push token...');
       registerToken(token);
     }
   }, [isAuthenticated, token]);

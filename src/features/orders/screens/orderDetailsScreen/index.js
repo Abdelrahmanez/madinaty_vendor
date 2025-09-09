@@ -97,7 +97,6 @@ const OrderRating = ({ onSubmitRating, styles, theme, t }) => {
       
       setSubmitted(true);
     } catch (error) {
-      console.error('Error submitting rating:', error);
     } finally {
       setSubmitting(false);
     }
@@ -343,7 +342,6 @@ const OrderDetailsScreen = ({ route, navigation }) => {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching order details:', error);
       Alert.alert(
         t('orderDetailsScreen.error'),
         t('orderDetailsScreen.errorFetchingDetails'),
@@ -383,7 +381,6 @@ const OrderDetailsScreen = ({ route, navigation }) => {
                 Alert.alert(t('orderDetailsScreen.orderCanceled'));
                 
               } catch (error) {
-                console.error('Error canceling order:', error);
                 Alert.alert(t('orderDetailsScreen.cantCancel'));
               } finally {
                 setLoading(false);
@@ -407,7 +404,6 @@ const OrderDetailsScreen = ({ route, navigation }) => {
     if (order) {
       // تنفيذ وظيفة إعادة الطلب
       if (__DEV__) {
-        console.log('Reorder', order._id);
       }
       Alert.alert(t('orderDetailsScreen.reorderSuccess'));
     }
@@ -439,7 +435,6 @@ const OrderDetailsScreen = ({ route, navigation }) => {
       setOrder({ ...order, isRated: true });
       Alert.alert(t('orderDetailsScreen.ratingSubmitted'));
     } catch (error) {
-      console.error('Error submitting rating:', error);
     }
   };
   

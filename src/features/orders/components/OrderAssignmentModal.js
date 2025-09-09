@@ -48,7 +48,6 @@ const OrderAssignmentModal = ({
       const response = await axiosInstance.get(API_ENDPOINTS.DRIVERS.GET_AVAILABLE_DRIVERS);
       setDrivers(response.data.data || []);
     } catch (error) {
-      console.error('Error fetching drivers:', error);
       Alert.alert('خطأ', 'فشل في جلب السائقين المتاحين');
     } finally {
       setLoading(false);
@@ -132,7 +131,6 @@ const OrderAssignmentModal = ({
   };
 
   const renderDriverItem = (driver) => {
-    console.log('🔍 Driver:', driver);
     const isSelected = selectedDriver?._id === driver._id;
     
     return (

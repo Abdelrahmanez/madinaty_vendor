@@ -72,7 +72,6 @@ const ProfileScreen = ({ navigation }) => {
         });
       }
     } catch (error) {
-      console.error('خطأ أثناء تسجيل الخروج:', error);
     }
   };
 

@@ -7,7 +7,6 @@ import { API_ENDPOINTS } from '../../../config/api';
  */
 export const getVendorFinancialData = (restaurantId) => {
   const endpoint = API_ENDPOINTS.ACCOUNTS.VENDOR_FINANCIAL_DATA(restaurantId);
-  console.log('🏪 Calling vendor financial data endpoint:', endpoint);
   return axiosInstance.get(endpoint);
 };
 
@@ -17,6 +16,5 @@ export const getVendorFinancialData = (restaurantId) => {
  */
 export const getRestaurantBalance = (restaurantId) => {
   const endpoint = API_ENDPOINTS.ACCOUNTING.RESTAURANT_BALANCE(restaurantId);
-  console.log('🏪 Calling restaurant balance endpoint:', endpoint);
   return axiosInstance.get(endpoint);
 };

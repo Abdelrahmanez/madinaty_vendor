@@ -25,11 +25,9 @@ export const getNotificationPermissionsAndToken = async () => {
   try {
     // 1. التحقق من إذا كان الجهاز حقيقي (وليس محاكي)
     if (!Device.isDevice) {
-      console.warn('⚠️ الإشعارات غير مدعومة على المحاكيات. يرجى استخدام جهاز حقيقي للاختبار.');
       return null;
     }
 
-    console.log('🔍 التحقق من صلاحيات الإشعارات...');
     
     // 2. التحقق من الأذونات الحالية
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -37,46 +35,37 @@ export const getNotificationPermissionsAndToken = async () => {
     
     // 3. طلب الأذونات إذا لم تكن ممنوحة بالفعل
     if (existingStatus !== 'granted') {
-      console.log('🙋‍♂️ طلب صلاحيات الإشعارات من المستخدم...');
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
     
     // 4. التحقق من موافقة المستخدم
     if (finalStatus !== 'granted') {
-      console.warn('❌ رفض المستخدم منح صلاحيات الإشعارات');
       return null;
     }
     
-    console.log('✅ تم الحصول على صلاحيات الإشعارات بنجاح');
     
     // 5. الحصول على Expo Push Token
     try {
-      console.log('🔑 جاري الحصول على توكن الإشعارات...');
       const projectId = Constants?.expoConfig?.extra?.eas?.projectId;
       
       // Skip push notifications in development if no proper EAS project is configured
       if (!projectId || projectId === 'your-project-id-here') {
-        console.log('تخطي الحصول على توكن الإشعارات - لم يتم تكوين معرف المشروع');
         return null;
       }
       
-      console.log('استخدام projectId للإشعارات:', projectId);
       
       const tokenData = await Notifications.getExpoPushTokenAsync({
         projectId: projectId,
       });
       
       const token = tokenData.data;
-      console.log('🎉 تم الحصول على توكن الإشعارات بنجاح:', token);
       
       return token;
     } catch (error) {
-      console.error('❌ خطأ في الحصول على توكن الإشعارات:', error);
       return null;
     }
   } catch (error) {
-    console.error('❌ خطأ غير متوقع أثناء التعامل مع الإشعارات:', error);
     return null;
   }
 };
@@ -115,7 +104,6 @@ export function useNotificationPermissions() {
         return { success: false, error: 'يجب تسجيل الدخول أولاً' };
       }
       
-      console.log('🚀 جاري إرسال توكن الإشعارات إلى الباك إند...');
       
       // تحديث ترويسات المصادقة قبل إرسال الطلب
       await refreshAuthHeaders();
@@ -124,16 +112,13 @@ export function useNotificationPermissions() {
       const result = await registerPushToken(currentToken);
       
       if (result.success) {
-        console.log('✅ تم تسجيل توكن الإشعارات بنجاح في الباك إند');
         setRegistered(true);
         return { success: true, data: result.data };
       } else {
-        console.error('❌ فشل تسجيل توكن الإشعارات:', result.error);
         setError(result.error);
         return { success: false, error: result.error };
       }
     } catch (err) {
-      console.error('❌ خطأ أثناء إرسال توكن الإشعارات للباك إند:', err);
       const errorMessage = err.message || 'حدث خطأ أثناء إرسال التوكن';
       setError(errorMessage);
       return { success: false, error: errorMessage };
@@ -151,7 +136,6 @@ export function useNotificationPermissions() {
       try {
         // 1. التحقق من الجهاز
         if (!Device.isDevice) {
-          console.warn('⚠️ الإشعارات غير مدعومة على المحاكيات. يرجى استخدام جهاز حقيقي للاختبار.');
           setPermissionStatus('device-not-supported');
           return;
         }
@@ -162,13 +146,11 @@ export function useNotificationPermissions() {
         
         // 3. طلب الصلاحيات إذا لم تكن ممنوحة
         if (status !== 'granted') {
-          console.log('🙋‍♂️ طلب صلاحيات الإشعارات من المستخدم...');
           const { status: newStatus } = await Notifications.requestPermissionsAsync();
           setPermissionStatus(newStatus);
           
           // 4. التحقق من الموافقة
           if (newStatus !== 'granted') {
-            console.warn('❌ رفض المستخدم منح صلاحيات الإشعارات');
             return;
           }
         }
@@ -179,11 +161,9 @@ export function useNotificationPermissions() {
         
         // 6. إرسال التوكن تلقائيًا للباك إند إذا كان المستخدم مسجل دخول
         if (pushToken && isAuthenticated) {
-          console.log('💡 تم اكتشاف توكن إشعارات ومستخدم مسجل. جاري إرسال التوكن تلقائيًا للباك إند...');
           await sendTokenToBackend(pushToken);
         }
       } catch (err) {
-        console.error('❌ خطأ أثناء طلب صلاحيات الإشعارات:', err);
         setError(err);
       } finally {
         setLoading(false);
@@ -251,7 +231,6 @@ export default function useNotifications() {
     try {
       // التحقق من إذا كان الجهاز حقيقي (وليس محاكي)
       if (!Device.isDevice) {
-        console.log('الإشعارات تحتاج إلى جهاز حقيقي');
         setError('الإشعارات غير مدعومة على المحاكيات');
         return null;
       }
@@ -268,7 +247,6 @@ export default function useNotifications() {
       
       // لا يمكن الحصول على الـ token إذا لم يتم منح الأذونات
       if (finalStatus !== 'granted') {
-        console.log('فشل الحصول على إذن الإشعارات!');
         setError('لم يتم منح إذن الإشعارات');
         return null;
       }
@@ -280,7 +258,6 @@ export default function useNotifications() {
         
         // Skip push notifications in development if no proper EAS project is configured
         if (!projectId || projectId === 'your-project-id-here') {
-          console.log('تخطي الحصول على توكن الإشعارات - لم يتم تكوين معرف المشروع');
           return null;
         }
         
@@ -289,12 +266,10 @@ export default function useNotifications() {
         });
         token = tokenData.data;
         
-        console.log('Expo push token:', token);
         
         // تخزين الـ token محلياً للاستخدام لاحقاً
         await AsyncStorage.setItem('expoPushToken', token);
       } catch (err) {
-        console.error('خطأ في الحصول على توكن الإشعارات:', err);
         return null;
       }
       
@@ -308,7 +283,6 @@ export default function useNotifications() {
         });
       }
     } catch (err) {
-      console.error('فشل تسجيل رمز الإشعارات:', err);
       setError(err.message);
       return null;
     }
@@ -332,7 +306,6 @@ export default function useNotifications() {
       setError(null);
       
       try {
-        console.log('إرسال توكن الإشعارات للباك إند:', token);
         
         // تأكد من تحديث ترويسات المصادقة قبل إرسال الطلب
         await refreshAuthHeaders();
@@ -340,21 +313,16 @@ export default function useNotifications() {
         const result = await registerPushToken(token);
         
         if (!result.success) {
-          console.error('فشل تسجيل توكن الإشعارات:', result.error);
           setError(result.error);
         } else {
-          console.log('تم تسجيل توكن الإشعارات بنجاح');
         }
       } catch (err) {
-        console.error('فشل تسجيل الـ token مع الباك إند:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     } else if (!isAuthenticated) {
-      console.log('لا يمكن تسجيل توكن الإشعارات: المستخدم غير مسجل الدخول');
     } else {
-      console.log('لا يمكن تسجيل توكن الإشعارات: التوكن غير متوفر');
     }
   };
 
@@ -371,12 +339,10 @@ export default function useNotifications() {
         await refreshAuthHeaders();
         
         await unregisterPushToken(token);
-        console.log('تم إلغاء تسجيل توكن الإشعارات بنجاح');
         
         // لا نقوم بحذف الـ token من التخزين المحلي
         // حتى نتمكن من استخدامه مرة أخرى عند تسجيل الدخول
       } catch (err) {
-        console.error('فشل إلغاء تسجيل الـ token:', err);
       } finally {
         setLoading(false);
       }
@@ -415,7 +381,6 @@ export default function useNotifications() {
 
     // المستمع للتفاعل مع الإشعارات (النقر عليها)
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('تم النقر على الإشعار:', response);
     });
 
     return () => {

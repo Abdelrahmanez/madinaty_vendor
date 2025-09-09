@@ -6,7 +6,6 @@ import { API_BASE_URL } from "../config/api";
  * يمكن استخدامها للتحقق من أن الخادم يعمل ويستجيب للطلبات
  */
 export const checkServerConnection = async () => {
-  console.log('🔄 جاري فحص الاتصال بالخادم:', API_BASE_URL);
 
   try {
     // محاولة إجراء طلب بسيط للتحقق من الاتصال (باستخدام Ping أو healthcheck)
@@ -16,17 +15,13 @@ export const checkServerConnection = async () => {
       timeout: 5000, // مهلة قصيرة لهذا الفحص
     });
 
-    console.log('✅ تم الاتصال بالخادم بنجاح!', response.status);
     return {
       success: true,
       status: response.status,
       message: 'تم الاتصال بالخادم بنجاح!'
     };
   } catch (error) {
-    console.error('❌ فشل الاتصال بالخادم');
-    
     if (error.code === 'ECONNABORTED') {
-      console.error('⏱️ انتهت مهلة الاتصال');
       return {
         success: false,
         errorType: 'timeout',
@@ -35,7 +30,6 @@ export const checkServerConnection = async () => {
     }
     
     if (error.code === 'ERR_NETWORK') {
-      console.error('🌐 لا يمكن الوصول للخادم:', error.message);
       return {
         success: false,
         errorType: 'network',
@@ -45,7 +39,6 @@ export const checkServerConnection = async () => {
 
     // إذا كان الخادم يستجيب ولكن برمز حالة خطأ (مثل 404)
     if (error.response) {
-      console.error(`🟡 الخادم استجاب برمز حالة: ${error.response.status}`);
       return {
         success: false,
         errorType: 'server_error',
@@ -67,7 +60,6 @@ export const checkServerConnection = async () => {
  * @returns {Object} نتائج فحص الاتصال
  */
 export const runNetworkDiagnostics = async () => {
-  console.log('📊 بدء تشخيص مشاكل الشبكة...');
   
   const results = {
     serverCheck: null,
@@ -90,7 +82,6 @@ export const runNetworkDiagnostics = async () => {
   // 2. التحقق من سياسات CORS
   if (results.serverCheck.success || results.serverCheck.errorType === 'server_error') {
     try {
-      console.log('🔍 التحقق من سياسات CORS...');
       const corsResponse = await axios({
         method: 'options',
         url: API_BASE_URL,
@@ -105,13 +96,11 @@ export const runNetworkDiagnostics = async () => {
         allowHeaders: headers['access-control-allow-headers'],
       };
       
-      console.log('✅ تم التحقق من سياسات CORS');
     } catch (err) {
       results.corsPolicies = {
         success: false,
         message: `فشل التحقق من CORS: ${err.message}`
       };
-      console.error('❌ فشل التحقق من سياسات CORS:', err.message);
     }
   } else {
     results.corsPolicies = {

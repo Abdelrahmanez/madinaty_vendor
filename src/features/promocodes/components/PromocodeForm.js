@@ -88,7 +88,6 @@ const PromocodeForm = ({
         setCategories(categoriesData);
         setMenuItems(menuItemsData);
       } catch (error) {
-        console.error('Error fetching data:', error);
       } finally {
         setLoadingData(false);
       }

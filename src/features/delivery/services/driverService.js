@@ -13,22 +13,14 @@ class DriverService {
    */
   async addDriverByPhone(phoneNumber) {
     try {
-      console.log('🔍 Adding driver with phone:', phoneNumber);
       
       const response = await axiosInstance.post(
         API_ENDPOINTS.DRIVERS.ADD_DRIVER,
         { phoneNumber }
       );
       
-      console.log('✅ Driver added successfully:', response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ خطأ في إضافة السائق:', error);
-      console.error('❌ Error details:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data
-      });
       throw error;
     }
   }
@@ -38,22 +30,14 @@ class DriverService {
    */
   async removeDriverByPhone(phoneNumber) {
     try {
-      console.log('🔍 Removing driver with phone:', phoneNumber);
       
       const response = await axiosInstance.post(
         API_ENDPOINTS.DRIVERS.REMOVE_DRIVER,
         { phoneNumber }
       );
       
-      console.log('✅ Driver removed successfully:', response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ خطأ في حذف السائق:', error);
-      console.error('❌ Error details:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data
-      });
       throw error;
     }
   }
@@ -63,21 +47,13 @@ class DriverService {
    */
   async getAllDrivers() {
     try {
-      console.log('🔍 Fetching all drivers...');
       
       const response = await axiosInstance.get(
         API_ENDPOINTS.DRIVERS.GET_ALL_DRIVERS
       );
       
-      console.log('✅ All drivers fetched successfully:', response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ خطأ في جلب السائقين:', error);
-      console.error('❌ Error details:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data
-      });
       throw error;
     }
   }
@@ -87,21 +63,13 @@ class DriverService {
    */
   async getAvailableDrivers() {
     try {
-      console.log('🔍 Fetching available drivers...');
       
       const response = await axiosInstance.get(
         API_ENDPOINTS.DRIVERS.GET_AVAILABLE_DRIVERS
       );
       
-      console.log('✅ Available drivers fetched successfully:', response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ خطأ في جلب السائقين المتاحين:', error);
-      console.error('❌ Error details:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data
-      });
       throw error;
     }
   }

@@ -20,7 +20,6 @@ export const useMenu = () => {
   // Fetch dishes
   const fetchDishes = useCallback(async (params = {}) => {
     if (!isAuthenticated) {
-      console.log('🔒 User not authenticated, skipping dishes fetch');
       return;
     }
 
@@ -28,11 +27,9 @@ export const useMenu = () => {
     const restaurantId = useRestaurantStore.getState().getRestaurantId();
     
     if (!restaurantId) {
-      console.log('🏪 No restaurant ID found, fetching restaurant data first...');
       try {
         await useRestaurantStore.getState().fetchMyRestaurant();
       } catch (error) {
-        console.error('❌ Failed to fetch restaurant data:', error);
         setError('Failed to fetch restaurant data');
         return;
       }
@@ -40,7 +37,6 @@ export const useMenu = () => {
 
     const currentRestaurantId = useRestaurantStore.getState().getRestaurantId();
     if (!currentRestaurantId) {
-      console.error('❌ Still no restaurant ID available');
       setError('Restaurant ID not available');
       return;
     }
@@ -49,7 +45,6 @@ export const useMenu = () => {
     setError(null);
     
     try {
-      console.log('🍽️ Fetching dishes for restaurant:', currentRestaurantId);
       
       // Include restaurant ID in the API call
       const response = await getDishes({
@@ -60,7 +55,6 @@ export const useMenu = () => {
         ...params
       });
       
-      console.log('🔍 Dishes API Response:', JSON.stringify(response.data, null, 2));
       
       // Handle different response formats
       const dishesData = response.data?.data || response.data || [];
@@ -81,13 +75,11 @@ export const useMenu = () => {
         });
         
         if (uniqueCategories.length > 0) {
-          console.log('📋 Using categories extracted from dishes (first time only):', uniqueCategories);
           setCategories(uniqueCategories);
           hasSetCategoriesRef.current = true;
         }
       }
     } catch (err) {
-      console.error('❌ Error fetching dishes:', err);
       setError(err.message || 'Failed to fetch dishes');
     } finally {
       setLoading(false);
@@ -98,13 +90,11 @@ export const useMenu = () => {
   const fetchCategoriesData = useCallback(async () => {
     try {
       const categoriesData = await fetchCategories('dish');
-      console.log('🔍 Categories API Response:', JSON.stringify(categoriesData, null, 2));
       
       // Handle different response formats
       const categoriesList = categoriesData?.data || categoriesData || [];
       setCategories(categoriesList);
     } catch (err) {
-      console.error('Error fetching categories:', err);
       // Set empty array to prevent undefined errors
       setCategories([]);
     }
@@ -159,11 +149,9 @@ export const useMenu = () => {
   // Toggle dish availability
   const toggleDishAvailabilityHandler = useCallback(async (dishId) => {
     try {
-      console.log('🔄 Toggling availability for dish:', dishId);
       
       // Call the API to toggle availability
       const response = await toggleDishAvailability(dishId);
-      console.log('✅ Toggle availability response:', response.data);
       
       // Update the local state with the response data
       setDishes(prevDishes => 
@@ -176,7 +164,6 @@ export const useMenu = () => {
       
       return response.data;
     } catch (err) {
-      console.error('❌ Error toggling dish availability:', err);
       setError(err.message || 'Failed to update dish availability');
       throw err;
     }
@@ -191,10 +178,8 @@ export const useMenu = () => {
       // Fetch fresh dishes and categories
       await fetchDishes();
       fetchCategoriesData().catch(err => {
-        console.log('⚠️ Categories refresh failed:', err.message);
       });
     } catch (error) {
-      console.error('❌ Error refreshing data:', error);
       setError('Failed to refresh data');
     }
   }, [fetchDishes, fetchCategoriesData]);
@@ -202,14 +187,12 @@ export const useMenu = () => {
   // Initialize data
   useEffect(() => {
     if (isAuthenticated) {
-      console.log('🔐 User authenticated, fetching menu data...');
       
       // First ensure we have restaurant data, then fetch dishes
       const initializeData = async () => {
         try {
           // Check if we have restaurant data
           if (!useRestaurantStore.getState().hasRestaurant()) {
-            console.log('🏪 Fetching restaurant data first...');
             await useRestaurantStore.getState().fetchMyRestaurant();
           }
           
@@ -218,17 +201,14 @@ export const useMenu = () => {
           
           // Try to fetch categories, but don't fail if it doesn't work
           fetchCategoriesData().catch(err => {
-            console.log('⚠️ Categories API failed, continuing without categories:', err.message);
           });
         } catch (error) {
-          console.error('❌ Error initializing menu data:', error);
           setError('Failed to initialize menu data');
         }
       };
       
       initializeData();
     } else {
-      console.log('⚠️ User not authenticated, skipping menu data fetch');
     }
   }, [isAuthenticated, fetchDishes, fetchCategoriesData]);
 

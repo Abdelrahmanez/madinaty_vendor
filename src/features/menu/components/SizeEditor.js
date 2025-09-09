@@ -35,7 +35,6 @@ const SizeEditor = ({
 
       await onSave(data);
     } catch (error) {
-      console.error('Error saving size:', error);
     } finally {
       setLoading(false);
     }
@@ -48,7 +47,6 @@ const SizeEditor = ({
     try {
       await onUpdateStock(parseInt(currentStock));
     } catch (error) {
-      console.error('Error updating stock:', error);
     } finally {
       setStockLoading(false);
     }

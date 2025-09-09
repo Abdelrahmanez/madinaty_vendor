@@ -22,7 +22,6 @@ const useRestaurant = () => {
         setError('Failed to fetch restaurant data');
       }
     } catch (err) {
-      console.error('Error fetching restaurant:', err);
       setError(err.response?.data?.message || 'Failed to fetch restaurant data');
     } finally {
       setLoading(false);
@@ -44,7 +43,6 @@ const useRestaurant = () => {
         return { success: false, error: 'Failed to update restaurant' };
       }
     } catch (err) {
-      console.error('Error updating restaurant:', err);
       const errorMessage = err.response?.data?.message || 'Failed to update restaurant';
       setError(errorMessage);
       return { success: false, error: errorMessage };

@@ -24,11 +24,9 @@ const MenuItemDetailsScreen = ({ route, navigation }) => {
   const handleToggleAvailability = async () => {
     setLoading(true);
     try {
-      console.log('🔄 Toggling availability for dish:', item._id);
       
       // Call the API to toggle availability
       const response = await toggleDishAvailability(item._id);
-      console.log('✅ Toggle availability response:', response.data);
       
       // Update the item in route params to reflect the change
       route.params.item.isAvailable = !item.isAvailable;
@@ -38,10 +36,7 @@ const MenuItemDetailsScreen = ({ route, navigation }) => {
       setSnackbarType('success');
       setSnackbarVisible(true);
       
-      console.log('✅ Availability toggled successfully');
     } catch (error) {
-      console.error('❌ Error toggling availability:', error);
-      
       // Show error message
       setSnackbarMessage('حدث خطأ أثناء تحديث حالة العنصر');
       setSnackbarType('error');

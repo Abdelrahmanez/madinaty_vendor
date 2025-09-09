@@ -29,23 +29,19 @@ const useRestaurantStore = create(
         setError(null);
         
         try {
-          console.log('🏪 Fetching my restaurant data...');
           const response = await axiosInstance.get(API_ENDPOINTS.RESTAURANTS.MY_RESTAURANT);
           
-          console.log('✅ Restaurant API Response:', JSON.stringify(response.data, null, 2));
           
           // Handle different response formats
           const restaurantData = response.data?.data || response.data;
           
           if (restaurantData) {
             setRestaurant(restaurantData);
-            console.log('✅ Restaurant data set:', restaurantData._id);
             return restaurantData;
           } else {
             throw new Error('No restaurant data received');
           }
         } catch (error) {
-          console.error('❌ Error fetching restaurant:', error);
           const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch restaurant';
           setError(errorMessage);
           throw error;

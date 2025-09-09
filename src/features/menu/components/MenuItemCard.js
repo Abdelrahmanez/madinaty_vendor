@@ -21,7 +21,6 @@ const MenuItemCard = ({
       try {
         await onToggleAvailability(item._id);
       } catch (error) {
-        console.error('Error in toggle availability:', error);
       } finally {
         setToggleLoading(false);
       }

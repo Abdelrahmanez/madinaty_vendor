@@ -38,7 +38,6 @@ const useAuth = () => {
       // Skip push notifications in development if no proper EAS project is configured
       const projectId = Constants?.expoConfig?.extra?.eas?.projectId;
       if (!projectId || projectId === 'your-project-id-here') {
-        console.log('تخطي تسجيل الإشعارات - لم يتم تكوين معرف المشروع');
         return;
       }
 
@@ -55,17 +54,14 @@ const useAuth = () => {
             token = tokenData.data;
             await AsyncStorage.setItem('expoPushToken', token);
           } catch (err) {
-            console.error('خطأ في الحصول على توكن الإشعارات:', err);
             return;
           }
         } else {
-          console.log('لا توجد أذونات للإشعارات');
           return;
         }
       }
       
       if (token) {
-        console.log('إرسال توكن الإشعارات بعد تسجيل الدخول:', token);
         
         // تأكد من تحديث ترويسات المصادقة قبل إرسال الطلب
         await refreshAuthHeaders();
@@ -74,13 +70,10 @@ const useAuth = () => {
         const result = await registerPushToken(token);
         
         if (result.success) {
-          console.log('تم تسجيل توكن الإشعارات بنجاح بعد تسجيل الدخول');
         } else {
-          console.error('فشل تسجيل توكن الإشعارات بعد تسجيل الدخول:', result.error);
         }
       }
     } catch (error) {
-      console.error('فشل تسجيل جهاز للإشعارات:', error);
       // لا نريد أن نؤثر على تجربة المستخدم إذا فشل تسجيل الإشعارات
     }
   };
@@ -93,7 +86,6 @@ const useAuth = () => {
       // Skip push notifications in development if no proper EAS project is configured
       const projectId = Constants?.expoConfig?.extra?.eas?.projectId;
       if (!projectId || projectId === 'your-project-id-here') {
-        console.log('تخطي إلغاء تسجيل الإشعارات - لم يتم تكوين معرف المشروع');
         return;
       }
 
@@ -106,13 +98,10 @@ const useAuth = () => {
         const result = await unregisterPushToken(token);
         
         if (result.success) {
-          console.log('تم إلغاء تسجيل توكن الإشعارات بنجاح عند تسجيل الخروج');
         } else {
-          console.error('فشل إلغاء تسجيل توكن الإشعارات عند تسجيل الخروج:', result.error);
         }
       }
     } catch (error) {
-      console.error('فشل إلغاء تسجيل الجهاز للإشعارات:', error);
     }
   };
 
@@ -145,7 +134,6 @@ const useAuth = () => {
       
       return { success: true, data: response };
     } catch (error) {
-      console.error('Login error:', error);
       triggerAlert('error', t('loginScreen.loginError'));
       return { success: false, error };
     } finally {
@@ -160,7 +148,6 @@ const useAuth = () => {
     try {
       setLoading(true);
       const response = await registerRequest(userData);
-      console.log('API Response from signup:', response);
       
       // تسجيل الدخول تلقائياً بعد التسجيل الناجح
       if (response && response.accessToken) {
@@ -173,7 +160,6 @@ const useAuth = () => {
           setUser(response.user);
         } else {
           // إذا لم يتم توفير بيانات المستخدم، قم فقط بتسجيل الدخول دون تعيين بيانات المستخدم
-          console.log('تم إنشاء المستخدم بنجاح ولكن لم يتم استرداد بيانات المستخدم من API');
         }
 
         // تحديث ترويسات المصادقة بعد تسجيل الدخول
@@ -187,7 +173,6 @@ const useAuth = () => {
       
       return { success: true, data: response };
     } catch (error) {
-      console.error('Signup error:', error);
       triggerAlert('error', t('signupScreen.signupError'));
       return { success: false, error };
     } finally {
@@ -221,7 +206,6 @@ const useAuth = () => {
       
       return { success: true };
     } catch (error) {
-      console.error('Logout error:', error);
       // حتى في حالة الفشل، نقوم بتسجيل الخروج محلياً
       storeLogout();
       return { success: true, error };

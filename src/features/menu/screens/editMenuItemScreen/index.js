@@ -66,7 +66,6 @@ const EditMenuItemScreen = ({ route, navigation }) => {
       // For now, just show success message
       
     } catch (error) {
-      console.error('Error saving size:', error);
       showSnackbar('حدث خطأ أثناء حفظ الحجم', 'error');
     } finally {
       setLoading(false);
@@ -82,7 +81,6 @@ const EditMenuItemScreen = ({ route, navigation }) => {
       // For now, just show success message
       
     } catch (error) {
-      console.error('Error updating stock:', error);
       showSnackbar('حدث خطأ أثناء تحديث المخزون', 'error');
     }
   };
@@ -114,7 +112,6 @@ const EditMenuItemScreen = ({ route, navigation }) => {
       // In real app, update local state or refetch data
       
     } catch (error) {
-      console.error('Error adding addons:', error);
       showSnackbar('حدث خطأ أثناء إضافة الإضافات', 'error');
     }
   };
@@ -127,7 +124,6 @@ const EditMenuItemScreen = ({ route, navigation }) => {
       // In real app, update local state or refetch data
       
     } catch (error) {
-      console.error('Error removing addons:', error);
       showSnackbar('حدث خطأ أثناء إزالة الإضافات', 'error');
     }
   };
@@ -141,7 +137,6 @@ const EditMenuItemScreen = ({ route, navigation }) => {
       // In real app, update local state or refetch data
       
     } catch (error) {
-      console.error('Error saving offer:', error);
       showSnackbar('حدث خطأ أثناء حفظ العرض', 'error');
     }
   };
@@ -163,7 +158,6 @@ const EditMenuItemScreen = ({ route, navigation }) => {
               // In real app, update local state or refetch data
               
             } catch (error) {
-              console.error('Error deleting offer:', error);
               showSnackbar('حدث خطأ أثناء حذف العرض', 'error');
             }
           },

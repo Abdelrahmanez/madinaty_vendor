@@ -23,7 +23,6 @@ export const formatDate = (date) => {
       DATE_FORMAT_CONFIG.options
     );
   } catch (error) {
-    console.warn('Error formatting date:', error);
     return 'غير محدد';
   }
 };

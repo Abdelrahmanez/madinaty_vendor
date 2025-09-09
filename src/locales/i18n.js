@@ -40,7 +40,6 @@ const loadLanguage = async () => {
       i18n.changeLanguage(storedLang);
     }
   } catch (error) {
-    console.error("Failed to load language from storage", error);
   }
 };
 loadLanguage(); // Call it immediately

@@ -21,7 +21,6 @@ export class AppError extends Error {
  */
 export const handleApiError = (error, context = '') => {
   if (__DEV__) {
-    console.error(`API Error in ${context}:`, error);
   }
 
   if (error.response) {

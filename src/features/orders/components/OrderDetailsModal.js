@@ -371,7 +371,6 @@ const OrderDetailsModal = ({
                 </View>
               )}
               {
-                console.log('Transformed Order Customer Name:', transformedOrder)
               }
             </View>
 

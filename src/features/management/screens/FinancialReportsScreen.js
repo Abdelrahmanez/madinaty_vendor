@@ -17,9 +17,7 @@ const FinancialReportsScreen = () => {
   // Ensure restaurant data is loaded when screen mounts
   React.useEffect(() => {
     if (!restaurant) {
-      console.log('🏪 No restaurant data found, fetching...');
       fetchMyRestaurant().catch(err => {
-        console.error('❌ Error fetching restaurant data:', err);
       });
     }
   }, [restaurant, fetchMyRestaurant]);

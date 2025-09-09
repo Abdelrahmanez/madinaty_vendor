@@ -28,7 +28,6 @@ const PromocodeCard = ({
         day: 'numeric' 
       });
     } catch (error) {
-      console.error('خطأ في تنسيق التاريخ:', error);
       return dateString;
     }
   };

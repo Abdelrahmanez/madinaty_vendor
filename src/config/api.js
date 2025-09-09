@@ -5,7 +5,7 @@
  */
 
 // Base URL for all API requests
-export const API_BASE_URL = "http://192.168.3.10:8000/api/v1";
+export const API_BASE_URL = process.env.API_BASE_URL || "https://madinaty-backend.onrender.com/api/v1";
 
 // API Endpoints organized by module
 export const API_ENDPOINTS = {
@@ -40,7 +40,6 @@ export const API_ENDPOINTS = {
   RESTAURANTS: {
     LIST: "/restaurants",
     DETAIL: (id) => {
-      console.log("Fetching restaurant detail for id:", id);
       return `/restaurants/${id}`;
     },
     MY_RESTAURANT: "/restaurants/my-restaurant",
@@ -131,12 +130,6 @@ export const API_ENDPOINTS = {
 };
 
 // Debug: Log the API endpoints to verify they're loaded correctly
-console.log('🔍 API_ENDPOINTS loaded:', Object.keys(API_ENDPOINTS));
-console.log('🔍 ORDERS endpoints loaded:', Object.keys(API_ENDPOINTS.ORDERS));
-console.log('🔍 ACCOUNTS endpoints loaded:', Object.keys(API_ENDPOINTS.ACCOUNTS));
-console.log('🔍 ACCOUNTING endpoints loaded:', Object.keys(API_ENDPOINTS.ACCOUNTING));
-console.log('🔍 UPDATE_STATUS function type:', typeof API_ENDPOINTS.ORDERS.UPDATE_STATUS);
-console.log('🔍 CANCEL function type:', typeof API_ENDPOINTS.ORDERS.CANCEL);
 
 export default {
   BASE_URL: API_BASE_URL,

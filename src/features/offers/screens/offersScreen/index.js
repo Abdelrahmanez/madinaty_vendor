@@ -32,7 +32,6 @@ const OfferCard = ({ offer, onPress, theme }) => {
         day: 'numeric' 
       });
     } catch (error) {
-      console.error('خطأ في تنسيق التاريخ:', error);
       return dateString;
     }
   };
@@ -172,7 +171,6 @@ const OffersScreen = ({ navigation }) => {
     try {
       await fetchOffers();
     } catch (error) {
-      console.error('Error refreshing offers:', error);
     }
   };
 

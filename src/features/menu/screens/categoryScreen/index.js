@@ -16,7 +16,6 @@ export default function CategoryScreen({ navigation, route }) {
     const { category, loading, error } = useGetCategory(categoryId);
 
     const { dishes, loading: dishesLoading, error: dishesError } = useDishes({ categoryId });
-    console.log(dishes);
 
     return (
         <View style={styles.container}>

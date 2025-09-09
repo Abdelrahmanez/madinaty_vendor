@@ -51,7 +51,6 @@ const RestaurantImageUploader = ({
 
       onChange && onChange(imageFile);
     } catch (e) {
-      console.error('Image pick error:', e?.message || e);
     }
   }, [onChange, requestPermissionIfNeeded]);
 

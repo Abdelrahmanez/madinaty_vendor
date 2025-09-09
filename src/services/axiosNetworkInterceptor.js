@@ -50,11 +50,8 @@ export const setupNetworkInterceptors = (axiosInstance, checkNetworkStatus) => {
       
       // التعامل مع أخطاء الشبكة
       if (axios.isCancel(error)) {
-        console.log('الطلب تم إلغاؤه:', error.message);
       } else if (error.code === 'ECONNABORTED') {
-        console.error('⏱️ انتهت مهلة الطلب:', error.config.url);
       } else if (error.code === 'ERR_NETWORK') {
-        console.error('🌐 خطأ في الشبكة:', error.message);
       }
       
       return Promise.reject(error);
